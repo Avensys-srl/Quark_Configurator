@@ -202,7 +202,7 @@ Public Class Program_Form
             If customerData.SerialNumber.StartsWith("9999") Then
                 Invoke(Sub() Grp_KHK.Visible = True)
             ElseIf customerData.SerialNumber.StartsWith("7603") AndAlso
-                    Integer.Parse(customerData.SerialNumber.Substring(customerData.SerialNumber.Length - 3)) < 60 Then
+                    Integer.Parse(customerData.SerialNumber.Substring(customerData.SerialNumber.Length - 3)) < 110 Then
                 Invoke(Sub() Grp_KHK.Visible = True)
             Else
                 Invoke(Sub() Grp_KHK.Visible = False)
