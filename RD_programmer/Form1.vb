@@ -204,6 +204,8 @@ Public Class Program_Form
             ElseIf customerData.SerialNumber.StartsWith("7603") AndAlso
                     Integer.Parse(customerData.SerialNumber.Substring(customerData.SerialNumber.Length - 3)) < 110 Then
                 Invoke(Sub() Grp_KHK.Visible = True)
+            ElseIf customerData.SerialNumber.StartsWith("8705") Then
+                Invoke(Sub() Grp_KHK.Visible = True)
             Else
                 Invoke(Sub() Grp_KHK.Visible = False)
             End If
@@ -453,7 +455,8 @@ Public Class Program_Form
                     End If
                 Case 15
                     If tb_COMStrem.Text.Contains("Please set SUM/WIN (min:12, max:32) :") Then
-                        InviaStringa(num_SWSetpoint.Value.ToString())
+                        'InviaStringa(num_SWSetpoint.Value.ToString())
+                        InviaStringa("99")
                         writeStep += 1
                         ResetInactivityTimer()
                     End If
