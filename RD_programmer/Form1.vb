@@ -2,6 +2,7 @@
 Imports System.Reflection
 Imports System.Text
 Imports System.Text.RegularExpressions
+Imports System.Threading.Tasks
 
 Public Class Program_Form
     Dim isConnected As Boolean = False
@@ -359,13 +360,14 @@ Public Class Program_Form
         num_VOCSetpoint.Enabled = False
         num_TempSetpoint.Enabled = False
         num_SWSetpoint.Enabled = False
+        num_SWSetpoint.Maximum = 99
         customerData.Clear()
         Invoke(Sub() tb_COMStrem.Text = String.Empty)
         UpdateFormControls()
     End Sub
 
 
-    Private Sub SerialDataTimer_Tick(sender As Object, e As EventArgs) Handles SerialDataTimer.Tick
+    Private Async Sub SerialDataTimer_Tick(sender As Object, e As EventArgs) Handles SerialDataTimer.Tick
 
         Dim savestep As Integer
 
@@ -455,8 +457,7 @@ Public Class Program_Form
                     End If
                 Case 15
                     If tb_COMStrem.Text.Contains("Please set SUM/WIN (min:12, max:32) :") Then
-                        'InviaStringa(num_SWSetpoint.Value.ToString())
-                        InviaStringa("99")
+                        InviaStringa(num_SWSetpoint.Value.ToString())
                         writeStep += 1
                         ResetInactivityTimer()
                     End If
@@ -497,6 +498,7 @@ Public Class Program_Form
                         ResetInactivityTimer()
                     End If
                 Case Else
+                    Await Task.Delay(6000)
                     isWriting = False
                     PB_SaveData.Visible = isWriting
                     lb_SaveProg.Visible = isWriting
@@ -551,7 +553,13 @@ Public Class Program_Form
         num_FilterTimer.Enabled = True
         num_RHSetpoint.Enabled = True
         num_TempSetpoint.Enabled = True
-        num_SWSetpoint.Enabled = True
+        num_FKITimer.Enabled = True
+        If (customerData.SUM_WINSetPoint = 99) Then
+            CB_BPDisable.Checked = True
+        Else
+            CB_BPDisable.Checked = False
+            num_SWSetpoint.Enabled = True
+        End If
     End Sub
 
 
@@ -826,7 +834,17 @@ Public Class Program_Form
         Process.Start(FileName)
     End Sub
 
-
+    Private Sub CB_BPDisable_CheckedChanged(sender As Object, e As EventArgs) Handles CB_BPDisable.CheckedChanged
+        If (CB_BPDisable.Checked = True) Then
+            num_SWSetpoint.Maximum = 99
+            num_SWSetpoint.Value = 99
+            num_SWSetpoint.Enabled = False
+        Else
+            num_SWSetpoint.Maximum = 32
+            num_SWSetpoint.Value = 16
+            num_SWSetpoint.Enabled = True
+        End If
+    End Sub
 End Class
 
 

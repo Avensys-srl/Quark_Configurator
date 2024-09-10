@@ -50,6 +50,8 @@ Partial Class Program_Form
         Me.lb_Configuration = New System.Windows.Forms.Label()
         Me.RB_left = New System.Windows.Forms.RadioButton()
         Me.Grp_UnitParam = New System.Windows.Forms.GroupBox()
+        Me.Label11 = New System.Windows.Forms.Label()
+        Me.CB_BPDisable = New System.Windows.Forms.CheckBox()
         Me.num_SWSetpoint = New System.Windows.Forms.NumericUpDown()
         Me.num_TempSetpoint = New System.Windows.Forms.NumericUpDown()
         Me.num_VOCSetpoint = New System.Windows.Forms.NumericUpDown()
@@ -267,11 +269,11 @@ Partial Class Program_Form
         Me.Grp_KHK.Controls.Add(Me.RB_NC)
         Me.Grp_KHK.Controls.Add(Me.lb_KHKenable)
         Me.Grp_KHK.Controls.Add(Me.CB_KHKenable)
-        Me.Grp_KHK.Location = New System.Drawing.Point(361, 322)
+        Me.Grp_KHK.Location = New System.Drawing.Point(361, 344)
         Me.Grp_KHK.Margin = New System.Windows.Forms.Padding(2)
         Me.Grp_KHK.Name = "Grp_KHK"
         Me.Grp_KHK.Padding = New System.Windows.Forms.Padding(2)
-        Me.Grp_KHK.Size = New System.Drawing.Size(225, 111)
+        Me.Grp_KHK.Size = New System.Drawing.Size(225, 89)
         Me.Grp_KHK.TabIndex = 6
         Me.Grp_KHK.TabStop = False
         Me.Grp_KHK.Text = "KHK"
@@ -279,7 +281,7 @@ Partial Class Program_Form
         'lb_KHKContactBehavoir
         '
         Me.lb_KHKContactBehavoir.AutoSize = True
-        Me.lb_KHKContactBehavoir.Location = New System.Drawing.Point(4, 78)
+        Me.lb_KHKContactBehavoir.Location = New System.Drawing.Point(4, 73)
         Me.lb_KHKContactBehavoir.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.lb_KHKContactBehavoir.Name = "lb_KHKContactBehavoir"
         Me.lb_KHKContactBehavoir.Size = New System.Drawing.Size(89, 13)
@@ -289,7 +291,7 @@ Partial Class Program_Form
         'lb_KHKSetpoint
         '
         Me.lb_KHKSetpoint.AutoSize = True
-        Me.lb_KHKSetpoint.Location = New System.Drawing.Point(4, 49)
+        Me.lb_KHKSetpoint.Location = New System.Drawing.Point(4, 44)
         Me.lb_KHKSetpoint.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.lb_KHKSetpoint.Name = "lb_KHKSetpoint"
         Me.lb_KHKSetpoint.Size = New System.Drawing.Size(75, 13)
@@ -299,7 +301,7 @@ Partial Class Program_Form
         'Label12
         '
         Me.Label12.AutoSize = True
-        Me.Label12.Location = New System.Drawing.Point(170, 49)
+        Me.Label12.Location = New System.Drawing.Point(170, 44)
         Me.Label12.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.Label12.Name = "Label12"
         Me.Label12.Size = New System.Drawing.Size(15, 13)
@@ -309,7 +311,7 @@ Partial Class Program_Form
         'num_KHK_Setpoint
         '
         Me.num_KHK_Setpoint.Enabled = False
-        Me.num_KHK_Setpoint.Location = New System.Drawing.Point(114, 47)
+        Me.num_KHK_Setpoint.Location = New System.Drawing.Point(114, 42)
         Me.num_KHK_Setpoint.Margin = New System.Windows.Forms.Padding(2)
         Me.num_KHK_Setpoint.Minimum = New Decimal(New Integer() {20, 0, 0, 0})
         Me.num_KHK_Setpoint.Name = "num_KHK_Setpoint"
@@ -321,7 +323,7 @@ Partial Class Program_Form
         'RB_NO
         '
         Me.RB_NO.AutoSize = True
-        Me.RB_NO.Location = New System.Drawing.Point(155, 74)
+        Me.RB_NO.Location = New System.Drawing.Point(155, 69)
         Me.RB_NO.Margin = New System.Windows.Forms.Padding(2)
         Me.RB_NO.Name = "RB_NO"
         Me.RB_NO.Size = New System.Drawing.Size(41, 17)
@@ -333,7 +335,7 @@ Partial Class Program_Form
         'RB_NC
         '
         Me.RB_NC.AutoSize = True
-        Me.RB_NC.Location = New System.Drawing.Point(114, 74)
+        Me.RB_NC.Location = New System.Drawing.Point(114, 69)
         Me.RB_NC.Margin = New System.Windows.Forms.Padding(2)
         Me.RB_NC.Name = "RB_NC"
         Me.RB_NC.Size = New System.Drawing.Size(40, 17)
@@ -345,7 +347,7 @@ Partial Class Program_Form
         'lb_KHKenable
         '
         Me.lb_KHKenable.AutoSize = True
-        Me.lb_KHKenable.Location = New System.Drawing.Point(4, 21)
+        Me.lb_KHKenable.Location = New System.Drawing.Point(4, 16)
         Me.lb_KHKenable.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.lb_KHKenable.Name = "lb_KHKenable"
         Me.lb_KHKenable.Size = New System.Drawing.Size(65, 13)
@@ -355,7 +357,7 @@ Partial Class Program_Form
         'CB_KHKenable
         '
         Me.CB_KHKenable.AutoSize = True
-        Me.CB_KHKenable.Location = New System.Drawing.Point(114, 20)
+        Me.CB_KHKenable.Location = New System.Drawing.Point(114, 15)
         Me.CB_KHKenable.Margin = New System.Windows.Forms.Padding(2)
         Me.CB_KHKenable.Name = "CB_KHKenable"
         Me.CB_KHKenable.Size = New System.Drawing.Size(15, 14)
@@ -435,6 +437,8 @@ Partial Class Program_Form
         '
         'Grp_UnitParam
         '
+        Me.Grp_UnitParam.Controls.Add(Me.Label11)
+        Me.Grp_UnitParam.Controls.Add(Me.CB_BPDisable)
         Me.Grp_UnitParam.Controls.Add(Me.num_SWSetpoint)
         Me.Grp_UnitParam.Controls.Add(Me.num_TempSetpoint)
         Me.Grp_UnitParam.Controls.Add(Me.num_VOCSetpoint)
@@ -461,16 +465,36 @@ Partial Class Program_Form
         Me.Grp_UnitParam.Controls.Add(Me.lb_BoostTimer)
         Me.Grp_UnitParam.Location = New System.Drawing.Point(361, 96)
         Me.Grp_UnitParam.Name = "Grp_UnitParam"
-        Me.Grp_UnitParam.Size = New System.Drawing.Size(225, 221)
+        Me.Grp_UnitParam.Size = New System.Drawing.Size(225, 246)
         Me.Grp_UnitParam.TabIndex = 9
         Me.Grp_UnitParam.TabStop = False
         Me.Grp_UnitParam.Text = "Parameter Setting"
+        '
+        'Label11
+        '
+        Me.Label11.AutoSize = True
+        Me.Label11.Location = New System.Drawing.Point(6, 219)
+        Me.Label11.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.Label11.Name = "Label11"
+        Me.Label11.Size = New System.Drawing.Size(79, 13)
+        Me.Label11.TabIndex = 7
+        Me.Label11.Text = "Disable Bypass"
+        '
+        'CB_BPDisable
+        '
+        Me.CB_BPDisable.AutoSize = True
+        Me.CB_BPDisable.Location = New System.Drawing.Point(114, 218)
+        Me.CB_BPDisable.Margin = New System.Windows.Forms.Padding(2)
+        Me.CB_BPDisable.Name = "CB_BPDisable"
+        Me.CB_BPDisable.Size = New System.Drawing.Size(15, 14)
+        Me.CB_BPDisable.TabIndex = 6
+        Me.CB_BPDisable.UseVisualStyleBackColor = True
         '
         'num_SWSetpoint
         '
         Me.num_SWSetpoint.Enabled = False
         Me.num_SWSetpoint.Location = New System.Drawing.Point(114, 188)
-        Me.num_SWSetpoint.Maximum = New Decimal(New Integer() {32, 0, 0, 0})
+        Me.num_SWSetpoint.Maximum = New Decimal(New Integer() {99, 0, 0, 0})
         Me.num_SWSetpoint.Minimum = New Decimal(New Integer() {12, 0, 0, 0})
         Me.num_SWSetpoint.Name = "num_SWSetpoint"
         Me.num_SWSetpoint.Size = New System.Drawing.Size(49, 20)
@@ -530,7 +554,7 @@ Partial Class Program_Form
         Me.num_FKITimer.Enabled = False
         Me.num_FKITimer.Location = New System.Drawing.Point(114, 67)
         Me.num_FKITimer.Maximum = New Decimal(New Integer() {120, 0, 0, 0})
-        Me.num_FKITimer.Minimum = New Decimal(New Integer() {10, 0, 0, 0})
+        Me.num_FKITimer.Minimum = New Decimal(New Integer() {7, 0, 0, 0})
         Me.num_FKITimer.Name = "num_FKITimer"
         Me.num_FKITimer.Size = New System.Drawing.Size(49, 20)
         Me.num_FKITimer.TabIndex = 3
@@ -1127,7 +1151,7 @@ Partial Class Program_Form
         Me.tb_COMStrem.HideSelection = False
         Me.tb_COMStrem.Location = New System.Drawing.Point(3, 3)
         Me.tb_COMStrem.Name = "tb_COMStrem"
-        Me.tb_COMStrem.Size = New System.Drawing.Size(425, 344)
+        Me.tb_COMStrem.Size = New System.Drawing.Size(864, 344)
         Me.tb_COMStrem.TabIndex = 8
         Me.tb_COMStrem.Text = ""
         '
@@ -1298,4 +1322,6 @@ Partial Class Program_Form
     Friend WithEvents num_KHK_Setpoint As NumericUpDown
     Friend WithEvents lb_KHKSetpoint As Label
     Friend WithEvents lb_KHKContactBehavoir As Label
+    Friend WithEvents Label11 As Label
+    Friend WithEvents CB_BPDisable As CheckBox
 End Class
