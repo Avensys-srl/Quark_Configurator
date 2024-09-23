@@ -27,6 +27,8 @@ Module Module1
         Public Property IMBALANCE_ENABLE As Byte
         Public Property KHK_SET_POINT As Byte
 
+        Public Property KHKIMBALANCESetPoint As SByte
+
         Public Sub Clear()
             FSC_CAF_Speed1 = 0
             FSC_CAF_Speed2 = 0
@@ -53,6 +55,7 @@ Module Module1
             IMBALANCESetPoint = 0
             IMBALANCE_ENABLE = False
             KHK_SET_POINT = 100
+            KHKIMBALANCESetPoint = 0
         End Sub
     End Class
 

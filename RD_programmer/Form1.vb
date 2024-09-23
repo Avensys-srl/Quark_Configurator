@@ -186,6 +186,13 @@ Public Class Program_Form
             Invoke(Sub() num_KHK_Setpoint.Value = 100)
         End If
 
+        If customerData.KHKIMBALANCESetPoint <> 0 Then
+            Invoke(Sub() num_KHKImbalance_Setpoint.Value = customerData.KHKIMBALANCESetPoint)
+        Else
+            Invoke(Sub() num_KHKImbalance_Setpoint.Value = 0)
+        End If
+
+
         If customerData.VersionHW IsNot Nothing AndAlso customerData.VersionHW.Length <> 0 Then
             Invoke(Sub() lb_HW_vers.Text = lb_HW_vers.Text + " " + customerData.VersionHW)
         Else
@@ -206,6 +213,8 @@ Public Class Program_Form
                     Integer.Parse(customerData.SerialNumber.Substring(customerData.SerialNumber.Length - 3)) < 110 Then
                 Invoke(Sub() Grp_KHK.Visible = True)
             ElseIf customerData.SerialNumber.StartsWith("8705") Then
+                Invoke(Sub() Grp_KHK.Visible = True)
+            ElseIf customerData.SerialNumber.StartsWith("8910") Then
                 Invoke(Sub() Grp_KHK.Visible = True)
             Else
                 Invoke(Sub() Grp_KHK.Visible = False)
@@ -497,6 +506,13 @@ Public Class Program_Form
                         writeStep += 1
                         ResetInactivityTimer()
                     End If
+                Case 21
+                    If tb_COMStrem.Text.Contains("Please set KHK IMBALANCE value  (min:-70, max:70) :") Then
+                        customerData.KHKIMBALANCESetPoint = num_KHKImbalance_Setpoint.Value
+                        InviaStringa(customerData.KHKIMBALANCESetPoint.ToString())
+                        writeStep += 1
+                        ResetInactivityTimer()
+                    End If
                 Case Else
                     Await Task.Delay(6000)
                     isWriting = False
@@ -508,7 +524,7 @@ Public Class Program_Form
             End Select
 
             If (isWriting) Then
-                savestep = (writeStep - 1) / 20 * 100
+                savestep = (writeStep - 1) / 21 * 100
                 PB_SaveData.Value = savestep
                 lb_SaveProg.Text = savestep.ToString() + " %"
             End If
@@ -685,7 +701,6 @@ Public Class Program_Form
                     Case "Configuration"
                         customerData.Configuration = value
                     Case "KHK Config"
-
                         SByte.TryParse(value, numero)
                         If numero < 2 AndAlso numero > 5 Then
                             numero = 2
@@ -693,6 +708,8 @@ Public Class Program_Form
                         customerData.KHK_VALUE = numero
                     Case "IMBALANCE Enable"
                         customerData.IMBALANCE_ENABLE = value
+                    Case "IMBALANCE KHK Set Point"
+                        SByte.TryParse(numericValue, customerData.KHKIMBALANCESetPoint)
                 End Select
             End If
         Next
@@ -775,6 +792,8 @@ Public Class Program_Form
 
     Private Sub KHK_ENABLE_CheckedChanged(sender As Object, e As EventArgs) Handles CB_KHKenable.CheckedChanged
         num_KHK_Setpoint.Enabled = CB_KHKenable.Checked
+        num_KHKImbalance_Setpoint.Enabled = CB_KHKenable.Checked
+
         If CB_KHKenable.Checked = True Then
             If RB_NC.Checked = True Then
                 customerData.KHK_VALUE = 3

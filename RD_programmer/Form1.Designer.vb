@@ -34,7 +34,10 @@ Partial Class Program_Form
         Me.num_Imbalance_Setpoint = New System.Windows.Forms.NumericUpDown()
         Me.Btn_FirmwareUpdate = New System.Windows.Forms.Button()
         Me.Grp_KHK = New System.Windows.Forms.GroupBox()
+        Me.Label13 = New System.Windows.Forms.Label()
         Me.lb_KHKContactBehavoir = New System.Windows.Forms.Label()
+        Me.Label14 = New System.Windows.Forms.Label()
+        Me.num_KHKImbalance_Setpoint = New System.Windows.Forms.NumericUpDown()
         Me.lb_KHKSetpoint = New System.Windows.Forms.Label()
         Me.Label12 = New System.Windows.Forms.Label()
         Me.num_KHK_Setpoint = New System.Windows.Forms.NumericUpDown()
@@ -125,6 +128,7 @@ Partial Class Program_Form
         Me.Grp_Imbalance.SuspendLayout()
         CType(Me.num_Imbalance_Setpoint, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Grp_KHK.SuspendLayout()
+        CType(Me.num_KHKImbalance_Setpoint, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.num_KHK_Setpoint, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Grp_UnitConfig.SuspendLayout()
         CType(Me.PcBx_Quark, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -176,7 +180,7 @@ Partial Class Program_Form
         Me.TP_Configurator.Location = New System.Drawing.Point(4, 22)
         Me.TP_Configurator.Name = "TP_Configurator"
         Me.TP_Configurator.Padding = New System.Windows.Forms.Padding(3)
-        Me.TP_Configurator.Size = New System.Drawing.Size(870, 445)
+        Me.TP_Configurator.Size = New System.Drawing.Size(870, 481)
         Me.TP_Configurator.TabIndex = 0
         Me.TP_Configurator.Text = "Configurator"
         Me.TP_Configurator.UseVisualStyleBackColor = True
@@ -192,7 +196,7 @@ Partial Class Program_Form
         Me.Grp_Imbalance.Margin = New System.Windows.Forms.Padding(2)
         Me.Grp_Imbalance.Name = "Grp_Imbalance"
         Me.Grp_Imbalance.Padding = New System.Windows.Forms.Padding(2)
-        Me.Grp_Imbalance.Size = New System.Drawing.Size(341, 48)
+        Me.Grp_Imbalance.Size = New System.Drawing.Size(341, 91)
         Me.Grp_Imbalance.TabIndex = 7
         Me.Grp_Imbalance.TabStop = False
         Me.Grp_Imbalance.Text = "Imbalance"
@@ -261,7 +265,10 @@ Partial Class Program_Form
         '
         'Grp_KHK
         '
+        Me.Grp_KHK.Controls.Add(Me.Label13)
         Me.Grp_KHK.Controls.Add(Me.lb_KHKContactBehavoir)
+        Me.Grp_KHK.Controls.Add(Me.Label14)
+        Me.Grp_KHK.Controls.Add(Me.num_KHKImbalance_Setpoint)
         Me.Grp_KHK.Controls.Add(Me.lb_KHKSetpoint)
         Me.Grp_KHK.Controls.Add(Me.Label12)
         Me.Grp_KHK.Controls.Add(Me.num_KHK_Setpoint)
@@ -273,20 +280,52 @@ Partial Class Program_Form
         Me.Grp_KHK.Margin = New System.Windows.Forms.Padding(2)
         Me.Grp_KHK.Name = "Grp_KHK"
         Me.Grp_KHK.Padding = New System.Windows.Forms.Padding(2)
-        Me.Grp_KHK.Size = New System.Drawing.Size(225, 89)
+        Me.Grp_KHK.Size = New System.Drawing.Size(225, 132)
         Me.Grp_KHK.TabIndex = 6
         Me.Grp_KHK.TabStop = False
         Me.Grp_KHK.Text = "KHK"
         '
+        'Label13
+        '
+        Me.Label13.AutoSize = True
+        Me.Label13.Location = New System.Drawing.Point(170, 76)
+        Me.Label13.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.Label13.Name = "Label13"
+        Me.Label13.Size = New System.Drawing.Size(15, 13)
+        Me.Label13.TabIndex = 14
+        Me.Label13.Text = "%"
+        '
         'lb_KHKContactBehavoir
         '
         Me.lb_KHKContactBehavoir.AutoSize = True
-        Me.lb_KHKContactBehavoir.Location = New System.Drawing.Point(4, 73)
+        Me.lb_KHKContactBehavoir.Location = New System.Drawing.Point(4, 110)
         Me.lb_KHKContactBehavoir.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.lb_KHKContactBehavoir.Name = "lb_KHKContactBehavoir"
         Me.lb_KHKContactBehavoir.Size = New System.Drawing.Size(89, 13)
         Me.lb_KHKContactBehavoir.TabIndex = 12
         Me.lb_KHKContactBehavoir.Text = "Contact Behavior"
+        '
+        'Label14
+        '
+        Me.Label14.AutoSize = True
+        Me.Label14.Location = New System.Drawing.Point(4, 76)
+        Me.Label14.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.Label14.Name = "Label14"
+        Me.Label14.Size = New System.Drawing.Size(85, 13)
+        Me.Label14.TabIndex = 13
+        Me.Label14.Text = "Imbalance Level"
+        '
+        'num_KHKImbalance_Setpoint
+        '
+        Me.num_KHKImbalance_Setpoint.Enabled = False
+        Me.num_KHKImbalance_Setpoint.Location = New System.Drawing.Point(114, 74)
+        Me.num_KHKImbalance_Setpoint.Margin = New System.Windows.Forms.Padding(2)
+        Me.num_KHKImbalance_Setpoint.Maximum = New Decimal(New Integer() {70, 0, 0, 0})
+        Me.num_KHKImbalance_Setpoint.Minimum = New Decimal(New Integer() {70, 0, 0, -2147483648})
+        Me.num_KHKImbalance_Setpoint.Name = "num_KHKImbalance_Setpoint"
+        Me.num_KHKImbalance_Setpoint.Size = New System.Drawing.Size(49, 20)
+        Me.num_KHKImbalance_Setpoint.TabIndex = 12
+        Me.num_KHKImbalance_Setpoint.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
         '
         'lb_KHKSetpoint
         '
@@ -323,7 +362,7 @@ Partial Class Program_Form
         'RB_NO
         '
         Me.RB_NO.AutoSize = True
-        Me.RB_NO.Location = New System.Drawing.Point(155, 69)
+        Me.RB_NO.Location = New System.Drawing.Point(155, 106)
         Me.RB_NO.Margin = New System.Windows.Forms.Padding(2)
         Me.RB_NO.Name = "RB_NO"
         Me.RB_NO.Size = New System.Drawing.Size(41, 17)
@@ -335,7 +374,7 @@ Partial Class Program_Form
         'RB_NC
         '
         Me.RB_NC.AutoSize = True
-        Me.RB_NC.Location = New System.Drawing.Point(114, 69)
+        Me.RB_NC.Location = New System.Drawing.Point(114, 106)
         Me.RB_NC.Margin = New System.Windows.Forms.Padding(2)
         Me.RB_NC.Name = "RB_NC"
         Me.RB_NC.Size = New System.Drawing.Size(40, 17)
@@ -389,7 +428,7 @@ Partial Class Program_Form
         Me.Grp_UnitConfig.Controls.Add(Me.RB_left)
         Me.Grp_UnitConfig.Location = New System.Drawing.Point(592, 7)
         Me.Grp_UnitConfig.Name = "Grp_UnitConfig"
-        Me.Grp_UnitConfig.Size = New System.Drawing.Size(272, 426)
+        Me.Grp_UnitConfig.Size = New System.Drawing.Size(272, 468)
         Me.Grp_UnitConfig.TabIndex = 12
         Me.Grp_UnitConfig.TabStop = False
         Me.Grp_UnitConfig.Text = "Configuration"
@@ -1123,7 +1162,7 @@ Partial Class Program_Form
         Me.Tab_Main.Location = New System.Drawing.Point(12, 12)
         Me.Tab_Main.Name = "Tab_Main"
         Me.Tab_Main.SelectedIndex = 0
-        Me.Tab_Main.Size = New System.Drawing.Size(878, 471)
+        Me.Tab_Main.Size = New System.Drawing.Size(878, 507)
         Me.Tab_Main.TabIndex = 7
         '
         'TP_Shell
@@ -1133,7 +1172,7 @@ Partial Class Program_Form
         Me.TP_Shell.Controls.Add(Me.Btn_SendData)
         Me.TP_Shell.Location = New System.Drawing.Point(4, 22)
         Me.TP_Shell.Name = "TP_Shell"
-        Me.TP_Shell.Size = New System.Drawing.Size(870, 445)
+        Me.TP_Shell.Size = New System.Drawing.Size(870, 481)
         Me.TP_Shell.TabIndex = 1
         Me.TP_Shell.Text = "Shell"
         Me.TP_Shell.UseVisualStyleBackColor = True
@@ -1180,7 +1219,7 @@ Partial Class Program_Form
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(905, 485)
+        Me.ClientSize = New System.Drawing.Size(905, 527)
         Me.Controls.Add(Me.lb_QKvers)
         Me.Controls.Add(Me.Tab_Main)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D
@@ -1196,6 +1235,7 @@ Partial Class Program_Form
         CType(Me.num_Imbalance_Setpoint, System.ComponentModel.ISupportInitialize).EndInit()
         Me.Grp_KHK.ResumeLayout(False)
         Me.Grp_KHK.PerformLayout()
+        CType(Me.num_KHKImbalance_Setpoint, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.num_KHK_Setpoint, System.ComponentModel.ISupportInitialize).EndInit()
         Me.Grp_UnitConfig.ResumeLayout(False)
         Me.Grp_UnitConfig.PerformLayout()
@@ -1324,4 +1364,7 @@ Partial Class Program_Form
     Friend WithEvents lb_KHKContactBehavoir As Label
     Friend WithEvents Label11 As Label
     Friend WithEvents CB_BPDisable As CheckBox
+    Friend WithEvents Label13 As Label
+    Friend WithEvents Label14 As Label
+    Friend WithEvents num_KHKImbalance_Setpoint As NumericUpDown
 End Class
