@@ -1,4 +1,5 @@
-﻿Imports System.IO.Ports
+﻿Imports System.IO
+Imports System.IO.Ports
 Imports System.Reflection
 Imports System.Text
 Imports System.Text.RegularExpressions
@@ -6,6 +7,11 @@ Imports System.Threading.Tasks
 
 Public Class Program_Form
     Dim isConnected As Boolean = False
+    Dim isTimestampEnabled As Boolean = True
+    Dim logFileIndex As Integer = 1
+    Dim currentLogFilePath As String
+    Dim logFileSizeLimit As Long = 1024 * 1024 ' 1 MB
+    Dim isLoggingEnabled As Boolean = False
     Private character2Sent As Boolean = False
     Private character6Sent As Boolean = False
     Private isWriting As Boolean = False
@@ -17,6 +23,8 @@ Public Class Program_Form
     Private WithEvents portWatcher As ManagementEventWatcher
     Private isService = False
     Private hiddenPages As New List(Of TabPage)()
+    Private logBuffer As New StringBuilder()
+
 
     Private Sub CheckProgressBar()
         PB_Speed1FSC.Value = num_Speed1FSC.Value
@@ -27,89 +35,137 @@ Public Class Program_Form
         PB_Speed3CAP.Value = num_Speed3CAP.Value
     End Sub
 
+    Private Function GenerateLogFileName() As String
+        Do
+            Dim logFileName As String = $"Log{logFileIndex:D4}.txt"
+            Dim logFilePath As String = Path.Combine(Application.StartupPath, logFileName)
+            If Not File.Exists(logFilePath) Then
+                Return logFilePath
+            End If
+            logFileIndex += 1
+        Loop
+    End Function
+
+    Private Sub StartNewLogFile()
+        logFileIndex = 1
+        currentLogFilePath = GenerateLogFileName()
+        File.Create(currentLogFilePath).Dispose()
+    End Sub
+
+    Private Sub AppendLogData(data As String)
+        If isLoggingEnabled Then
+            ' Usa un StringBuilder per raccogliere la riga intera prima di scrivere
+            Dim logEntry As New StringBuilder()
+
+            ' Aggiunge timestamp se abilitato
+            If isTimestampEnabled Then
+                logEntry.Append($"{DateTime.Now:yyyy-MM-dd HH:mm:ss} , ")
+            End If
+
+            ' Rimuove caratteri di newline indesiderati che spezzano le righe
+            data = data.Replace(vbCr, "").Replace(vbLf, "")
+
+            ' Aggiunge la riga formattata correttamente
+            logEntry.Append(data)
+
+            ' Scrive una sola riga nel file senza spezzarla
+            File.AppendAllText(currentLogFilePath, logEntry.ToString() & Environment.NewLine)
+
+            ' Controlla se il file ha superato il limite di dimensione
+            Dim fileInfo As New FileInfo(currentLogFilePath)
+            If fileInfo.Length > logFileSizeLimit Then
+                logFileIndex += 1
+                currentLogFilePath = GenerateLogFileName()
+                File.Create(currentLogFilePath).Dispose()
+            End If
+        End If
+    End Sub
+
+
+
 
     Private Sub UpdateFormControls()
-        If customerData.FSC_CAF_Speed1 <> 0 Then
+        If customerData.FSC_CAF_Speed1 > 24 Then
             Invoke(Sub() num_Speed1FSC.Value = customerData.FSC_CAF_Speed1)
         Else
             Invoke(Sub() num_Speed1FSC.Value = 25)
         End If
 
-        If customerData.FSC_CAF_Speed2 <> 0 Then
+        If customerData.FSC_CAF_Speed2 > 24 Then
             Invoke(Sub() num_Speed2FSC.Value = customerData.FSC_CAF_Speed2)
         Else
             Invoke(Sub() num_Speed2FSC.Value = 25)
         End If
 
-        If customerData.FSC_CAF_Speed3 <> 0 Then
+        If customerData.FSC_CAF_Speed3 > 24 Then
             Invoke(Sub() num_Speed3FSC.Value = customerData.FSC_CAF_Speed3)
         Else
             Invoke(Sub() num_Speed3FSC.Value = 25)
         End If
 
-        If customerData.CAP_Speed1 <> 0 Then
+        If customerData.CAP_Speed1 > 29 Then
             Invoke(Sub() num_Speed1CAP.Value = customerData.CAP_Speed1)
         Else
             Invoke(Sub() num_Speed1CAP.Value = 30)
         End If
 
-        If customerData.CAP_Speed2 <> 0 Then
+        If customerData.CAP_Speed2 > 29 Then
             Invoke(Sub() num_Speed2CAP.Value = customerData.CAP_Speed2)
         Else
             Invoke(Sub() num_Speed2CAP.Value = 30)
         End If
 
-        If customerData.CAP_Speed3 <> 0 Then
+        If customerData.CAP_Speed3 > 29 Then
             Invoke(Sub() num_Speed3CAP.Value = customerData.CAP_Speed3)
         Else
             Invoke(Sub() num_Speed3CAP.Value = 30)
         End If
 
-        If customerData.BoostTimer <> 0 Then
+        If customerData.BoostTimer > 14 Then
             Invoke(Sub() num_BoostTimer.Value = customerData.BoostTimer)
         Else
             Invoke(Sub() num_BoostTimer.Value = 15)
         End If
 
-        If customerData.FilterTimer <> 0 Then
+        If customerData.FilterTimer > 29 Then
             Invoke(Sub() num_FilterTimer.Value = customerData.FilterTimer)
         Else
             Invoke(Sub() num_FilterTimer.Value = 30)
         End If
 
-        If customerData.FireKitTimer <> 0 Then
+        If customerData.FireKitTimer > 7 Then
             Invoke(Sub() num_FKITimer.Value = customerData.FireKitTimer)
         Else
             Invoke(Sub() num_FKITimer.Value = 10)
         End If
 
-        If customerData.CO2SetPoint <> 0 Then
+        If customerData.CO2SetPoint > 699 Then
             Invoke(Sub() num_CO2Setpoint.Value = customerData.CO2SetPoint)
         Else
             Invoke(Sub() num_CO2Setpoint.Value = 700)
         End If
 
-        If customerData.RHSetPoint <> 0 Then
+        If customerData.RHSetPoint > 19 Then
             Invoke(Sub() num_RHSetpoint.Value = customerData.RHSetPoint)
         Else
             Invoke(Sub() num_RHSetpoint.Value = 20)
         End If
 
-        If customerData.VOCSetPoint <> 0 Then
+        If customerData.VOCSetPoint > 1 Then
             Invoke(Sub() num_VOCSetpoint.Value = customerData.VOCSetPoint)
         Else
             Invoke(Sub() num_VOCSetpoint.Value = 2)
         End If
 
 
-        If customerData.TempSetPoint <> 0 Then
+        If customerData.TempSetPoint > 11 Then
             Invoke(Sub() num_TempSetpoint.Value = customerData.TempSetPoint)
         Else
             Invoke(Sub() num_TempSetpoint.Value = 12)
         End If
 
 
-        If customerData.SUM_WINSetPoint <> 0 Then
+        If customerData.SUM_WINSetPoint > 11 Then
             Invoke(Sub() num_SWSetpoint.Value = customerData.SUM_WINSetPoint)
         Else
             Invoke(Sub() num_SWSetpoint.Value = 12)
@@ -168,7 +224,7 @@ Public Class Program_Form
             RB_NO.Enabled = False
         End If
 
-        If customerData.IMBALANCESetPoint <> 0 Then
+        If customerData.IMBALANCESetPoint > -70 AndAlso customerData.IMBALANCESetPoint < 70 Then
             Invoke(Sub() num_Imbalance_Setpoint.Value = customerData.IMBALANCESetPoint)
         Else
             Invoke(Sub() num_Imbalance_Setpoint.Value = 0)
@@ -180,13 +236,13 @@ Public Class Program_Form
             CB_ImbEnable.Checked = False
         End If
 
-        If customerData.KHK_SET_POINT <> 0 Then
+        If customerData.KHK_SET_POINT > 20 Then
             Invoke(Sub() num_KHK_Setpoint.Value = customerData.KHK_SET_POINT)
         Else
             Invoke(Sub() num_KHK_Setpoint.Value = 100)
         End If
 
-        If customerData.KHKIMBALANCESetPoint <> 0 Then
+        If customerData.KHKIMBALANCESetPoint > -70 AndAlso customerData.KHKIMBALANCESetPoint < 70 Then
             Invoke(Sub() num_KHKImbalance_Setpoint.Value = customerData.KHKIMBALANCESetPoint)
         Else
             Invoke(Sub() num_KHKImbalance_Setpoint.Value = 0)
@@ -548,9 +604,7 @@ Public Class Program_Form
             End If
         End If
     End Sub
-    Private Sub tb_COMStrem_TextChanged(sender As Object, e As EventArgs) Handles tb_COMStrem.TextChanged
-        ResetInactivityTimer()
-    End Sub
+
 
     Private Sub ExtractConfigData()
         Dim startPattern As String = "---[ 2  Read Config. Data Unit ]---"
@@ -581,7 +635,29 @@ Public Class Program_Form
 
     Private Sub SerialPort1_DataReceived(sender As Object, e As SerialDataReceivedEventArgs) Handles SerialPort1.DataReceived
         Dim receivedData As String = SerialPort1.ReadExisting()
-        Invoke(Sub() tb_COMStrem.AppendText(receivedData))
+
+        ' Accumula i dati nel buffer
+        SyncLock logBuffer
+            logBuffer.Append(receivedData)
+
+            ' Controlla se il buffer contiene una linea completa
+            While logBuffer.ToString().Contains(vbLf)
+                ' Trova la posizione della prima newline
+                Dim lineEndIndex As Integer = logBuffer.ToString().IndexOf(vbLf)
+
+                ' Estrai la linea completa
+                Dim completeLine As String = logBuffer.ToString().Substring(0, lineEndIndex).Trim()
+
+                ' Rimuovi la riga dal buffer
+                logBuffer.Remove(0, lineEndIndex + 1)
+
+                ' Scrivi la linea nel log e aggiorna l'interfaccia grafica
+                Invoke(Sub()
+                           tb_COMStrem.AppendText(completeLine & Environment.NewLine)
+                           AppendLogData(completeLine) ' Scrive solo righe complete nel log
+                       End Sub)
+            End While
+        End SyncLock
     End Sub
 
     Private Sub Btn_Connect_Click(sender As Object, e As EventArgs) Handles Btn_Connect.Click
@@ -863,6 +939,17 @@ Public Class Program_Form
             num_SWSetpoint.Value = 16
             num_SWSetpoint.Enabled = True
         End If
+    End Sub
+
+    Private Sub CB_SaveLog_CheckedChanged(sender As Object, e As EventArgs) Handles CB_SaveLog.CheckedChanged
+        isLoggingEnabled = CB_SaveLog.Checked
+        If isLoggingEnabled Then
+            StartNewLogFile()
+        End If
+    End Sub
+
+    Private Sub CB_Timestamp_CheckedChanged(sender As Object, e As EventArgs) Handles CB_Timestamp.CheckedChanged
+        isTimestampEnabled = CB_Timestamp.Checked
     End Sub
 End Class
 

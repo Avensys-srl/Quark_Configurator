@@ -30,20 +30,20 @@ Module Module1
         Public Property KHKIMBALANCESetPoint As SByte
 
         Public Sub Clear()
-            FSC_CAF_Speed1 = 0
-            FSC_CAF_Speed2 = 0
-            FSC_CAF_Speed3 = 0
-            CAP_Speed1 = 0
-            CAP_Speed2 = 0
-            CAP_Speed3 = 0
-            BoostTimer = 0
-            FilterTimer = 0
-            FireKitTimer = 0
-            CO2SetPoint = 0
-            RHSetPoint = 0
-            VOCSetPoint = 0
-            TempSetPoint = 0
-            SUM_WINSetPoint = 0
+            FSC_CAF_Speed1 = 25
+            FSC_CAF_Speed2 = 25
+            FSC_CAF_Speed3 = 25
+            CAP_Speed1 = 30
+            CAP_Speed2 = 30
+            CAP_Speed3 = 30
+            BoostTimer = 15
+            FilterTimer = 30
+            FireKitTimer = 10
+            CO2SetPoint = 700
+            RHSetPoint = 20
+            VOCSetPoint = 2
+            TempSetPoint = 12
+            SUM_WINSetPoint = 12
             Configuration = String.Empty
             VersionHW = String.Empty
             VersionSW = String.Empty

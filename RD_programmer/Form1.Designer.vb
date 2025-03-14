@@ -119,6 +119,8 @@ Partial Class Program_Form
         Me.PcBx_Logo = New System.Windows.Forms.PictureBox()
         Me.Tab_Main = New System.Windows.Forms.TabControl()
         Me.TP_Shell = New System.Windows.Forms.TabPage()
+        Me.CB_Timestamp = New System.Windows.Forms.CheckBox()
+        Me.CB_SaveLog = New System.Windows.Forms.CheckBox()
         Me.Input_String = New System.Windows.Forms.RichTextBox()
         Me.tb_COMStrem = New System.Windows.Forms.RichTextBox()
         Me.Btn_SendData = New System.Windows.Forms.Button()
@@ -1167,6 +1169,8 @@ Partial Class Program_Form
         '
         'TP_Shell
         '
+        Me.TP_Shell.Controls.Add(Me.CB_Timestamp)
+        Me.TP_Shell.Controls.Add(Me.CB_SaveLog)
         Me.TP_Shell.Controls.Add(Me.Input_String)
         Me.TP_Shell.Controls.Add(Me.tb_COMStrem)
         Me.TP_Shell.Controls.Add(Me.Btn_SendData)
@@ -1176,6 +1180,26 @@ Partial Class Program_Form
         Me.TP_Shell.TabIndex = 1
         Me.TP_Shell.Text = "Shell"
         Me.TP_Shell.UseVisualStyleBackColor = True
+        '
+        'CB_Timestamp
+        '
+        Me.CB_Timestamp.AutoSize = True
+        Me.CB_Timestamp.Location = New System.Drawing.Point(555, 361)
+        Me.CB_Timestamp.Name = "CB_Timestamp"
+        Me.CB_Timestamp.Size = New System.Drawing.Size(99, 17)
+        Me.CB_Timestamp.TabIndex = 10
+        Me.CB_Timestamp.Text = "Add Timestamp"
+        Me.CB_Timestamp.UseVisualStyleBackColor = True
+        '
+        'CB_SaveLog
+        '
+        Me.CB_SaveLog.AutoSize = True
+        Me.CB_SaveLog.Location = New System.Drawing.Point(468, 361)
+        Me.CB_SaveLog.Name = "CB_SaveLog"
+        Me.CB_SaveLog.Size = New System.Drawing.Size(69, 17)
+        Me.CB_SaveLog.TabIndex = 10
+        Me.CB_SaveLog.Text = "SaveLog"
+        Me.CB_SaveLog.UseVisualStyleBackColor = True
         '
         'Input_String
         '
@@ -1263,6 +1287,7 @@ Partial Class Program_Form
         CType(Me.PcBx_Logo, System.ComponentModel.ISupportInitialize).EndInit()
         Me.Tab_Main.ResumeLayout(False)
         Me.TP_Shell.ResumeLayout(False)
+        Me.TP_Shell.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -1367,4 +1392,6 @@ Partial Class Program_Form
     Friend WithEvents Label13 As Label
     Friend WithEvents Label14 As Label
     Friend WithEvents num_KHKImbalance_Setpoint As NumericUpDown
+    Friend WithEvents CB_SaveLog As CheckBox
+    Friend WithEvents CB_Timestamp As CheckBox
 End Class
