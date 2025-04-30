@@ -10,30 +10,22 @@ Public Class Program_Form
     Dim isTimestampEnabled As Boolean = True
     Dim logFileIndex As Integer = 1
     Dim currentLogFilePath As String
-    Dim logFileSizeLimit As Long = 1024 * 1024 ' 1 MB
+    ReadOnly logFileSizeLimit As Long = 1024 * 1024 ' 1 MB
     Dim isLoggingEnabled As Boolean = False
     Private character2Sent As Boolean = False
     Private character6Sent As Boolean = False
     Private isWriting As Boolean = False
     Private writeStep As Integer = 1
     Private parameterRead As Boolean = False
-    Dim customerData As New CustomerData
-    Private configDataBuilder As New StringBuilder()
+    ReadOnly customerData As New CustomerData
+    ReadOnly configDataBuilder As New StringBuilder()
     Private Const InactivityTimeoutMilliseconds As Integer = 1000 ' 1 secondo
-    Private WithEvents portWatcher As ManagementEventWatcher
+    Private WithEvents PortWatcher As ManagementEventWatcher
     Private isService = False
-    Private hiddenPages As New List(Of TabPage)()
-    Private logBuffer As New StringBuilder()
+    ReadOnly hiddenPages As New List(Of TabPage)()
+    ReadOnly logBuffer As New StringBuilder()
 
 
-    Private Sub CheckProgressBar()
-        PB_Speed1FSC.Value = num_Speed1FSC.Value
-        PB_Speed2FSC.Value = num_Speed2FSC.Value
-        PB_Speed3FSC.Value = num_Speed3FSC.Value
-        PB_Speed1CAP.Value = num_Speed1CAP.Value
-        PB_Speed2CAP.Value = num_Speed2CAP.Value
-        PB_Speed3CAP.Value = num_Speed3CAP.Value
-    End Sub
 
     Private Function GenerateLogFileName() As String
         Do
@@ -81,80 +73,70 @@ Public Class Program_Form
         End If
     End Sub
 
-
-
-
     Private Sub UpdateFormControls()
-        If customerData.FSC_CAF_Speed1 > 24 Then
-            Invoke(Sub() num_Speed1FSC.Value = customerData.FSC_CAF_Speed1)
-        Else
-            Invoke(Sub() num_Speed1FSC.Value = 25)
-        End If
 
-        If customerData.FSC_CAF_Speed2 > 24 Then
-            Invoke(Sub() num_Speed2FSC.Value = customerData.FSC_CAF_Speed2)
-        Else
-            Invoke(Sub() num_Speed2FSC.Value = 25)
-        End If
-
-        If customerData.FSC_CAF_Speed3 > 24 Then
-            Invoke(Sub() num_Speed3FSC.Value = customerData.FSC_CAF_Speed3)
-        Else
-            Invoke(Sub() num_Speed3FSC.Value = 25)
-        End If
 
         If customerData.CAP_Speed1 > 29 Then
             Invoke(Sub() num_Speed1CAP.Value = customerData.CAP_Speed1)
         Else
             Invoke(Sub() num_Speed1CAP.Value = 30)
+            Invoke(Sub() customerData.CAP_Speed1 = 30)
         End If
 
         If customerData.CAP_Speed2 > 29 Then
             Invoke(Sub() num_Speed2CAP.Value = customerData.CAP_Speed2)
         Else
             Invoke(Sub() num_Speed2CAP.Value = 30)
+            Invoke(Sub() customerData.CAP_Speed2 = 30)
         End If
 
         If customerData.CAP_Speed3 > 29 Then
             Invoke(Sub() num_Speed3CAP.Value = customerData.CAP_Speed3)
         Else
             Invoke(Sub() num_Speed3CAP.Value = 30)
+            Invoke(Sub() customerData.CAP_Speed3 = 30)
         End If
 
         If customerData.BoostTimer > 14 Then
             Invoke(Sub() num_BoostTimer.Value = customerData.BoostTimer)
         Else
             Invoke(Sub() num_BoostTimer.Value = 15)
+            Invoke(Sub() customerData.BoostTimer = 15)
         End If
 
         If customerData.FilterTimer > 29 Then
             Invoke(Sub() num_FilterTimer.Value = customerData.FilterTimer)
         Else
             Invoke(Sub() num_FilterTimer.Value = 30)
+            Invoke(Sub() customerData.FilterTimer = 30)
         End If
 
         If customerData.FireKitTimer > 7 Then
             Invoke(Sub() num_FKITimer.Value = customerData.FireKitTimer)
         Else
             Invoke(Sub() num_FKITimer.Value = 10)
+            Invoke(Sub() customerData.FireKitTimer = 10)
         End If
 
         If customerData.CO2SetPoint > 699 Then
             Invoke(Sub() num_CO2Setpoint.Value = customerData.CO2SetPoint)
         Else
             Invoke(Sub() num_CO2Setpoint.Value = 700)
+            Invoke(Sub() customerData.CO2SetPoint = 700)
         End If
 
         If customerData.RHSetPoint > 19 Then
             Invoke(Sub() num_RHSetpoint.Value = customerData.RHSetPoint)
         Else
             Invoke(Sub() num_RHSetpoint.Value = 20)
+            Invoke(Sub() customerData.RHSetPoint = 20)
         End If
 
         If customerData.VOCSetPoint > 1 Then
             Invoke(Sub() num_VOCSetpoint.Value = customerData.VOCSetPoint)
         Else
             Invoke(Sub() num_VOCSetpoint.Value = 2)
+            Invoke(Sub() customerData.VOCSetPoint = 2)
         End If
 
 
@@ -162,6 +144,7 @@ Public Class Program_Form
             Invoke(Sub() num_TempSetpoint.Value = customerData.TempSetPoint)
         Else
             Invoke(Sub() num_TempSetpoint.Value = 12)
+            Invoke(Sub() customerData.TempSetPoint = 12)
         End If
 
 
@@ -169,6 +152,7 @@ Public Class Program_Form
             Invoke(Sub() num_SWSetpoint.Value = customerData.SUM_WINSetPoint)
         Else
             Invoke(Sub() num_SWSetpoint.Value = 12)
+            Invoke(Sub() customerData.SUM_WINSetPoint = 12)
         End If
 
 
@@ -224,10 +208,25 @@ Public Class Program_Form
             RB_NO.Enabled = False
         End If
 
-        If customerData.IMBALANCESetPoint > -70 AndAlso customerData.IMBALANCESetPoint < 70 Then
-            Invoke(Sub() num_Imbalance_Setpoint.Value = customerData.IMBALANCESetPoint)
+        If customerData.IMBALANCESetPoint1 > -70 AndAlso customerData.IMBALANCESetPoint1 < 70 Then
+            Invoke(Sub() num_Imbalance_Setpoint1.Value = customerData.IMBALANCESetPoint1)
         Else
-            Invoke(Sub() num_Imbalance_Setpoint.Value = 0)
+            Invoke(Sub() num_Imbalance_Setpoint1.Value = 0)
+            Invoke(Sub() customerData.IMBALANCESetPoint1 = 0)
+        End If
+
+        If customerData.IMBALANCESetPoint2 > -70 AndAlso customerData.IMBALANCESetPoint2 < 70 Then
+            Invoke(Sub() num_Imbalance_Setpoint2.Value = customerData.IMBALANCESetPoint2)
+        Else
+            Invoke(Sub() num_Imbalance_Setpoint2.Value = 0)
+            Invoke(Sub() customerData.IMBALANCESetPoint2 = 0)
+        End If
+
+        If customerData.IMBALANCESetPoint3 > -70 AndAlso customerData.IMBALANCESetPoint3 < 70 Then
+            Invoke(Sub() num_Imbalance_Setpoint3.Value = customerData.IMBALANCESetPoint3)
+        Else
+            Invoke(Sub() num_Imbalance_Setpoint3.Value = 0)
+            Invoke(Sub() customerData.IMBALANCESetPoint3 = 0)
         End If
 
         If customerData.IMBALANCE_ENABLE = 1 Then
@@ -236,17 +235,58 @@ Public Class Program_Form
             CB_ImbEnable.Checked = False
         End If
 
-        If customerData.KHK_SET_POINT > 20 Then
-            Invoke(Sub() num_KHK_Setpoint.Value = customerData.KHK_SET_POINT)
-        Else
-            Invoke(Sub() num_KHK_Setpoint.Value = 100)
-        End If
-
         If customerData.KHKIMBALANCESetPoint > -70 AndAlso customerData.KHKIMBALANCESetPoint < 70 Then
             Invoke(Sub() num_KHKImbalance_Setpoint.Value = customerData.KHKIMBALANCESetPoint)
         Else
             Invoke(Sub() num_KHKImbalance_Setpoint.Value = 0)
+            Invoke(Sub() customerData.KHKIMBALANCESetPoint = 0)
         End If
+
+
+        'INIZIO Setting Velocità
+        Dim velocitaCalcolate1 = customerData.GetCalculatedSpeeds(1)
+        Dim velocitaCalcolate2 = customerData.GetCalculatedSpeeds(2)
+        Dim velocitaCalcolate3 = customerData.GetCalculatedSpeeds(3)
+        Dim velocitaCalcolateK = customerData.GetCalculatedSpeeds(0)
+
+
+        If customerData.FSC_CAF_Speed1 > 24 Then
+            Invoke(Sub() num_F_Speed1.Value = velocitaCalcolate1.SpeedF)
+            Invoke(Sub() num_R_Speed1.Value = velocitaCalcolate1.SpeedR)
+        Else
+            Invoke(Sub() num_F_Speed1.Value = 25)
+            Invoke(Sub() num_R_Speed1.Value = 25)
+            Invoke(Sub() customerData.FSC_CAF_Speed1 = 25)
+        End If
+
+        If customerData.FSC_CAF_Speed2 > 24 Then
+            Invoke(Sub() num_F_Speed2.Value = velocitaCalcolate2.SpeedF)
+            Invoke(Sub() num_R_Speed2.Value = velocitaCalcolate2.SpeedR)
+        Else
+            Invoke(Sub() num_F_Speed2.Value = 25)
+            Invoke(Sub() num_R_Speed2.Value = 25)
+            Invoke(Sub() customerData.FSC_CAF_Speed2 = 25)
+        End If
+
+        If customerData.FSC_CAF_Speed3 > 24 Then
+            Invoke(Sub() num_F_Speed3.Value = velocitaCalcolate3.SpeedF)
+            Invoke(Sub() num_R_Speed3.Value = velocitaCalcolate3.SpeedR)
+        Else
+            Invoke(Sub() num_F_Speed3.Value = 25)
+            Invoke(Sub() num_R_Speed3.Value = 25)
+            Invoke(Sub() customerData.FSC_CAF_Speed3 = 25)
+        End If
+
+        If customerData.KHK_SET_POINT > 25 And customerData.KHK_SET_POINT <= 100 Then
+            Invoke(Sub() num_FK_Speed.Value = velocitaCalcolateK.SpeedF)
+            Invoke(Sub() num_RK_Speed.Value = velocitaCalcolateK.SpeedR)
+        Else
+            Invoke(Sub() num_FK_Speed.Value = 100)
+            Invoke(Sub() num_RK_Speed.Value = 100)
+            Invoke(Sub() customerData.KHK_SET_POINT = 100)
+        End If
+        ' FINE Setting Velocità
+
 
 
         If customerData.VersionHW IsNot Nothing AndAlso customerData.VersionHW.Length <> 0 Then
@@ -411,9 +451,9 @@ Public Class Program_Form
         character2Sent = False
         character6Sent = False
         parameterRead = False
-        num_Speed1FSC.Enabled = False
-        num_Speed2FSC.Enabled = False
-        num_Speed3FSC.Enabled = False
+        num_F_Speed1.Enabled = False
+        num_F_Speed2.Enabled = False
+        num_F_Speed3.Enabled = False
         num_Speed1CAP.Enabled = False
         num_Speed2CAP.Enabled = False
         num_Speed3CAP.Enabled = False
@@ -444,19 +484,19 @@ Public Class Program_Form
                     ResetInactivityTimer()
                 Case 2
                     If tb_COMStrem.Text.Contains("Please set speed 1 > 25% (ex. 25...30...40):") Then
-                        InviaStringa(num_Speed1FSC.Value.ToString())
+                        InviaStringa(customerData.FSC_CAF_Speed1.ToString())
                         writeStep += 1
                         ResetInactivityTimer()
                     End If
                 Case 3
                     If tb_COMStrem.Text.Contains("Please set speed 2 > speed 1 :") Then
-                        InviaStringa(num_Speed2FSC.Value.ToString())
+                        InviaStringa(customerData.FSC_CAF_Speed2.ToString())
                         writeStep += 1
                         ResetInactivityTimer()
                     End If
                 Case 4
                     If tb_COMStrem.Text.Contains("Please set speed 3 > speed 2 :") Then
-                        InviaStringa(num_Speed3FSC.Value.ToString())
+                        InviaStringa(customerData.FSC_CAF_Speed3.ToString())
                         writeStep += 1
                         ResetInactivityTimer()
                     End If
@@ -544,8 +584,7 @@ Public Class Program_Form
                     End If
                 Case 18
                     If tb_COMStrem.Text.Contains("Please set IMBALANCE value  (min:-70, max:70) :") Then
-                        customerData.IMBALANCESetPoint = num_Imbalance_Setpoint.Value
-                        InviaStringa(customerData.IMBALANCESetPoint.ToString())
+                        InviaStringa(customerData.IMBALANCESetPoint1.ToString())
                         writeStep += 1
                         ResetInactivityTimer()
                     End If
@@ -557,15 +596,25 @@ Public Class Program_Form
                     End If
                 Case 20
                     If tb_COMStrem.Text.Contains("Please set KHK value  (min:20, max:100) :") Then
-                        customerData.KHK_SET_POINT = num_KHK_Setpoint.Value
                         InviaStringa(customerData.KHK_SET_POINT.ToString())
                         writeStep += 1
                         ResetInactivityTimer()
                     End If
                 Case 21
                     If tb_COMStrem.Text.Contains("Please set KHK IMBALANCE value  (min:-70, max:70) :") Then
-                        customerData.KHKIMBALANCESetPoint = num_KHKImbalance_Setpoint.Value
                         InviaStringa(customerData.KHKIMBALANCESetPoint.ToString())
+                        writeStep += 1
+                        ResetInactivityTimer()
+                    End If
+                Case 22
+                    If tb_COMStrem.Text.Contains("Please set IMBALANCE 2 value  (min:-70, max:70) :") Then
+                        InviaStringa(customerData.IMBALANCESetPoint2.ToString())
+                        writeStep += 1
+                        ResetInactivityTimer()
+                    End If
+                Case 23
+                    If tb_COMStrem.Text.Contains("Please set IMBALANCE 3 value  (min:-70, max:70) :") Then
+                        InviaStringa(customerData.IMBALANCESetPoint3.ToString())
                         writeStep += 1
                         ResetInactivityTimer()
                     End If
@@ -573,6 +622,7 @@ Public Class Program_Form
                     Await Task.Delay(6000)
                     isWriting = False
                     PB_SaveData.Visible = isWriting
+                    PB_SaveData.Value = 0
                     lb_SaveProg.Visible = isWriting
                     writeStep = 1
                     lb_status.Text = "Data successfully saved"
@@ -580,7 +630,7 @@ Public Class Program_Form
             End Select
 
             If (isWriting) Then
-                savestep = (writeStep - 1) / 21 * 100
+                savestep = (writeStep - 1) / 23 * 100
                 PB_SaveData.Value = savestep
                 lb_SaveProg.Text = savestep.ToString() + " %"
             End If
@@ -616,9 +666,12 @@ Public Class Program_Form
             ParseCustomerData(dataToParse, customerData)
         End If
         lb_status.Text = "Data loaded successfully."
-        num_Speed1FSC.Enabled = True
-        num_Speed2FSC.Enabled = True
-        num_Speed3FSC.Enabled = True
+        num_F_Speed1.Enabled = True
+        num_F_Speed2.Enabled = True
+        num_F_Speed3.Enabled = True
+        num_R_Speed1.Enabled = True
+        num_R_Speed2.Enabled = True
+        num_R_Speed3.Enabled = True
         num_BoostTimer.Enabled = True
         num_FilterTimer.Enabled = True
         num_RHSetpoint.Enabled = True
@@ -657,7 +710,18 @@ Public Class Program_Form
                            AppendLogData(completeLine) ' Scrive solo righe complete nel log
                        End Sub)
             End While
+
+            If logBuffer.Length > 0 AndAlso Not logBuffer.ToString().Contains(vbLf) Then
+                Invoke(Sub()
+                           tb_COMStrem.AppendText(logBuffer.ToString())
+                           AppendLogData(logBuffer.ToString())
+                           logBuffer.Clear()
+                       End Sub)
+            End If
+
         End SyncLock
+
+
     End Sub
 
     Private Sub Btn_Connect_Click(sender As Object, e As EventArgs) Handles Btn_Connect.Click
@@ -670,7 +734,7 @@ Public Class Program_Form
                 SerialPort1.BaudRate = 9600
                 SerialPort1.Encoding = Encoding.Default
                 SerialPort1.DtrEnable = True
-                SerialPort1.NewLine = ControlChars.Lf
+                SerialPort1.NewLine = vbLf
 
                 SerialPort1.Open()
 
@@ -728,7 +792,9 @@ Public Class Program_Form
 
                 'Dim numericValue As String = Regex.Replace(value, "[^\d]", "")
                 Dim numericValue As String = Regex.Replace(value, "[^-?\d+]", "")
+                'Dim numericValue As String = Regex.Replace(value, "^-?\d+", "")
                 Dim numero As Int16
+
 
                 Select Case name
                     Case "2.03-Version HW..."
@@ -766,7 +832,7 @@ Public Class Program_Form
                     Case "SUM/WIN Set Point"
                         Integer.TryParse(numericValue, customerData.SUM_WINSetPoint)
                     Case "IMBALANCE Set Point"
-                        SByte.TryParse(numericValue, customerData.IMBALANCESetPoint)
+                        SByte.TryParse(numericValue, customerData.IMBALANCESetPoint1)
                     Case "KHK Set Point"
                         SByte.TryParse(numericValue, numero)
                         If (numero < customerData.FSC_CAF_Speed3) Then
@@ -786,6 +852,10 @@ Public Class Program_Form
                         customerData.IMBALANCE_ENABLE = value
                     Case "IMBALANCE KHK Set Point"
                         SByte.TryParse(numericValue, customerData.KHKIMBALANCESetPoint)
+                    Case "IMBALANCE 2 Set Point"
+                        SByte.TryParse(numericValue, customerData.IMBALANCESetPoint2)
+                    Case "IMBALANCE 3 Set Point"
+                        SByte.TryParse(numericValue, customerData.IMBALANCESetPoint3)
                 End Select
             End If
         Next
@@ -810,40 +880,95 @@ Public Class Program_Form
         End If
     End Sub
 
-    Private Sub num_Speed1FSC_ValueChanged(sender As Object, e As EventArgs) Handles num_Speed1FSC.ValueChanged
-        CheckProgressBar()
-        If num_Speed1FSC.Value > num_Speed2FSC.Value Then
-            num_Speed2FSC.Value = num_Speed1FSC.Value
+    Private Sub F_Speed1_ValueChanged(sender As Object, e As EventArgs) Handles num_F_Speed1.ValueChanged
+
+        If CB_ImbEnable.Checked Then
+            customerData.UpdateSpeedSettings(num_F_Speed1.Value, num_R_Speed1.Value, 1)
+            num_Imbalance_Setpoint1.Value = customerData.IMBALANCESetPoint1
+        Else
+            num_R_Speed1.Value = num_F_Speed1.Value
+            customerData.UpdateSpeedSettings(num_F_Speed1.Value, num_R_Speed1.Value, 1)
+            num_Imbalance_Setpoint1.Value = customerData.IMBALANCESetPoint1
         End If
+
     End Sub
 
-    Private Sub num_Speed2FSC_ValueChanged(sender As Object, e As EventArgs) Handles num_Speed2FSC.ValueChanged
-        CheckProgressBar()
-        If num_Speed2FSC.Value > num_Speed3FSC.Value Then
-            num_Speed3FSC.Value = num_Speed2FSC.Value
+    Private Sub F_Speed2_ValueChanged(sender As Object, e As EventArgs) Handles num_F_Speed2.ValueChanged
+
+        If CB_ImbEnable.Checked Then
+            customerData.UpdateSpeedSettings(num_F_Speed2.Value, num_R_Speed2.Value, 2)
+            num_Imbalance_Setpoint2.Value = customerData.IMBALANCESetPoint2
+        Else
+            num_R_Speed2.Value = num_F_Speed2.Value
+            customerData.UpdateSpeedSettings(num_F_Speed2.Value, num_R_Speed2.Value, 2)
+            num_Imbalance_Setpoint2.Value = customerData.IMBALANCESetPoint2
         End If
-        If num_Speed2FSC.Value < num_Speed1FSC.Value Then
-            num_Speed1FSC.Value = num_Speed2FSC.Value
-        End If
+
     End Sub
 
-    Private Sub num_Speed3FSC_ValueChanged(sender As Object, e As EventArgs) Handles num_Speed3FSC.ValueChanged
-        CheckProgressBar()
-        If num_Speed3FSC.Value < num_Speed2FSC.Value Then
-            num_Speed2FSC.Value = num_Speed3FSC.Value
+    Private Sub F_Speed3_ValueChanged(sender As Object, e As EventArgs) Handles num_F_Speed3.ValueChanged
+
+        If CB_ImbEnable.Checked Then
+            customerData.UpdateSpeedSettings(num_F_Speed3.Value, num_R_Speed3.Value, 3)
+            num_Imbalance_Setpoint3.Value = customerData.IMBALANCESetPoint3
+        Else
+            num_R_Speed3.Value = num_F_Speed3.Value
+            customerData.UpdateSpeedSettings(num_F_Speed3.Value, num_R_Speed3.Value, 3)
+            num_Imbalance_Setpoint3.Value = customerData.IMBALANCESetPoint3
         End If
-        num_KHK_Setpoint.Minimum = num_Speed3FSC.Value
+
     End Sub
 
-    Private Sub num_Speed1CAP_ValueChanged(sender As Object, e As EventArgs) Handles num_Speed1CAP.ValueChanged
-        CheckProgressBar()
+
+    Private Sub R_Speed1_ValueChanged(sender As Object, e As EventArgs) Handles num_R_Speed1.ValueChanged
+
+        If CB_ImbEnable.Checked Then
+            customerData.UpdateSpeedSettings(num_F_Speed1.Value, num_R_Speed1.Value, 1)
+            num_Imbalance_Setpoint1.Value = customerData.IMBALANCESetPoint1
+        Else
+            num_F_Speed1.Value = num_R_Speed1.Value
+            customerData.UpdateSpeedSettings(num_F_Speed1.Value, num_R_Speed1.Value, 1)
+            num_Imbalance_Setpoint1.Value = customerData.IMBALANCESetPoint1
+        End If
+
+    End Sub
+
+    Private Sub R_Speed2_ValueChanged(sender As Object, e As EventArgs) Handles num_R_Speed2.ValueChanged
+
+        If CB_ImbEnable.Checked Then
+            customerData.UpdateSpeedSettings(num_F_Speed2.Value, num_R_Speed2.Value, 2)
+            num_Imbalance_Setpoint2.Value = customerData.IMBALANCESetPoint2
+        Else
+            num_F_Speed2.Value = num_R_Speed2.Value
+            customerData.UpdateSpeedSettings(num_F_Speed2.Value, num_R_Speed2.Value, 2)
+            num_Imbalance_Setpoint2.Value = customerData.IMBALANCESetPoint2
+        End If
+
+    End Sub
+
+    Private Sub R_Speed3_ValueChanged(sender As Object, e As EventArgs) Handles num_R_Speed3.ValueChanged
+
+        If CB_ImbEnable.Checked Then
+            customerData.UpdateSpeedSettings(num_F_Speed3.Value, num_R_Speed3.Value, 3)
+            num_Imbalance_Setpoint3.Value = customerData.IMBALANCESetPoint3
+        Else
+            num_F_Speed3.Value = num_R_Speed3.Value
+            customerData.UpdateSpeedSettings(num_F_Speed3.Value, num_R_Speed3.Value, 3)
+            num_Imbalance_Setpoint3.Value = customerData.IMBALANCESetPoint3
+        End If
+
+    End Sub
+
+
+    Private Sub Speed1CAP_ValueChanged(sender As Object, e As EventArgs) Handles num_Speed1CAP.ValueChanged, NumericUpDown4.ValueChanged
+
         If num_Speed1CAP.Value > num_Speed2CAP.Value Then
             num_Speed2CAP.Value = num_Speed1CAP.Value
         End If
     End Sub
 
-    Private Sub num_Speed2CAP_ValueChanged(sender As Object, e As EventArgs) Handles num_Speed2CAP.ValueChanged
-        CheckProgressBar()
+    Private Sub Speed2CAP_ValueChanged(sender As Object, e As EventArgs) Handles num_Speed2CAP.ValueChanged, NumericUpDown5.ValueChanged
+
         If num_Speed2CAP.Value > num_Speed3CAP.Value Then
             num_Speed3CAP.Value = num_Speed2CAP.Value
         End If
@@ -852,8 +977,8 @@ Public Class Program_Form
         End If
     End Sub
 
-    Private Sub num_Speed3CAP_ValueChanged(sender As Object, e As EventArgs) Handles num_Speed3CAP.ValueChanged
-        CheckProgressBar()
+    Private Sub Speed3CAP_ValueChanged(sender As Object, e As EventArgs) Handles num_Speed3CAP.ValueChanged, NumericUpDown6.ValueChanged
+
         If num_Speed3CAP.Value < num_Speed2CAP.Value Then
             num_Speed2CAP.Value = num_Speed3CAP.Value
         End If
@@ -867,8 +992,8 @@ Public Class Program_Form
     End Sub
 
     Private Sub KHK_ENABLE_CheckedChanged(sender As Object, e As EventArgs) Handles CB_KHKenable.CheckedChanged
-        num_KHK_Setpoint.Enabled = CB_KHKenable.Checked
-        num_KHKImbalance_Setpoint.Enabled = CB_KHKenable.Checked
+        num_FK_Speed.Enabled = CB_KHKenable.Checked
+        num_RK_Speed.Enabled = CB_KHKenable.Checked
 
         If CB_KHKenable.Checked = True Then
             If RB_NC.Checked = True Then
@@ -910,12 +1035,21 @@ Public Class Program_Form
     End Sub
 
     Private Sub Imbalance_Enable_CheckedChanged(sender As Object, e As EventArgs) Handles CB_ImbEnable.CheckedChanged
-        num_Imbalance_Setpoint.Enabled = CB_ImbEnable.Checked
+
         If CB_ImbEnable.Checked = True Then
             customerData.IMBALANCE_ENABLE = 1
         Else
             customerData.IMBALANCE_ENABLE = 0
+            num_F_Speed1.Value = customerData.FSC_CAF_Speed1
+            num_F_Speed2.Value = customerData.FSC_CAF_Speed2
+            num_F_Speed3.Value = customerData.FSC_CAF_Speed3
+            num_FK_Speed.Value = customerData.KHK_SET_POINT
+            num_R_Speed1.Value = num_F_Speed1.Value
+            num_R_Speed2.Value = num_F_Speed2.Value
+            num_R_Speed3.Value = num_F_Speed3.Value
+            num_RK_Speed.Value = num_FK_Speed.Value
         End If
+
     End Sub
 
     Private Sub Bootloader_Button_Click(sender As Object, e As EventArgs) Handles Btn_FirmwareUpdate.Click
@@ -951,6 +1085,30 @@ Public Class Program_Form
     Private Sub CB_Timestamp_CheckedChanged(sender As Object, e As EventArgs) Handles CB_Timestamp.CheckedChanged
         isTimestampEnabled = CB_Timestamp.Checked
     End Sub
+
+    Private Sub FK_Speed_ValueChanged(sender As Object, e As EventArgs) Handles num_FK_Speed.ValueChanged
+        If CB_ImbEnable.Checked Then
+            customerData.UpdateSpeedSettings(num_FK_Speed.Value, num_RK_Speed.Value, 0)
+            num_KHKImbalance_Setpoint.Value = customerData.KHKIMBALANCESetPoint
+        Else
+            num_RK_Speed.Value = num_FK_Speed.Value
+            customerData.UpdateSpeedSettings(num_FK_Speed.Value, num_RK_Speed.Value, 0)
+            num_KHKImbalance_Setpoint.Value = customerData.KHKIMBALANCESetPoint
+        End If
+    End Sub
+
+    Private Sub RK_Speed_ValueChanged(sender As Object, e As EventArgs) Handles num_RK_Speed.ValueChanged
+        If CB_ImbEnable.Checked Then
+            customerData.UpdateSpeedSettings(num_FK_Speed.Value, num_RK_Speed.Value, 0)
+            num_KHKImbalance_Setpoint.Value = customerData.KHKIMBALANCESetPoint
+        Else
+            num_FK_Speed.Value = num_RK_Speed.Value
+            customerData.UpdateSpeedSettings(num_FK_Speed.Value, num_RK_Speed.Value, 0)
+            num_KHKImbalance_Setpoint.Value = customerData.KHKIMBALANCESetPoint
+        End If
+    End Sub
+
+
 End Class
 
 

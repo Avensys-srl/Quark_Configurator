@@ -27,24 +27,19 @@ Partial Class Program_Form
         Me.SerialPort1 = New System.IO.Ports.SerialPort(Me.components)
         Me.TP_Configurator = New System.Windows.Forms.TabPage()
         Me.Grp_Imbalance = New System.Windows.Forms.GroupBox()
-        Me.lb_ImbalanceEnable = New System.Windows.Forms.Label()
-        Me.CB_ImbEnable = New System.Windows.Forms.CheckBox()
-        Me.Label10 = New System.Windows.Forms.Label()
-        Me.lb_ImbalanceLevel = New System.Windows.Forms.Label()
-        Me.num_Imbalance_Setpoint = New System.Windows.Forms.NumericUpDown()
-        Me.Btn_FirmwareUpdate = New System.Windows.Forms.Button()
-        Me.Grp_KHK = New System.Windows.Forms.GroupBox()
         Me.Label13 = New System.Windows.Forms.Label()
-        Me.lb_KHKContactBehavoir = New System.Windows.Forms.Label()
+        Me.Label17 = New System.Windows.Forms.Label()
         Me.Label14 = New System.Windows.Forms.Label()
         Me.num_KHKImbalance_Setpoint = New System.Windows.Forms.NumericUpDown()
-        Me.lb_KHKSetpoint = New System.Windows.Forms.Label()
-        Me.Label12 = New System.Windows.Forms.Label()
-        Me.num_KHK_Setpoint = New System.Windows.Forms.NumericUpDown()
-        Me.RB_NO = New System.Windows.Forms.RadioButton()
-        Me.RB_NC = New System.Windows.Forms.RadioButton()
-        Me.lb_KHKenable = New System.Windows.Forms.Label()
-        Me.CB_KHKenable = New System.Windows.Forms.CheckBox()
+        Me.lb_ImbalanceLevel3 = New System.Windows.Forms.Label()
+        Me.num_Imbalance_Setpoint3 = New System.Windows.Forms.NumericUpDown()
+        Me.Label15 = New System.Windows.Forms.Label()
+        Me.lb_ImbalanceLevel2 = New System.Windows.Forms.Label()
+        Me.num_Imbalance_Setpoint2 = New System.Windows.Forms.NumericUpDown()
+        Me.Label10 = New System.Windows.Forms.Label()
+        Me.lb_ImbalanceLevel1 = New System.Windows.Forms.Label()
+        Me.num_Imbalance_Setpoint1 = New System.Windows.Forms.NumericUpDown()
+        Me.Btn_FirmwareUpdate = New System.Windows.Forms.Button()
         Me.lb_SaveProg = New System.Windows.Forms.Label()
         Me.PB_SaveData = New System.Windows.Forms.ProgressBar()
         Me.Grp_UnitConfig = New System.Windows.Forms.GroupBox()
@@ -84,30 +79,51 @@ Partial Class Program_Form
         Me.lb_HW_vers = New System.Windows.Forms.Label()
         Me.lb_SerialNumber = New System.Windows.Forms.Label()
         Me.Grp_SpeedConf = New System.Windows.Forms.GroupBox()
+        Me.Grp_KHK = New System.Windows.Forms.GroupBox()
+        Me.lb_KHKenable = New System.Windows.Forms.Label()
+        Me.lb_KHKContactBehavoir = New System.Windows.Forms.Label()
+        Me.Label23 = New System.Windows.Forms.Label()
+        Me.num_FK_Speed = New System.Windows.Forms.NumericUpDown()
+        Me.num_RK_Speed = New System.Windows.Forms.NumericUpDown()
+        Me.lb_KHKSetpoint = New System.Windows.Forms.Label()
+        Me.RB_NO = New System.Windows.Forms.RadioButton()
+        Me.Label12 = New System.Windows.Forms.Label()
+        Me.CB_KHKenable = New System.Windows.Forms.CheckBox()
+        Me.RB_NC = New System.Windows.Forms.RadioButton()
+        Me.Label25 = New System.Windows.Forms.Label()
+        Me.Label24 = New System.Windows.Forms.Label()
+        Me.NumericUpDown6 = New System.Windows.Forms.NumericUpDown()
         Me.num_Speed3CAP = New System.Windows.Forms.NumericUpDown()
+        Me.NumericUpDown5 = New System.Windows.Forms.NumericUpDown()
         Me.num_Speed2CAP = New System.Windows.Forms.NumericUpDown()
+        Me.lb_ImbalanceEnable = New System.Windows.Forms.Label()
+        Me.CB_ImbEnable = New System.Windows.Forms.CheckBox()
+        Me.NumericUpDown4 = New System.Windows.Forms.NumericUpDown()
         Me.num_Speed1CAP = New System.Windows.Forms.NumericUpDown()
-        Me.num_Speed3FSC = New System.Windows.Forms.NumericUpDown()
-        Me.num_Speed2FSC = New System.Windows.Forms.NumericUpDown()
-        Me.num_Speed1FSC = New System.Windows.Forms.NumericUpDown()
+        Me.num_R_Speed3 = New System.Windows.Forms.NumericUpDown()
+        Me.num_F_Speed3 = New System.Windows.Forms.NumericUpDown()
+        Me.num_R_Speed2 = New System.Windows.Forms.NumericUpDown()
+        Me.num_F_Speed2 = New System.Windows.Forms.NumericUpDown()
+        Me.num_R_Speed1 = New System.Windows.Forms.NumericUpDown()
+        Me.Label22 = New System.Windows.Forms.Label()
+        Me.num_F_Speed1 = New System.Windows.Forms.NumericUpDown()
         Me.vlb_Speed3CAP = New System.Windows.Forms.Label()
+        Me.Label21 = New System.Windows.Forms.Label()
         Me.lb_Speed3CAP = New System.Windows.Forms.Label()
         Me.vlb_Speed2CAP = New System.Windows.Forms.Label()
+        Me.Label20 = New System.Windows.Forms.Label()
         Me.lb_Speed2CAP = New System.Windows.Forms.Label()
         Me.vlb_Speed1CAP = New System.Windows.Forms.Label()
+        Me.Label19 = New System.Windows.Forms.Label()
         Me.lb_Speed1CAP = New System.Windows.Forms.Label()
         Me.vlb_Speed3FSC = New System.Windows.Forms.Label()
+        Me.Label18 = New System.Windows.Forms.Label()
         Me.lb_Speed3FSC = New System.Windows.Forms.Label()
         Me.vlb_Speed2FSC = New System.Windows.Forms.Label()
+        Me.Label16 = New System.Windows.Forms.Label()
         Me.lb_Speed2FSC = New System.Windows.Forms.Label()
         Me.vlb_Speed1FSC = New System.Windows.Forms.Label()
         Me.lb_Speed1FSC = New System.Windows.Forms.Label()
-        Me.PB_Speed3CAP = New System.Windows.Forms.ProgressBar()
-        Me.PB_Speed2CAP = New System.Windows.Forms.ProgressBar()
-        Me.PB_Speed1CAP = New System.Windows.Forms.ProgressBar()
-        Me.PB_Speed3FSC = New System.Windows.Forms.ProgressBar()
-        Me.PB_Speed2FSC = New System.Windows.Forms.ProgressBar()
-        Me.PB_Speed1FSC = New System.Windows.Forms.ProgressBar()
         Me.Label2 = New System.Windows.Forms.Label()
         Me.COM_List = New System.Windows.Forms.ListBox()
         Me.lb_status = New System.Windows.Forms.Label()
@@ -128,10 +144,10 @@ Partial Class Program_Form
         Me.lb_QKvers = New System.Windows.Forms.Label()
         Me.TP_Configurator.SuspendLayout()
         Me.Grp_Imbalance.SuspendLayout()
-        CType(Me.num_Imbalance_Setpoint, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.Grp_KHK.SuspendLayout()
         CType(Me.num_KHKImbalance_Setpoint, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.num_KHK_Setpoint, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.num_Imbalance_Setpoint3, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.num_Imbalance_Setpoint2, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.num_Imbalance_Setpoint1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Grp_UnitConfig.SuspendLayout()
         CType(Me.PcBx_Quark, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Grp_UnitParam.SuspendLayout()
@@ -145,12 +161,21 @@ Partial Class Program_Form
         CType(Me.num_BoostTimer, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Grp_UnitData.SuspendLayout()
         Me.Grp_SpeedConf.SuspendLayout()
+        Me.Grp_KHK.SuspendLayout()
+        CType(Me.num_FK_Speed, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.num_RK_Speed, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.NumericUpDown6, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.num_Speed3CAP, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.NumericUpDown5, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.num_Speed2CAP, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.NumericUpDown4, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.num_Speed1CAP, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.num_Speed3FSC, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.num_Speed2FSC, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.num_Speed1FSC, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.num_R_Speed3, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.num_F_Speed3, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.num_R_Speed2, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.num_F_Speed2, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.num_R_Speed1, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.num_F_Speed1, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.PcBx_Logo, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Tab_Main.SuspendLayout()
         Me.TP_Shell.SuspendLayout()
@@ -163,7 +188,6 @@ Partial Class Program_Form
         '
         Me.TP_Configurator.Controls.Add(Me.Grp_Imbalance)
         Me.TP_Configurator.Controls.Add(Me.Btn_FirmwareUpdate)
-        Me.TP_Configurator.Controls.Add(Me.Grp_KHK)
         Me.TP_Configurator.Controls.Add(Me.lb_SaveProg)
         Me.TP_Configurator.Controls.Add(Me.PB_SaveData)
         Me.TP_Configurator.Controls.Add(Me.Grp_UnitConfig)
@@ -189,71 +213,155 @@ Partial Class Program_Form
         '
         'Grp_Imbalance
         '
-        Me.Grp_Imbalance.Controls.Add(Me.lb_ImbalanceEnable)
-        Me.Grp_Imbalance.Controls.Add(Me.CB_ImbEnable)
+        Me.Grp_Imbalance.Controls.Add(Me.Label13)
+        Me.Grp_Imbalance.Controls.Add(Me.Label17)
+        Me.Grp_Imbalance.Controls.Add(Me.Label14)
+        Me.Grp_Imbalance.Controls.Add(Me.num_KHKImbalance_Setpoint)
+        Me.Grp_Imbalance.Controls.Add(Me.lb_ImbalanceLevel3)
+        Me.Grp_Imbalance.Controls.Add(Me.num_Imbalance_Setpoint3)
+        Me.Grp_Imbalance.Controls.Add(Me.Label15)
+        Me.Grp_Imbalance.Controls.Add(Me.lb_ImbalanceLevel2)
+        Me.Grp_Imbalance.Controls.Add(Me.num_Imbalance_Setpoint2)
         Me.Grp_Imbalance.Controls.Add(Me.Label10)
-        Me.Grp_Imbalance.Controls.Add(Me.lb_ImbalanceLevel)
-        Me.Grp_Imbalance.Controls.Add(Me.num_Imbalance_Setpoint)
-        Me.Grp_Imbalance.Location = New System.Drawing.Point(14, 385)
+        Me.Grp_Imbalance.Controls.Add(Me.lb_ImbalanceLevel1)
+        Me.Grp_Imbalance.Controls.Add(Me.num_Imbalance_Setpoint1)
+        Me.Grp_Imbalance.Location = New System.Drawing.Point(361, 347)
         Me.Grp_Imbalance.Margin = New System.Windows.Forms.Padding(2)
         Me.Grp_Imbalance.Name = "Grp_Imbalance"
         Me.Grp_Imbalance.Padding = New System.Windows.Forms.Padding(2)
-        Me.Grp_Imbalance.Size = New System.Drawing.Size(341, 91)
+        Me.Grp_Imbalance.Size = New System.Drawing.Size(225, 129)
         Me.Grp_Imbalance.TabIndex = 7
         Me.Grp_Imbalance.TabStop = False
         Me.Grp_Imbalance.Text = "Imbalance"
+        Me.Grp_Imbalance.Visible = False
         '
-        'lb_ImbalanceEnable
+        'Label13
         '
-        Me.lb_ImbalanceEnable.AutoSize = True
-        Me.lb_ImbalanceEnable.Location = New System.Drawing.Point(4, 22)
-        Me.lb_ImbalanceEnable.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
-        Me.lb_ImbalanceEnable.Name = "lb_ImbalanceEnable"
-        Me.lb_ImbalanceEnable.Size = New System.Drawing.Size(92, 13)
-        Me.lb_ImbalanceEnable.TabIndex = 11
-        Me.lb_ImbalanceEnable.Text = "Enable Imbalance"
+        Me.Label13.AutoSize = True
+        Me.Label13.Location = New System.Drawing.Point(183, 89)
+        Me.Label13.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.Label13.Name = "Label13"
+        Me.Label13.Size = New System.Drawing.Size(15, 13)
+        Me.Label13.TabIndex = 14
+        Me.Label13.Text = "%"
         '
-        'CB_ImbEnable
+        'Label17
         '
-        Me.CB_ImbEnable.AutoSize = True
-        Me.CB_ImbEnable.Location = New System.Drawing.Point(110, 22)
-        Me.CB_ImbEnable.Margin = New System.Windows.Forms.Padding(2)
-        Me.CB_ImbEnable.Name = "CB_ImbEnable"
-        Me.CB_ImbEnable.Size = New System.Drawing.Size(15, 14)
-        Me.CB_ImbEnable.TabIndex = 10
-        Me.CB_ImbEnable.UseVisualStyleBackColor = True
+        Me.Label17.AutoSize = True
+        Me.Label17.Location = New System.Drawing.Point(183, 66)
+        Me.Label17.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.Label17.Name = "Label17"
+        Me.Label17.Size = New System.Drawing.Size(15, 13)
+        Me.Label17.TabIndex = 17
+        Me.Label17.Text = "%"
+        '
+        'Label14
+        '
+        Me.Label14.AutoSize = True
+        Me.Label14.Location = New System.Drawing.Point(7, 91)
+        Me.Label14.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.Label14.Name = "Label14"
+        Me.Label14.Size = New System.Drawing.Size(110, 13)
+        Me.Label14.TabIndex = 13
+        Me.Label14.Text = "Imbalance KHK Level"
+        '
+        'num_KHKImbalance_Setpoint
+        '
+        Me.num_KHKImbalance_Setpoint.Enabled = False
+        Me.num_KHKImbalance_Setpoint.Location = New System.Drawing.Point(121, 89)
+        Me.num_KHKImbalance_Setpoint.Margin = New System.Windows.Forms.Padding(2)
+        Me.num_KHKImbalance_Setpoint.Maximum = New Decimal(New Integer() {70, 0, 0, 0})
+        Me.num_KHKImbalance_Setpoint.Minimum = New Decimal(New Integer() {70, 0, 0, -2147483648})
+        Me.num_KHKImbalance_Setpoint.Name = "num_KHKImbalance_Setpoint"
+        Me.num_KHKImbalance_Setpoint.Size = New System.Drawing.Size(55, 20)
+        Me.num_KHKImbalance_Setpoint.TabIndex = 12
+        Me.num_KHKImbalance_Setpoint.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        '
+        'lb_ImbalanceLevel3
+        '
+        Me.lb_ImbalanceLevel3.AutoSize = True
+        Me.lb_ImbalanceLevel3.Location = New System.Drawing.Point(23, 66)
+        Me.lb_ImbalanceLevel3.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.lb_ImbalanceLevel3.Name = "lb_ImbalanceLevel3"
+        Me.lb_ImbalanceLevel3.Size = New System.Drawing.Size(94, 13)
+        Me.lb_ImbalanceLevel3.TabIndex = 16
+        Me.lb_ImbalanceLevel3.Text = "Imbalance Level 3"
+        '
+        'num_Imbalance_Setpoint3
+        '
+        Me.num_Imbalance_Setpoint3.Enabled = False
+        Me.num_Imbalance_Setpoint3.Location = New System.Drawing.Point(121, 64)
+        Me.num_Imbalance_Setpoint3.Margin = New System.Windows.Forms.Padding(2)
+        Me.num_Imbalance_Setpoint3.Maximum = New Decimal(New Integer() {70, 0, 0, 0})
+        Me.num_Imbalance_Setpoint3.Minimum = New Decimal(New Integer() {70, 0, 0, -2147483648})
+        Me.num_Imbalance_Setpoint3.Name = "num_Imbalance_Setpoint3"
+        Me.num_Imbalance_Setpoint3.Size = New System.Drawing.Size(55, 20)
+        Me.num_Imbalance_Setpoint3.TabIndex = 15
+        Me.num_Imbalance_Setpoint3.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        '
+        'Label15
+        '
+        Me.Label15.AutoSize = True
+        Me.Label15.Location = New System.Drawing.Point(183, 42)
+        Me.Label15.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.Label15.Name = "Label15"
+        Me.Label15.Size = New System.Drawing.Size(15, 13)
+        Me.Label15.TabIndex = 14
+        Me.Label15.Text = "%"
+        '
+        'lb_ImbalanceLevel2
+        '
+        Me.lb_ImbalanceLevel2.AutoSize = True
+        Me.lb_ImbalanceLevel2.Location = New System.Drawing.Point(23, 42)
+        Me.lb_ImbalanceLevel2.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.lb_ImbalanceLevel2.Name = "lb_ImbalanceLevel2"
+        Me.lb_ImbalanceLevel2.Size = New System.Drawing.Size(94, 13)
+        Me.lb_ImbalanceLevel2.TabIndex = 13
+        Me.lb_ImbalanceLevel2.Text = "Imbalance Level 2"
+        '
+        'num_Imbalance_Setpoint2
+        '
+        Me.num_Imbalance_Setpoint2.Enabled = False
+        Me.num_Imbalance_Setpoint2.Location = New System.Drawing.Point(121, 40)
+        Me.num_Imbalance_Setpoint2.Margin = New System.Windows.Forms.Padding(2)
+        Me.num_Imbalance_Setpoint2.Maximum = New Decimal(New Integer() {70, 0, 0, 0})
+        Me.num_Imbalance_Setpoint2.Minimum = New Decimal(New Integer() {70, 0, 0, -2147483648})
+        Me.num_Imbalance_Setpoint2.Name = "num_Imbalance_Setpoint2"
+        Me.num_Imbalance_Setpoint2.Size = New System.Drawing.Size(55, 20)
+        Me.num_Imbalance_Setpoint2.TabIndex = 12
+        Me.num_Imbalance_Setpoint2.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
         '
         'Label10
         '
         Me.Label10.AutoSize = True
-        Me.Label10.Location = New System.Drawing.Point(302, 22)
+        Me.Label10.Location = New System.Drawing.Point(183, 19)
         Me.Label10.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.Label10.Name = "Label10"
         Me.Label10.Size = New System.Drawing.Size(15, 13)
         Me.Label10.TabIndex = 9
         Me.Label10.Text = "%"
         '
-        'lb_ImbalanceLevel
+        'lb_ImbalanceLevel1
         '
-        Me.lb_ImbalanceLevel.AutoSize = True
-        Me.lb_ImbalanceLevel.Location = New System.Drawing.Point(148, 22)
-        Me.lb_ImbalanceLevel.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
-        Me.lb_ImbalanceLevel.Name = "lb_ImbalanceLevel"
-        Me.lb_ImbalanceLevel.Size = New System.Drawing.Size(85, 13)
-        Me.lb_ImbalanceLevel.TabIndex = 8
-        Me.lb_ImbalanceLevel.Text = "Imbalance Level"
+        Me.lb_ImbalanceLevel1.AutoSize = True
+        Me.lb_ImbalanceLevel1.Location = New System.Drawing.Point(23, 19)
+        Me.lb_ImbalanceLevel1.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.lb_ImbalanceLevel1.Name = "lb_ImbalanceLevel1"
+        Me.lb_ImbalanceLevel1.Size = New System.Drawing.Size(94, 13)
+        Me.lb_ImbalanceLevel1.TabIndex = 8
+        Me.lb_ImbalanceLevel1.Text = "Imbalance Level 1"
         '
-        'num_Imbalance_Setpoint
+        'num_Imbalance_Setpoint1
         '
-        Me.num_Imbalance_Setpoint.Enabled = False
-        Me.num_Imbalance_Setpoint.Location = New System.Drawing.Point(240, 20)
-        Me.num_Imbalance_Setpoint.Margin = New System.Windows.Forms.Padding(2)
-        Me.num_Imbalance_Setpoint.Maximum = New Decimal(New Integer() {70, 0, 0, 0})
-        Me.num_Imbalance_Setpoint.Minimum = New Decimal(New Integer() {70, 0, 0, -2147483648})
-        Me.num_Imbalance_Setpoint.Name = "num_Imbalance_Setpoint"
-        Me.num_Imbalance_Setpoint.Size = New System.Drawing.Size(55, 20)
-        Me.num_Imbalance_Setpoint.TabIndex = 7
-        Me.num_Imbalance_Setpoint.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        Me.num_Imbalance_Setpoint1.Enabled = False
+        Me.num_Imbalance_Setpoint1.Location = New System.Drawing.Point(121, 17)
+        Me.num_Imbalance_Setpoint1.Margin = New System.Windows.Forms.Padding(2)
+        Me.num_Imbalance_Setpoint1.Maximum = New Decimal(New Integer() {71, 0, 0, 0})
+        Me.num_Imbalance_Setpoint1.Minimum = New Decimal(New Integer() {71, 0, 0, -2147483648})
+        Me.num_Imbalance_Setpoint1.Name = "num_Imbalance_Setpoint1"
+        Me.num_Imbalance_Setpoint1.Size = New System.Drawing.Size(55, 20)
+        Me.num_Imbalance_Setpoint1.TabIndex = 7
+        Me.num_Imbalance_Setpoint1.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
         '
         'Btn_FirmwareUpdate
         '
@@ -264,146 +372,6 @@ Partial Class Program_Form
         Me.Btn_FirmwareUpdate.TabIndex = 15
         Me.Btn_FirmwareUpdate.Text = "Firmware Update"
         Me.Btn_FirmwareUpdate.UseVisualStyleBackColor = True
-        '
-        'Grp_KHK
-        '
-        Me.Grp_KHK.Controls.Add(Me.Label13)
-        Me.Grp_KHK.Controls.Add(Me.lb_KHKContactBehavoir)
-        Me.Grp_KHK.Controls.Add(Me.Label14)
-        Me.Grp_KHK.Controls.Add(Me.num_KHKImbalance_Setpoint)
-        Me.Grp_KHK.Controls.Add(Me.lb_KHKSetpoint)
-        Me.Grp_KHK.Controls.Add(Me.Label12)
-        Me.Grp_KHK.Controls.Add(Me.num_KHK_Setpoint)
-        Me.Grp_KHK.Controls.Add(Me.RB_NO)
-        Me.Grp_KHK.Controls.Add(Me.RB_NC)
-        Me.Grp_KHK.Controls.Add(Me.lb_KHKenable)
-        Me.Grp_KHK.Controls.Add(Me.CB_KHKenable)
-        Me.Grp_KHK.Location = New System.Drawing.Point(361, 344)
-        Me.Grp_KHK.Margin = New System.Windows.Forms.Padding(2)
-        Me.Grp_KHK.Name = "Grp_KHK"
-        Me.Grp_KHK.Padding = New System.Windows.Forms.Padding(2)
-        Me.Grp_KHK.Size = New System.Drawing.Size(225, 132)
-        Me.Grp_KHK.TabIndex = 6
-        Me.Grp_KHK.TabStop = False
-        Me.Grp_KHK.Text = "KHK"
-        '
-        'Label13
-        '
-        Me.Label13.AutoSize = True
-        Me.Label13.Location = New System.Drawing.Point(170, 76)
-        Me.Label13.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
-        Me.Label13.Name = "Label13"
-        Me.Label13.Size = New System.Drawing.Size(15, 13)
-        Me.Label13.TabIndex = 14
-        Me.Label13.Text = "%"
-        '
-        'lb_KHKContactBehavoir
-        '
-        Me.lb_KHKContactBehavoir.AutoSize = True
-        Me.lb_KHKContactBehavoir.Location = New System.Drawing.Point(4, 110)
-        Me.lb_KHKContactBehavoir.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
-        Me.lb_KHKContactBehavoir.Name = "lb_KHKContactBehavoir"
-        Me.lb_KHKContactBehavoir.Size = New System.Drawing.Size(89, 13)
-        Me.lb_KHKContactBehavoir.TabIndex = 12
-        Me.lb_KHKContactBehavoir.Text = "Contact Behavior"
-        '
-        'Label14
-        '
-        Me.Label14.AutoSize = True
-        Me.Label14.Location = New System.Drawing.Point(4, 76)
-        Me.Label14.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
-        Me.Label14.Name = "Label14"
-        Me.Label14.Size = New System.Drawing.Size(85, 13)
-        Me.Label14.TabIndex = 13
-        Me.Label14.Text = "Imbalance Level"
-        '
-        'num_KHKImbalance_Setpoint
-        '
-        Me.num_KHKImbalance_Setpoint.Enabled = False
-        Me.num_KHKImbalance_Setpoint.Location = New System.Drawing.Point(114, 74)
-        Me.num_KHKImbalance_Setpoint.Margin = New System.Windows.Forms.Padding(2)
-        Me.num_KHKImbalance_Setpoint.Maximum = New Decimal(New Integer() {70, 0, 0, 0})
-        Me.num_KHKImbalance_Setpoint.Minimum = New Decimal(New Integer() {70, 0, 0, -2147483648})
-        Me.num_KHKImbalance_Setpoint.Name = "num_KHKImbalance_Setpoint"
-        Me.num_KHKImbalance_Setpoint.Size = New System.Drawing.Size(49, 20)
-        Me.num_KHKImbalance_Setpoint.TabIndex = 12
-        Me.num_KHKImbalance_Setpoint.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
-        '
-        'lb_KHKSetpoint
-        '
-        Me.lb_KHKSetpoint.AutoSize = True
-        Me.lb_KHKSetpoint.Location = New System.Drawing.Point(4, 44)
-        Me.lb_KHKSetpoint.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
-        Me.lb_KHKSetpoint.Name = "lb_KHKSetpoint"
-        Me.lb_KHKSetpoint.Size = New System.Drawing.Size(75, 13)
-        Me.lb_KHKSetpoint.TabIndex = 12
-        Me.lb_KHKSetpoint.Text = "KHK Set Point"
-        '
-        'Label12
-        '
-        Me.Label12.AutoSize = True
-        Me.Label12.Location = New System.Drawing.Point(170, 44)
-        Me.Label12.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
-        Me.Label12.Name = "Label12"
-        Me.Label12.Size = New System.Drawing.Size(15, 13)
-        Me.Label12.TabIndex = 9
-        Me.Label12.Text = "%"
-        '
-        'num_KHK_Setpoint
-        '
-        Me.num_KHK_Setpoint.Enabled = False
-        Me.num_KHK_Setpoint.Location = New System.Drawing.Point(114, 42)
-        Me.num_KHK_Setpoint.Margin = New System.Windows.Forms.Padding(2)
-        Me.num_KHK_Setpoint.Minimum = New Decimal(New Integer() {20, 0, 0, 0})
-        Me.num_KHK_Setpoint.Name = "num_KHK_Setpoint"
-        Me.num_KHK_Setpoint.Size = New System.Drawing.Size(50, 20)
-        Me.num_KHK_Setpoint.TabIndex = 8
-        Me.num_KHK_Setpoint.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
-        Me.num_KHK_Setpoint.Value = New Decimal(New Integer() {20, 0, 0, 0})
-        '
-        'RB_NO
-        '
-        Me.RB_NO.AutoSize = True
-        Me.RB_NO.Location = New System.Drawing.Point(155, 106)
-        Me.RB_NO.Margin = New System.Windows.Forms.Padding(2)
-        Me.RB_NO.Name = "RB_NO"
-        Me.RB_NO.Size = New System.Drawing.Size(41, 17)
-        Me.RB_NO.TabIndex = 7
-        Me.RB_NO.TabStop = True
-        Me.RB_NO.Text = "NO"
-        Me.RB_NO.UseVisualStyleBackColor = True
-        '
-        'RB_NC
-        '
-        Me.RB_NC.AutoSize = True
-        Me.RB_NC.Location = New System.Drawing.Point(114, 106)
-        Me.RB_NC.Margin = New System.Windows.Forms.Padding(2)
-        Me.RB_NC.Name = "RB_NC"
-        Me.RB_NC.Size = New System.Drawing.Size(40, 17)
-        Me.RB_NC.TabIndex = 6
-        Me.RB_NC.TabStop = True
-        Me.RB_NC.Text = "NC"
-        Me.RB_NC.UseVisualStyleBackColor = True
-        '
-        'lb_KHKenable
-        '
-        Me.lb_KHKenable.AutoSize = True
-        Me.lb_KHKenable.Location = New System.Drawing.Point(4, 16)
-        Me.lb_KHKenable.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
-        Me.lb_KHKenable.Name = "lb_KHKenable"
-        Me.lb_KHKenable.Size = New System.Drawing.Size(65, 13)
-        Me.lb_KHKenable.TabIndex = 5
-        Me.lb_KHKenable.Text = "Enable KHK"
-        '
-        'CB_KHKenable
-        '
-        Me.CB_KHKenable.AutoSize = True
-        Me.CB_KHKenable.Location = New System.Drawing.Point(114, 15)
-        Me.CB_KHKenable.Margin = New System.Windows.Forms.Padding(2)
-        Me.CB_KHKenable.Name = "CB_KHKenable"
-        Me.CB_KHKenable.Size = New System.Drawing.Size(15, 14)
-        Me.CB_KHKenable.TabIndex = 4
-        Me.CB_KHKenable.UseVisualStyleBackColor = True
         '
         'lb_SaveProg
         '
@@ -430,7 +398,7 @@ Partial Class Program_Form
         Me.Grp_UnitConfig.Controls.Add(Me.RB_left)
         Me.Grp_UnitConfig.Location = New System.Drawing.Point(592, 7)
         Me.Grp_UnitConfig.Name = "Grp_UnitConfig"
-        Me.Grp_UnitConfig.Size = New System.Drawing.Size(272, 468)
+        Me.Grp_UnitConfig.Size = New System.Drawing.Size(272, 377)
         Me.Grp_UnitConfig.TabIndex = 12
         Me.Grp_UnitConfig.TabStop = False
         Me.Grp_UnitConfig.Text = "Configuration"
@@ -811,119 +779,383 @@ Partial Class Program_Form
         '
         'Grp_SpeedConf
         '
+        Me.Grp_SpeedConf.Controls.Add(Me.Grp_KHK)
+        Me.Grp_SpeedConf.Controls.Add(Me.Label25)
+        Me.Grp_SpeedConf.Controls.Add(Me.Label24)
+        Me.Grp_SpeedConf.Controls.Add(Me.NumericUpDown6)
         Me.Grp_SpeedConf.Controls.Add(Me.num_Speed3CAP)
+        Me.Grp_SpeedConf.Controls.Add(Me.NumericUpDown5)
         Me.Grp_SpeedConf.Controls.Add(Me.num_Speed2CAP)
+        Me.Grp_SpeedConf.Controls.Add(Me.lb_ImbalanceEnable)
+        Me.Grp_SpeedConf.Controls.Add(Me.CB_ImbEnable)
+        Me.Grp_SpeedConf.Controls.Add(Me.NumericUpDown4)
         Me.Grp_SpeedConf.Controls.Add(Me.num_Speed1CAP)
-        Me.Grp_SpeedConf.Controls.Add(Me.num_Speed3FSC)
-        Me.Grp_SpeedConf.Controls.Add(Me.num_Speed2FSC)
-        Me.Grp_SpeedConf.Controls.Add(Me.num_Speed1FSC)
+        Me.Grp_SpeedConf.Controls.Add(Me.num_R_Speed3)
+        Me.Grp_SpeedConf.Controls.Add(Me.num_F_Speed3)
+        Me.Grp_SpeedConf.Controls.Add(Me.num_R_Speed2)
+        Me.Grp_SpeedConf.Controls.Add(Me.num_F_Speed2)
+        Me.Grp_SpeedConf.Controls.Add(Me.num_R_Speed1)
+        Me.Grp_SpeedConf.Controls.Add(Me.Label22)
+        Me.Grp_SpeedConf.Controls.Add(Me.num_F_Speed1)
         Me.Grp_SpeedConf.Controls.Add(Me.vlb_Speed3CAP)
+        Me.Grp_SpeedConf.Controls.Add(Me.Label21)
         Me.Grp_SpeedConf.Controls.Add(Me.lb_Speed3CAP)
         Me.Grp_SpeedConf.Controls.Add(Me.vlb_Speed2CAP)
+        Me.Grp_SpeedConf.Controls.Add(Me.Label20)
         Me.Grp_SpeedConf.Controls.Add(Me.lb_Speed2CAP)
         Me.Grp_SpeedConf.Controls.Add(Me.vlb_Speed1CAP)
+        Me.Grp_SpeedConf.Controls.Add(Me.Label19)
         Me.Grp_SpeedConf.Controls.Add(Me.lb_Speed1CAP)
         Me.Grp_SpeedConf.Controls.Add(Me.vlb_Speed3FSC)
+        Me.Grp_SpeedConf.Controls.Add(Me.Label18)
         Me.Grp_SpeedConf.Controls.Add(Me.lb_Speed3FSC)
         Me.Grp_SpeedConf.Controls.Add(Me.vlb_Speed2FSC)
+        Me.Grp_SpeedConf.Controls.Add(Me.Label16)
         Me.Grp_SpeedConf.Controls.Add(Me.lb_Speed2FSC)
         Me.Grp_SpeedConf.Controls.Add(Me.vlb_Speed1FSC)
         Me.Grp_SpeedConf.Controls.Add(Me.lb_Speed1FSC)
-        Me.Grp_SpeedConf.Controls.Add(Me.PB_Speed3CAP)
-        Me.Grp_SpeedConf.Controls.Add(Me.PB_Speed2CAP)
-        Me.Grp_SpeedConf.Controls.Add(Me.PB_Speed1CAP)
-        Me.Grp_SpeedConf.Controls.Add(Me.PB_Speed3FSC)
-        Me.Grp_SpeedConf.Controls.Add(Me.PB_Speed2FSC)
-        Me.Grp_SpeedConf.Controls.Add(Me.PB_Speed1FSC)
         Me.Grp_SpeedConf.Location = New System.Drawing.Point(14, 170)
         Me.Grp_SpeedConf.Name = "Grp_SpeedConf"
-        Me.Grp_SpeedConf.Size = New System.Drawing.Size(342, 214)
+        Me.Grp_SpeedConf.Size = New System.Drawing.Size(342, 306)
         Me.Grp_SpeedConf.TabIndex = 7
         Me.Grp_SpeedConf.TabStop = False
         Me.Grp_SpeedConf.Text = "Speed Configuration"
         '
+        'Grp_KHK
+        '
+        Me.Grp_KHK.Controls.Add(Me.lb_KHKenable)
+        Me.Grp_KHK.Controls.Add(Me.lb_KHKContactBehavoir)
+        Me.Grp_KHK.Controls.Add(Me.Label23)
+        Me.Grp_KHK.Controls.Add(Me.num_FK_Speed)
+        Me.Grp_KHK.Controls.Add(Me.num_RK_Speed)
+        Me.Grp_KHK.Controls.Add(Me.lb_KHKSetpoint)
+        Me.Grp_KHK.Controls.Add(Me.RB_NO)
+        Me.Grp_KHK.Controls.Add(Me.Label12)
+        Me.Grp_KHK.Controls.Add(Me.CB_KHKenable)
+        Me.Grp_KHK.Controls.Add(Me.RB_NC)
+        Me.Grp_KHK.Location = New System.Drawing.Point(6, 226)
+        Me.Grp_KHK.Name = "Grp_KHK"
+        Me.Grp_KHK.Size = New System.Drawing.Size(330, 74)
+        Me.Grp_KHK.TabIndex = 14
+        Me.Grp_KHK.TabStop = False
+        Me.Grp_KHK.Text = "KHK"
+        '
+        'lb_KHKenable
+        '
+        Me.lb_KHKenable.AutoSize = True
+        Me.lb_KHKenable.Location = New System.Drawing.Point(22, 21)
+        Me.lb_KHKenable.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.lb_KHKenable.Name = "lb_KHKenable"
+        Me.lb_KHKenable.Size = New System.Drawing.Size(65, 13)
+        Me.lb_KHKenable.TabIndex = 5
+        Me.lb_KHKenable.Text = "Enable KHK"
+        '
+        'lb_KHKContactBehavoir
+        '
+        Me.lb_KHKContactBehavoir.AutoSize = True
+        Me.lb_KHKContactBehavoir.Location = New System.Drawing.Point(125, 22)
+        Me.lb_KHKContactBehavoir.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.lb_KHKContactBehavoir.Name = "lb_KHKContactBehavoir"
+        Me.lb_KHKContactBehavoir.Size = New System.Drawing.Size(89, 13)
+        Me.lb_KHKContactBehavoir.TabIndex = 12
+        Me.lb_KHKContactBehavoir.Text = "Contact Behavior"
+        '
+        'Label23
+        '
+        Me.Label23.AutoSize = True
+        Me.Label23.Location = New System.Drawing.Point(254, 48)
+        Me.Label23.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.Label23.Name = "Label23"
+        Me.Label23.Size = New System.Drawing.Size(15, 13)
+        Me.Label23.TabIndex = 9
+        Me.Label23.Text = "%"
+        '
+        'num_FK_Speed
+        '
+        Me.num_FK_Speed.Enabled = False
+        Me.num_FK_Speed.Location = New System.Drawing.Point(124, 46)
+        Me.num_FK_Speed.Margin = New System.Windows.Forms.Padding(2)
+        Me.num_FK_Speed.Minimum = New Decimal(New Integer() {20, 0, 0, 0})
+        Me.num_FK_Speed.Name = "num_FK_Speed"
+        Me.num_FK_Speed.Size = New System.Drawing.Size(53, 20)
+        Me.num_FK_Speed.TabIndex = 8
+        Me.num_FK_Speed.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        Me.num_FK_Speed.Value = New Decimal(New Integer() {20, 0, 0, 0})
+        '
+        'num_RK_Speed
+        '
+        Me.num_RK_Speed.Enabled = False
+        Me.num_RK_Speed.Location = New System.Drawing.Point(202, 46)
+        Me.num_RK_Speed.Margin = New System.Windows.Forms.Padding(2)
+        Me.num_RK_Speed.Minimum = New Decimal(New Integer() {20, 0, 0, 0})
+        Me.num_RK_Speed.Name = "num_RK_Speed"
+        Me.num_RK_Speed.Size = New System.Drawing.Size(51, 20)
+        Me.num_RK_Speed.TabIndex = 8
+        Me.num_RK_Speed.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        Me.num_RK_Speed.Value = New Decimal(New Integer() {20, 0, 0, 0})
+        '
+        'lb_KHKSetpoint
+        '
+        Me.lb_KHKSetpoint.AutoSize = True
+        Me.lb_KHKSetpoint.Location = New System.Drawing.Point(0, 47)
+        Me.lb_KHKSetpoint.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.lb_KHKSetpoint.Name = "lb_KHKSetpoint"
+        Me.lb_KHKSetpoint.Size = New System.Drawing.Size(75, 13)
+        Me.lb_KHKSetpoint.TabIndex = 12
+        Me.lb_KHKSetpoint.Text = "KHK Set Point"
+        '
+        'RB_NO
+        '
+        Me.RB_NO.AutoSize = True
+        Me.RB_NO.Location = New System.Drawing.Point(257, 21)
+        Me.RB_NO.Margin = New System.Windows.Forms.Padding(2)
+        Me.RB_NO.Name = "RB_NO"
+        Me.RB_NO.Size = New System.Drawing.Size(41, 17)
+        Me.RB_NO.TabIndex = 7
+        Me.RB_NO.TabStop = True
+        Me.RB_NO.Text = "NO"
+        Me.RB_NO.UseVisualStyleBackColor = True
+        '
+        'Label12
+        '
+        Me.Label12.AutoSize = True
+        Me.Label12.Location = New System.Drawing.Point(177, 48)
+        Me.Label12.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.Label12.Name = "Label12"
+        Me.Label12.Size = New System.Drawing.Size(15, 13)
+        Me.Label12.TabIndex = 9
+        Me.Label12.Text = "%"
+        '
+        'CB_KHKenable
+        '
+        Me.CB_KHKenable.AutoSize = True
+        Me.CB_KHKenable.Location = New System.Drawing.Point(3, 21)
+        Me.CB_KHKenable.Margin = New System.Windows.Forms.Padding(2)
+        Me.CB_KHKenable.Name = "CB_KHKenable"
+        Me.CB_KHKenable.Size = New System.Drawing.Size(15, 14)
+        Me.CB_KHKenable.TabIndex = 4
+        Me.CB_KHKenable.UseVisualStyleBackColor = True
+        '
+        'RB_NC
+        '
+        Me.RB_NC.AutoSize = True
+        Me.RB_NC.Location = New System.Drawing.Point(216, 21)
+        Me.RB_NC.Margin = New System.Windows.Forms.Padding(2)
+        Me.RB_NC.Name = "RB_NC"
+        Me.RB_NC.Size = New System.Drawing.Size(40, 17)
+        Me.RB_NC.TabIndex = 6
+        Me.RB_NC.TabStop = True
+        Me.RB_NC.Text = "NC"
+        Me.RB_NC.UseVisualStyleBackColor = True
+        '
+        'Label25
+        '
+        Me.Label25.AutoSize = True
+        Me.Label25.Location = New System.Drawing.Point(205, 18)
+        Me.Label25.Name = "Label25"
+        Me.Label25.Size = New System.Drawing.Size(39, 13)
+        Me.Label25.TabIndex = 13
+        Me.Label25.Text = "Return"
+        '
+        'Label24
+        '
+        Me.Label24.AutoSize = True
+        Me.Label24.Location = New System.Drawing.Point(128, 18)
+        Me.Label24.Name = "Label24"
+        Me.Label24.Size = New System.Drawing.Size(39, 13)
+        Me.Label24.TabIndex = 13
+        Me.Label24.Text = "Supply"
+        '
+        'NumericUpDown6
+        '
+        Me.NumericUpDown6.Enabled = False
+        Me.NumericUpDown6.Location = New System.Drawing.Point(210, 200)
+        Me.NumericUpDown6.Maximum = New Decimal(New Integer() {400, 0, 0, 0})
+        Me.NumericUpDown6.Minimum = New Decimal(New Integer() {30, 0, 0, 0})
+        Me.NumericUpDown6.Name = "NumericUpDown6"
+        Me.NumericUpDown6.Size = New System.Drawing.Size(51, 20)
+        Me.NumericUpDown6.TabIndex = 2
+        Me.NumericUpDown6.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        Me.NumericUpDown6.Value = New Decimal(New Integer() {30, 0, 0, 0})
+        '
         'num_Speed3CAP
         '
         Me.num_Speed3CAP.Enabled = False
-        Me.num_Speed3CAP.Location = New System.Drawing.Point(240, 174)
+        Me.num_Speed3CAP.Location = New System.Drawing.Point(132, 200)
         Me.num_Speed3CAP.Maximum = New Decimal(New Integer() {400, 0, 0, 0})
         Me.num_Speed3CAP.Minimum = New Decimal(New Integer() {30, 0, 0, 0})
         Me.num_Speed3CAP.Name = "num_Speed3CAP"
-        Me.num_Speed3CAP.Size = New System.Drawing.Size(56, 20)
+        Me.num_Speed3CAP.Size = New System.Drawing.Size(51, 20)
         Me.num_Speed3CAP.TabIndex = 2
         Me.num_Speed3CAP.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
         Me.num_Speed3CAP.Value = New Decimal(New Integer() {30, 0, 0, 0})
         '
+        'NumericUpDown5
+        '
+        Me.NumericUpDown5.Enabled = False
+        Me.NumericUpDown5.Location = New System.Drawing.Point(210, 171)
+        Me.NumericUpDown5.Maximum = New Decimal(New Integer() {400, 0, 0, 0})
+        Me.NumericUpDown5.Minimum = New Decimal(New Integer() {30, 0, 0, 0})
+        Me.NumericUpDown5.Name = "NumericUpDown5"
+        Me.NumericUpDown5.Size = New System.Drawing.Size(51, 20)
+        Me.NumericUpDown5.TabIndex = 2
+        Me.NumericUpDown5.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        Me.NumericUpDown5.Value = New Decimal(New Integer() {30, 0, 0, 0})
+        '
         'num_Speed2CAP
         '
         Me.num_Speed2CAP.Enabled = False
-        Me.num_Speed2CAP.Location = New System.Drawing.Point(240, 145)
+        Me.num_Speed2CAP.Location = New System.Drawing.Point(132, 171)
         Me.num_Speed2CAP.Maximum = New Decimal(New Integer() {400, 0, 0, 0})
         Me.num_Speed2CAP.Minimum = New Decimal(New Integer() {30, 0, 0, 0})
         Me.num_Speed2CAP.Name = "num_Speed2CAP"
-        Me.num_Speed2CAP.Size = New System.Drawing.Size(56, 20)
+        Me.num_Speed2CAP.Size = New System.Drawing.Size(51, 20)
         Me.num_Speed2CAP.TabIndex = 2
         Me.num_Speed2CAP.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
         Me.num_Speed2CAP.Value = New Decimal(New Integer() {30, 0, 0, 0})
         '
+        'lb_ImbalanceEnable
+        '
+        Me.lb_ImbalanceEnable.AutoSize = True
+        Me.lb_ImbalanceEnable.Location = New System.Drawing.Point(280, 38)
+        Me.lb_ImbalanceEnable.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.lb_ImbalanceEnable.Name = "lb_ImbalanceEnable"
+        Me.lb_ImbalanceEnable.Size = New System.Drawing.Size(56, 26)
+        Me.lb_ImbalanceEnable.TabIndex = 11
+        Me.lb_ImbalanceEnable.Text = "Enable" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Imbalance"
+        Me.lb_ImbalanceEnable.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        '
+        'CB_ImbEnable
+        '
+        Me.CB_ImbEnable.AutoSize = True
+        Me.CB_ImbEnable.Location = New System.Drawing.Point(300, 71)
+        Me.CB_ImbEnable.Margin = New System.Windows.Forms.Padding(2)
+        Me.CB_ImbEnable.Name = "CB_ImbEnable"
+        Me.CB_ImbEnable.Size = New System.Drawing.Size(15, 14)
+        Me.CB_ImbEnable.TabIndex = 10
+        Me.CB_ImbEnable.UseVisualStyleBackColor = True
+        '
+        'NumericUpDown4
+        '
+        Me.NumericUpDown4.Enabled = False
+        Me.NumericUpDown4.Location = New System.Drawing.Point(209, 142)
+        Me.NumericUpDown4.Maximum = New Decimal(New Integer() {400, 0, 0, 0})
+        Me.NumericUpDown4.Minimum = New Decimal(New Integer() {30, 0, 0, 0})
+        Me.NumericUpDown4.Name = "NumericUpDown4"
+        Me.NumericUpDown4.Size = New System.Drawing.Size(51, 20)
+        Me.NumericUpDown4.TabIndex = 2
+        Me.NumericUpDown4.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        Me.NumericUpDown4.Value = New Decimal(New Integer() {30, 0, 0, 0})
+        '
         'num_Speed1CAP
         '
         Me.num_Speed1CAP.Enabled = False
-        Me.num_Speed1CAP.Location = New System.Drawing.Point(239, 116)
+        Me.num_Speed1CAP.Location = New System.Drawing.Point(131, 142)
         Me.num_Speed1CAP.Maximum = New Decimal(New Integer() {400, 0, 0, 0})
         Me.num_Speed1CAP.Minimum = New Decimal(New Integer() {30, 0, 0, 0})
         Me.num_Speed1CAP.Name = "num_Speed1CAP"
-        Me.num_Speed1CAP.Size = New System.Drawing.Size(56, 20)
+        Me.num_Speed1CAP.Size = New System.Drawing.Size(51, 20)
         Me.num_Speed1CAP.TabIndex = 2
         Me.num_Speed1CAP.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
         Me.num_Speed1CAP.Value = New Decimal(New Integer() {30, 0, 0, 0})
         '
-        'num_Speed3FSC
+        'num_R_Speed3
         '
-        Me.num_Speed3FSC.Enabled = False
-        Me.num_Speed3FSC.Location = New System.Drawing.Point(240, 87)
-        Me.num_Speed3FSC.Minimum = New Decimal(New Integer() {25, 0, 0, 0})
-        Me.num_Speed3FSC.Name = "num_Speed3FSC"
-        Me.num_Speed3FSC.Size = New System.Drawing.Size(56, 20)
-        Me.num_Speed3FSC.TabIndex = 2
-        Me.num_Speed3FSC.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
-        Me.num_Speed3FSC.Value = New Decimal(New Integer() {25, 0, 0, 0})
+        Me.num_R_Speed3.Enabled = False
+        Me.num_R_Speed3.Location = New System.Drawing.Point(208, 96)
+        Me.num_R_Speed3.Minimum = New Decimal(New Integer() {25, 0, 0, 0})
+        Me.num_R_Speed3.Name = "num_R_Speed3"
+        Me.num_R_Speed3.Size = New System.Drawing.Size(51, 20)
+        Me.num_R_Speed3.TabIndex = 2
+        Me.num_R_Speed3.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        Me.num_R_Speed3.Value = New Decimal(New Integer() {25, 0, 0, 0})
         '
-        'num_Speed2FSC
+        'num_F_Speed3
         '
-        Me.num_Speed2FSC.Enabled = False
-        Me.num_Speed2FSC.Location = New System.Drawing.Point(239, 58)
-        Me.num_Speed2FSC.Minimum = New Decimal(New Integer() {25, 0, 0, 0})
-        Me.num_Speed2FSC.Name = "num_Speed2FSC"
-        Me.num_Speed2FSC.Size = New System.Drawing.Size(56, 20)
-        Me.num_Speed2FSC.TabIndex = 2
-        Me.num_Speed2FSC.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
-        Me.num_Speed2FSC.Value = New Decimal(New Integer() {25, 0, 0, 0})
+        Me.num_F_Speed3.Enabled = False
+        Me.num_F_Speed3.Location = New System.Drawing.Point(131, 96)
+        Me.num_F_Speed3.Minimum = New Decimal(New Integer() {25, 0, 0, 0})
+        Me.num_F_Speed3.Name = "num_F_Speed3"
+        Me.num_F_Speed3.Size = New System.Drawing.Size(51, 20)
+        Me.num_F_Speed3.TabIndex = 2
+        Me.num_F_Speed3.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        Me.num_F_Speed3.Value = New Decimal(New Integer() {25, 0, 0, 0})
         '
-        'num_Speed1FSC
+        'num_R_Speed2
         '
-        Me.num_Speed1FSC.Enabled = False
-        Me.num_Speed1FSC.Location = New System.Drawing.Point(239, 29)
-        Me.num_Speed1FSC.Minimum = New Decimal(New Integer() {25, 0, 0, 0})
-        Me.num_Speed1FSC.Name = "num_Speed1FSC"
-        Me.num_Speed1FSC.Size = New System.Drawing.Size(56, 20)
-        Me.num_Speed1FSC.TabIndex = 2
-        Me.num_Speed1FSC.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
-        Me.num_Speed1FSC.Value = New Decimal(New Integer() {25, 0, 0, 0})
+        Me.num_R_Speed2.Enabled = False
+        Me.num_R_Speed2.Location = New System.Drawing.Point(208, 67)
+        Me.num_R_Speed2.Minimum = New Decimal(New Integer() {25, 0, 0, 0})
+        Me.num_R_Speed2.Name = "num_R_Speed2"
+        Me.num_R_Speed2.Size = New System.Drawing.Size(51, 20)
+        Me.num_R_Speed2.TabIndex = 2
+        Me.num_R_Speed2.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        Me.num_R_Speed2.Value = New Decimal(New Integer() {25, 0, 0, 0})
+        '
+        'num_F_Speed2
+        '
+        Me.num_F_Speed2.Enabled = False
+        Me.num_F_Speed2.Location = New System.Drawing.Point(130, 67)
+        Me.num_F_Speed2.Minimum = New Decimal(New Integer() {25, 0, 0, 0})
+        Me.num_F_Speed2.Name = "num_F_Speed2"
+        Me.num_F_Speed2.Size = New System.Drawing.Size(51, 20)
+        Me.num_F_Speed2.TabIndex = 2
+        Me.num_F_Speed2.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        Me.num_F_Speed2.Value = New Decimal(New Integer() {25, 0, 0, 0})
+        '
+        'num_R_Speed1
+        '
+        Me.num_R_Speed1.Enabled = False
+        Me.num_R_Speed1.Location = New System.Drawing.Point(208, 38)
+        Me.num_R_Speed1.Minimum = New Decimal(New Integer() {25, 0, 0, 0})
+        Me.num_R_Speed1.Name = "num_R_Speed1"
+        Me.num_R_Speed1.Size = New System.Drawing.Size(51, 20)
+        Me.num_R_Speed1.TabIndex = 2
+        Me.num_R_Speed1.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        Me.num_R_Speed1.Value = New Decimal(New Integer() {25, 0, 0, 0})
+        '
+        'Label22
+        '
+        Me.Label22.AutoSize = True
+        Me.Label22.Location = New System.Drawing.Point(260, 202)
+        Me.Label22.Name = "Label22"
+        Me.Label22.Size = New System.Drawing.Size(20, 13)
+        Me.Label22.TabIndex = 1
+        Me.Label22.Text = "Pa"
+        '
+        'num_F_Speed1
+        '
+        Me.num_F_Speed1.Enabled = False
+        Me.num_F_Speed1.Location = New System.Drawing.Point(130, 38)
+        Me.num_F_Speed1.Minimum = New Decimal(New Integer() {25, 0, 0, 0})
+        Me.num_F_Speed1.Name = "num_F_Speed1"
+        Me.num_F_Speed1.Size = New System.Drawing.Size(51, 20)
+        Me.num_F_Speed1.TabIndex = 2
+        Me.num_F_Speed1.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        Me.num_F_Speed1.Value = New Decimal(New Integer() {25, 0, 0, 0})
         '
         'vlb_Speed3CAP
         '
         Me.vlb_Speed3CAP.AutoSize = True
-        Me.vlb_Speed3CAP.Location = New System.Drawing.Point(301, 176)
+        Me.vlb_Speed3CAP.Location = New System.Drawing.Point(182, 202)
         Me.vlb_Speed3CAP.Name = "vlb_Speed3CAP"
         Me.vlb_Speed3CAP.Size = New System.Drawing.Size(20, 13)
         Me.vlb_Speed3CAP.TabIndex = 1
         Me.vlb_Speed3CAP.Text = "Pa"
         '
+        'Label21
+        '
+        Me.Label21.AutoSize = True
+        Me.Label21.Location = New System.Drawing.Point(260, 173)
+        Me.Label21.Name = "Label21"
+        Me.Label21.Size = New System.Drawing.Size(20, 13)
+        Me.Label21.TabIndex = 1
+        Me.Label21.Text = "Pa"
+        '
         'lb_Speed3CAP
         '
         Me.lb_Speed3CAP.AutoSize = True
-        Me.lb_Speed3CAP.Location = New System.Drawing.Point(5, 176)
+        Me.lb_Speed3CAP.Location = New System.Drawing.Point(6, 202)
         Me.lb_Speed3CAP.Name = "lb_Speed3CAP"
         Me.lb_Speed3CAP.Size = New System.Drawing.Size(71, 13)
         Me.lb_Speed3CAP.TabIndex = 1
@@ -932,16 +1164,25 @@ Partial Class Program_Form
         'vlb_Speed2CAP
         '
         Me.vlb_Speed2CAP.AutoSize = True
-        Me.vlb_Speed2CAP.Location = New System.Drawing.Point(301, 147)
+        Me.vlb_Speed2CAP.Location = New System.Drawing.Point(182, 173)
         Me.vlb_Speed2CAP.Name = "vlb_Speed2CAP"
         Me.vlb_Speed2CAP.Size = New System.Drawing.Size(20, 13)
         Me.vlb_Speed2CAP.TabIndex = 1
         Me.vlb_Speed2CAP.Text = "Pa"
         '
+        'Label20
+        '
+        Me.Label20.AutoSize = True
+        Me.Label20.Location = New System.Drawing.Point(260, 144)
+        Me.Label20.Name = "Label20"
+        Me.Label20.Size = New System.Drawing.Size(20, 13)
+        Me.Label20.TabIndex = 1
+        Me.Label20.Text = "Pa"
+        '
         'lb_Speed2CAP
         '
         Me.lb_Speed2CAP.AutoSize = True
-        Me.lb_Speed2CAP.Location = New System.Drawing.Point(5, 147)
+        Me.lb_Speed2CAP.Location = New System.Drawing.Point(6, 173)
         Me.lb_Speed2CAP.Name = "lb_Speed2CAP"
         Me.lb_Speed2CAP.Size = New System.Drawing.Size(71, 13)
         Me.lb_Speed2CAP.TabIndex = 1
@@ -950,16 +1191,25 @@ Partial Class Program_Form
         'vlb_Speed1CAP
         '
         Me.vlb_Speed1CAP.AutoSize = True
-        Me.vlb_Speed1CAP.Location = New System.Drawing.Point(301, 118)
+        Me.vlb_Speed1CAP.Location = New System.Drawing.Point(182, 144)
         Me.vlb_Speed1CAP.Name = "vlb_Speed1CAP"
         Me.vlb_Speed1CAP.Size = New System.Drawing.Size(20, 13)
         Me.vlb_Speed1CAP.TabIndex = 1
         Me.vlb_Speed1CAP.Text = "Pa"
         '
+        'Label19
+        '
+        Me.Label19.AutoSize = True
+        Me.Label19.Location = New System.Drawing.Point(260, 98)
+        Me.Label19.Name = "Label19"
+        Me.Label19.Size = New System.Drawing.Size(15, 13)
+        Me.Label19.TabIndex = 1
+        Me.Label19.Text = "%"
+        '
         'lb_Speed1CAP
         '
         Me.lb_Speed1CAP.AutoSize = True
-        Me.lb_Speed1CAP.Location = New System.Drawing.Point(5, 118)
+        Me.lb_Speed1CAP.Location = New System.Drawing.Point(6, 144)
         Me.lb_Speed1CAP.Name = "lb_Speed1CAP"
         Me.lb_Speed1CAP.Size = New System.Drawing.Size(71, 13)
         Me.lb_Speed1CAP.TabIndex = 1
@@ -968,16 +1218,25 @@ Partial Class Program_Form
         'vlb_Speed3FSC
         '
         Me.vlb_Speed3FSC.AutoSize = True
-        Me.vlb_Speed3FSC.Location = New System.Drawing.Point(302, 89)
+        Me.vlb_Speed3FSC.Location = New System.Drawing.Point(182, 98)
         Me.vlb_Speed3FSC.Name = "vlb_Speed3FSC"
         Me.vlb_Speed3FSC.Size = New System.Drawing.Size(15, 13)
         Me.vlb_Speed3FSC.TabIndex = 1
         Me.vlb_Speed3FSC.Text = "%"
         '
+        'Label18
+        '
+        Me.Label18.AutoSize = True
+        Me.Label18.Location = New System.Drawing.Point(260, 69)
+        Me.Label18.Name = "Label18"
+        Me.Label18.Size = New System.Drawing.Size(15, 13)
+        Me.Label18.TabIndex = 1
+        Me.Label18.Text = "%"
+        '
         'lb_Speed3FSC
         '
         Me.lb_Speed3FSC.AutoSize = True
-        Me.lb_Speed3FSC.Location = New System.Drawing.Point(6, 89)
+        Me.lb_Speed3FSC.Location = New System.Drawing.Point(6, 98)
         Me.lb_Speed3FSC.Name = "lb_Speed3FSC"
         Me.lb_Speed3FSC.Size = New System.Drawing.Size(95, 13)
         Me.lb_Speed3FSC.TabIndex = 1
@@ -986,16 +1245,25 @@ Partial Class Program_Form
         'vlb_Speed2FSC
         '
         Me.vlb_Speed2FSC.AutoSize = True
-        Me.vlb_Speed2FSC.Location = New System.Drawing.Point(302, 60)
+        Me.vlb_Speed2FSC.Location = New System.Drawing.Point(182, 69)
         Me.vlb_Speed2FSC.Name = "vlb_Speed2FSC"
         Me.vlb_Speed2FSC.Size = New System.Drawing.Size(15, 13)
         Me.vlb_Speed2FSC.TabIndex = 1
         Me.vlb_Speed2FSC.Text = "%"
         '
+        'Label16
+        '
+        Me.Label16.AutoSize = True
+        Me.Label16.Location = New System.Drawing.Point(260, 40)
+        Me.Label16.Name = "Label16"
+        Me.Label16.Size = New System.Drawing.Size(15, 13)
+        Me.Label16.TabIndex = 1
+        Me.Label16.Text = "%"
+        '
         'lb_Speed2FSC
         '
         Me.lb_Speed2FSC.AutoSize = True
-        Me.lb_Speed2FSC.Location = New System.Drawing.Point(6, 60)
+        Me.lb_Speed2FSC.Location = New System.Drawing.Point(6, 69)
         Me.lb_Speed2FSC.Name = "lb_Speed2FSC"
         Me.lb_Speed2FSC.Size = New System.Drawing.Size(95, 13)
         Me.lb_Speed2FSC.TabIndex = 1
@@ -1004,7 +1272,7 @@ Partial Class Program_Form
         'vlb_Speed1FSC
         '
         Me.vlb_Speed1FSC.AutoSize = True
-        Me.vlb_Speed1FSC.Location = New System.Drawing.Point(302, 31)
+        Me.vlb_Speed1FSC.Location = New System.Drawing.Point(182, 43)
         Me.vlb_Speed1FSC.Name = "vlb_Speed1FSC"
         Me.vlb_Speed1FSC.Size = New System.Drawing.Size(15, 13)
         Me.vlb_Speed1FSC.TabIndex = 1
@@ -1013,68 +1281,11 @@ Partial Class Program_Form
         'lb_Speed1FSC
         '
         Me.lb_Speed1FSC.AutoSize = True
-        Me.lb_Speed1FSC.Location = New System.Drawing.Point(6, 31)
+        Me.lb_Speed1FSC.Location = New System.Drawing.Point(6, 40)
         Me.lb_Speed1FSC.Name = "lb_Speed1FSC"
         Me.lb_Speed1FSC.Size = New System.Drawing.Size(95, 13)
         Me.lb_Speed1FSC.TabIndex = 1
         Me.lb_Speed1FSC.Text = "Speed 1 FSC/CAF"
-        '
-        'PB_Speed3CAP
-        '
-        Me.PB_Speed3CAP.Location = New System.Drawing.Point(110, 175)
-        Me.PB_Speed3CAP.Maximum = 400
-        Me.PB_Speed3CAP.Name = "PB_Speed3CAP"
-        Me.PB_Speed3CAP.Size = New System.Drawing.Size(123, 19)
-        Me.PB_Speed3CAP.Step = 1
-        Me.PB_Speed3CAP.Style = System.Windows.Forms.ProgressBarStyle.Continuous
-        Me.PB_Speed3CAP.TabIndex = 0
-        '
-        'PB_Speed2CAP
-        '
-        Me.PB_Speed2CAP.Location = New System.Drawing.Point(110, 145)
-        Me.PB_Speed2CAP.Maximum = 400
-        Me.PB_Speed2CAP.Name = "PB_Speed2CAP"
-        Me.PB_Speed2CAP.Size = New System.Drawing.Size(123, 20)
-        Me.PB_Speed2CAP.Step = 1
-        Me.PB_Speed2CAP.Style = System.Windows.Forms.ProgressBarStyle.Continuous
-        Me.PB_Speed2CAP.TabIndex = 0
-        '
-        'PB_Speed1CAP
-        '
-        Me.PB_Speed1CAP.Location = New System.Drawing.Point(110, 116)
-        Me.PB_Speed1CAP.Maximum = 400
-        Me.PB_Speed1CAP.Name = "PB_Speed1CAP"
-        Me.PB_Speed1CAP.Size = New System.Drawing.Size(123, 20)
-        Me.PB_Speed1CAP.Step = 1
-        Me.PB_Speed1CAP.Style = System.Windows.Forms.ProgressBarStyle.Continuous
-        Me.PB_Speed1CAP.TabIndex = 0
-        '
-        'PB_Speed3FSC
-        '
-        Me.PB_Speed3FSC.Location = New System.Drawing.Point(110, 87)
-        Me.PB_Speed3FSC.Name = "PB_Speed3FSC"
-        Me.PB_Speed3FSC.Size = New System.Drawing.Size(123, 20)
-        Me.PB_Speed3FSC.Step = 1
-        Me.PB_Speed3FSC.Style = System.Windows.Forms.ProgressBarStyle.Continuous
-        Me.PB_Speed3FSC.TabIndex = 0
-        '
-        'PB_Speed2FSC
-        '
-        Me.PB_Speed2FSC.Location = New System.Drawing.Point(110, 58)
-        Me.PB_Speed2FSC.Name = "PB_Speed2FSC"
-        Me.PB_Speed2FSC.Size = New System.Drawing.Size(123, 20)
-        Me.PB_Speed2FSC.Step = 1
-        Me.PB_Speed2FSC.Style = System.Windows.Forms.ProgressBarStyle.Continuous
-        Me.PB_Speed2FSC.TabIndex = 0
-        '
-        'PB_Speed1FSC
-        '
-        Me.PB_Speed1FSC.Location = New System.Drawing.Point(110, 29)
-        Me.PB_Speed1FSC.Name = "PB_Speed1FSC"
-        Me.PB_Speed1FSC.Size = New System.Drawing.Size(123, 20)
-        Me.PB_Speed1FSC.Step = 1
-        Me.PB_Speed1FSC.Style = System.Windows.Forms.ProgressBarStyle.Continuous
-        Me.PB_Speed1FSC.TabIndex = 0
         '
         'Label2
         '
@@ -1256,11 +1467,10 @@ Partial Class Program_Form
         Me.TP_Configurator.PerformLayout()
         Me.Grp_Imbalance.ResumeLayout(False)
         Me.Grp_Imbalance.PerformLayout()
-        CType(Me.num_Imbalance_Setpoint, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.Grp_KHK.ResumeLayout(False)
-        Me.Grp_KHK.PerformLayout()
         CType(Me.num_KHKImbalance_Setpoint, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.num_KHK_Setpoint, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.num_Imbalance_Setpoint3, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.num_Imbalance_Setpoint2, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.num_Imbalance_Setpoint1, System.ComponentModel.ISupportInitialize).EndInit()
         Me.Grp_UnitConfig.ResumeLayout(False)
         Me.Grp_UnitConfig.PerformLayout()
         CType(Me.PcBx_Quark, System.ComponentModel.ISupportInitialize).EndInit()
@@ -1278,12 +1488,22 @@ Partial Class Program_Form
         Me.Grp_UnitData.PerformLayout()
         Me.Grp_SpeedConf.ResumeLayout(False)
         Me.Grp_SpeedConf.PerformLayout()
+        Me.Grp_KHK.ResumeLayout(False)
+        Me.Grp_KHK.PerformLayout()
+        CType(Me.num_FK_Speed, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.num_RK_Speed, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.NumericUpDown6, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.num_Speed3CAP, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.NumericUpDown5, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.num_Speed2CAP, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.NumericUpDown4, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.num_Speed1CAP, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.num_Speed3FSC, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.num_Speed2FSC, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.num_Speed1FSC, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.num_R_Speed3, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.num_F_Speed3, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.num_R_Speed2, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.num_F_Speed2, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.num_R_Speed1, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.num_F_Speed1, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.PcBx_Logo, System.ComponentModel.ISupportInitialize).EndInit()
         Me.Tab_Main.ResumeLayout(False)
         Me.TP_Shell.ResumeLayout(False)
@@ -1302,12 +1522,6 @@ Partial Class Program_Form
     Friend WithEvents Btn_Disconnect As Button
     Friend WithEvents Tab_Main As TabControl
     Friend WithEvents Grp_SpeedConf As GroupBox
-    Friend WithEvents PB_Speed3CAP As ProgressBar
-    Friend WithEvents PB_Speed2CAP As ProgressBar
-    Friend WithEvents PB_Speed1CAP As ProgressBar
-    Friend WithEvents PB_Speed3FSC As ProgressBar
-    Friend WithEvents PB_Speed2FSC As ProgressBar
-    Friend WithEvents PB_Speed1FSC As ProgressBar
     Friend WithEvents lb_Speed2CAP As Label
     Friend WithEvents lb_Speed1CAP As Label
     Friend WithEvents lb_Speed3FSC As Label
@@ -1353,12 +1567,12 @@ Partial Class Program_Form
     Friend WithEvents Label4 As Label
     Friend WithEvents Label3 As Label
     Friend WithEvents Label1 As Label
-    Friend WithEvents num_Speed1FSC As NumericUpDown
+    Friend WithEvents num_F_Speed1 As NumericUpDown
     Friend WithEvents num_Speed3CAP As NumericUpDown
     Friend WithEvents num_Speed2CAP As NumericUpDown
     Friend WithEvents num_Speed1CAP As NumericUpDown
-    Friend WithEvents num_Speed3FSC As NumericUpDown
-    Friend WithEvents num_Speed2FSC As NumericUpDown
+    Friend WithEvents num_F_Speed3 As NumericUpDown
+    Friend WithEvents num_F_Speed2 As NumericUpDown
     Friend WithEvents num_BoostTimer As NumericUpDown
     Friend WithEvents num_TempSetpoint As NumericUpDown
     Friend WithEvents num_VOCSetpoint As NumericUpDown
@@ -1373,18 +1587,17 @@ Partial Class Program_Form
     Friend WithEvents lb_QKvers As Label
     Friend WithEvents CB_KHKenable As CheckBox
     Friend WithEvents lb_KHKenable As Label
-    Friend WithEvents Grp_KHK As GroupBox
     Friend WithEvents RB_NO As RadioButton
     Friend WithEvents RB_NC As RadioButton
-    Friend WithEvents lb_ImbalanceLevel As Label
-    Friend WithEvents num_Imbalance_Setpoint As NumericUpDown
+    Friend WithEvents lb_ImbalanceLevel1 As Label
+    Friend WithEvents num_Imbalance_Setpoint1 As NumericUpDown
     Friend WithEvents Label10 As Label
     Friend WithEvents Grp_Imbalance As GroupBox
     Friend WithEvents lb_ImbalanceEnable As Label
     Friend WithEvents CB_ImbEnable As CheckBox
     Friend WithEvents Btn_FirmwareUpdate As Button
     Friend WithEvents Label12 As Label
-    Friend WithEvents num_KHK_Setpoint As NumericUpDown
+    Friend WithEvents num_FK_Speed As NumericUpDown
     Friend WithEvents lb_KHKSetpoint As Label
     Friend WithEvents lb_KHKContactBehavoir As Label
     Friend WithEvents Label11 As Label
@@ -1394,4 +1607,27 @@ Partial Class Program_Form
     Friend WithEvents num_KHKImbalance_Setpoint As NumericUpDown
     Friend WithEvents CB_SaveLog As CheckBox
     Friend WithEvents CB_Timestamp As CheckBox
+    Friend WithEvents Label17 As Label
+    Friend WithEvents lb_ImbalanceLevel3 As Label
+    Friend WithEvents num_Imbalance_Setpoint3 As NumericUpDown
+    Friend WithEvents Label15 As Label
+    Friend WithEvents lb_ImbalanceLevel2 As Label
+    Friend WithEvents num_Imbalance_Setpoint2 As NumericUpDown
+    Friend WithEvents NumericUpDown6 As NumericUpDown
+    Friend WithEvents NumericUpDown5 As NumericUpDown
+    Friend WithEvents NumericUpDown4 As NumericUpDown
+    Friend WithEvents num_R_Speed3 As NumericUpDown
+    Friend WithEvents num_R_Speed2 As NumericUpDown
+    Friend WithEvents num_R_Speed1 As NumericUpDown
+    Friend WithEvents Label22 As Label
+    Friend WithEvents Label21 As Label
+    Friend WithEvents Label20 As Label
+    Friend WithEvents Label19 As Label
+    Friend WithEvents Label18 As Label
+    Friend WithEvents Label16 As Label
+    Friend WithEvents Label25 As Label
+    Friend WithEvents Label24 As Label
+    Friend WithEvents num_RK_Speed As NumericUpDown
+    Friend WithEvents Label23 As Label
+    Friend WithEvents Grp_KHK As GroupBox
 End Class
