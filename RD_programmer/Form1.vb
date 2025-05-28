@@ -4,6 +4,7 @@ Imports System.Reflection
 Imports System.Text
 Imports System.Text.RegularExpressions
 Imports System.Threading.Tasks
+Imports System.Xml.Serialization
 
 Public Class Program_Form
     Dim isConnected As Boolean = False
@@ -24,6 +25,83 @@ Public Class Program_Form
     Private isService = False
     ReadOnly hiddenPages As New List(Of TabPage)()
     ReadOnly logBuffer As New StringBuilder()
+
+    Private Function GetCurrentApplicationData() As CustomerData
+        Dim dataToReturn As New CustomerData() ' Creiamo una nuova istanza per il salvataggio
+
+        ' --- Popolamento dalle proprietà di Me.customerData che sono aggiornate dagli eventi UI ---
+        ' Le velocità FSC_CAF e gli IMBALANCESetPoint sono aggiornati in Me.customerData
+        ' tramite il metodo customerData.UpdateSpeedSettings() chiamato negli eventi ValueChanged dei NumericUpDown.
+        dataToReturn.FSC_CAF_Speed1 = Me.customerData.FSC_CAF_Speed1
+        dataToReturn.FSC_CAF_Speed2 = Me.customerData.FSC_CAF_Speed2
+        dataToReturn.FSC_CAF_Speed3 = Me.customerData.FSC_CAF_Speed3
+        dataToReturn.IMBALANCESetPoint1 = Me.customerData.IMBALANCESetPoint1
+        dataToReturn.IMBALANCESetPoint2 = Me.customerData.IMBALANCESetPoint2
+        dataToReturn.IMBALANCESetPoint3 = Me.customerData.IMBALANCESetPoint3
+
+        ' Anche KHK_SET_POINT e KHKIMBALANCESetPoint sono gestiti da UpdateSpeedSettings (con speedIndex = 0)
+        dataToReturn.KHK_SET_POINT = Me.customerData.KHK_SET_POINT
+        dataToReturn.KHKIMBALANCESetPoint = Me.customerData.KHKIMBALANCESetPoint
+
+        ' --- Popolamento dai NumericUpDown per CAP Speeds e Timers ---
+        dataToReturn.CAP_Speed1 = CInt(num_Speed1CAP.Value)
+        dataToReturn.CAP_Speed2 = CInt(num_Speed2CAP.Value)
+        dataToReturn.CAP_Speed3 = CInt(num_Speed3CAP.Value)
+
+        dataToReturn.BoostTimer = CInt(num_BoostTimer.Value)
+        dataToReturn.FilterTimer = CInt(num_FilterTimer.Value)
+        dataToReturn.FireKitTimer = CInt(num_FKITimer.Value) ' Assumendo che il controllo sia num_FKITimer
+
+        ' --- Popolamento dai NumericUpDown per SetPoints ---
+        dataToReturn.CO2SetPoint = CInt(num_CO2Setpoint.Value)
+        dataToReturn.RHSetPoint = CInt(num_RHSetpoint.Value)
+        dataToReturn.VOCSetPoint = CInt(num_VOCSetpoint.Value)
+        dataToReturn.TempSetPoint = CInt(num_TempSetpoint.Value)
+
+        If CB_BPDisable.Checked Then
+            dataToReturn.SUM_WINSetPoint = 99 ' Valore speciale se il bypass è disabilitato
+        Else
+            dataToReturn.SUM_WINSetPoint = CInt(num_SWSetpoint.Value)
+        End If
+
+        ' --- Popolamento Configurazione KHK ---
+        dataToReturn.KHK_ENABLE = CB_KHKenable.Checked
+        dataToReturn.KHK_NC = RB_NC.Checked
+        dataToReturn.KHK_NO = RB_NO.Checked
+        ' KHK_VALUE è già aggiornato in Me.customerData dagli eventi dei controlli KHK
+        dataToReturn.KHK_VALUE = Me.customerData.KHK_VALUE
+
+        ' --- Popolamento Abilitazione Sbilanciamento ---
+        If CB_ImbEnable.Checked Then
+            dataToReturn.IMBALANCE_ENABLE = 1
+        Else
+            dataToReturn.IMBALANCE_ENABLE = 0
+        End If
+
+        ' --- Popolamento della proprietà 'Configuration' (LEFT/RIGHT) ---
+        If RB_left.Checked Then
+            dataToReturn.Configuration = "LEFT" ' O un identificatore più strutturato se necessario
+        ElseIf RB_right.Checked Then
+            dataToReturn.Configuration = "RIGHT"
+        Else
+            dataToReturn.Configuration = String.Empty ' O un default se nessuno è selezionato
+        End If
+
+        ' --- Popolamento dei dati "read-only" (Versioni, Seriale) da Me.customerData ---
+        ' Questi valori sono tipicamente letti dal dispositivo e non modificati dall'utente per il salvataggio.
+        'dataToReturn.VersionHW = Me.customerData.VersionHW
+        'dataToReturn.VersionSW = Me.customerData.VersionSW
+        'dataToReturn.SerialNumber = Me.customerData.SerialNumber
+
+        ' Le proprietà come F_Speed1, R_Speed1 ecc. nella classe CustomerData sono calcolate
+        ' dal metodo GetCalculatedSpeeds. Non le impostiamo direttamente qui per il salvataggio,
+        ' poiché sono dati derivati. Verranno serializzate con qualsiasi valore abbiano
+        ' nell'oggetto dataToReturn (probabilmente i default se non diversamente impostato
+        ' da un eventuale costruttore o metodo Clear chiamato su dataToReturn).
+        ' Per la serializzazione, ci concentriamo sui dati primari/sorgente.
+
+        Return dataToReturn
+    End Function
 
 
 
@@ -208,24 +286,15 @@ Public Class Program_Form
             RB_NO.Enabled = False
         End If
 
-        If customerData.IMBALANCESetPoint1 > -70 AndAlso customerData.IMBALANCESetPoint1 < 70 Then
-            Invoke(Sub() num_Imbalance_Setpoint1.Value = customerData.IMBALANCESetPoint1)
-        Else
-            Invoke(Sub() num_Imbalance_Setpoint1.Value = 0)
+        If (customerData.IMBALANCESetPoint1 < -70 AndAlso customerData.IMBALANCESetPoint1 > 70) Then
             Invoke(Sub() customerData.IMBALANCESetPoint1 = 0)
         End If
 
-        If customerData.IMBALANCESetPoint2 > -70 AndAlso customerData.IMBALANCESetPoint2 < 70 Then
-            Invoke(Sub() num_Imbalance_Setpoint2.Value = customerData.IMBALANCESetPoint2)
-        Else
-            Invoke(Sub() num_Imbalance_Setpoint2.Value = 0)
+        If (customerData.IMBALANCESetPoint2 < -70 AndAlso customerData.IMBALANCESetPoint2 > 70) Then
             Invoke(Sub() customerData.IMBALANCESetPoint2 = 0)
         End If
 
-        If customerData.IMBALANCESetPoint3 > -70 AndAlso customerData.IMBALANCESetPoint3 < 70 Then
-            Invoke(Sub() num_Imbalance_Setpoint3.Value = customerData.IMBALANCESetPoint3)
-        Else
-            Invoke(Sub() num_Imbalance_Setpoint3.Value = 0)
+        If (customerData.IMBALANCESetPoint3 < -70 AndAlso customerData.IMBALANCESetPoint3 > 70) Then
             Invoke(Sub() customerData.IMBALANCESetPoint3 = 0)
         End If
 
@@ -235,10 +304,7 @@ Public Class Program_Form
             CB_ImbEnable.Checked = False
         End If
 
-        If customerData.KHKIMBALANCESetPoint > -70 AndAlso customerData.KHKIMBALANCESetPoint < 70 Then
-            Invoke(Sub() num_KHKImbalance_Setpoint.Value = customerData.KHKIMBALANCESetPoint)
-        Else
-            Invoke(Sub() num_KHKImbalance_Setpoint.Value = 0)
+        If (customerData.KHKIMBALANCESetPoint < -70 AndAlso customerData.KHKIMBALANCESetPoint > 70) Then
             Invoke(Sub() customerData.KHKIMBALANCESetPoint = 0)
         End If
 
@@ -290,19 +356,19 @@ Public Class Program_Form
 
 
         If customerData.VersionHW IsNot Nothing AndAlso customerData.VersionHW.Length <> 0 Then
-            Invoke(Sub() lb_HW_vers.Text = lb_HW_vers.Text + " " + customerData.VersionHW)
+            Invoke(Sub() lb_HW_vers.Text = "Hardware Version: " + customerData.VersionHW)
         Else
             Invoke(Sub() lb_HW_vers.Text = "Hardware Version:")
         End If
 
         If customerData.VersionSW IsNot Nothing AndAlso customerData.VersionSW.Length <> 0 Then
-            Invoke(Sub() lb_SW_vers.Text = lb_SW_vers.Text + " " + customerData.VersionSW)
+            Invoke(Sub() lb_SW_vers.Text = "Software Version: " + customerData.VersionSW)
         Else
             Invoke(Sub() lb_SW_vers.Text = "Software Version:")
         End If
 
         If customerData.SerialNumber IsNot Nothing AndAlso customerData.SerialNumber.Length <> 0 Then
-            Invoke(Sub() lb_SerialNumber.Text = lb_SerialNumber.Text + " " + customerData.SerialNumber)
+            Invoke(Sub() lb_SerialNumber.Text = "Serial Number: " + customerData.SerialNumber)
             If customerData.SerialNumber.StartsWith("9999") Then
                 Invoke(Sub() Grp_KHK.Visible = True)
             ElseIf customerData.SerialNumber.StartsWith("7603") AndAlso
@@ -373,13 +439,59 @@ Public Class Program_Form
         Invoke(Sub() PopulateSerialPorts())
     End Sub
 
+    Private Sub LoadXmlConfigFiles()
+        ' Pulisci la ListBox prima di popolarla
+        Lsb_FileConfig.Items.Clear()
+
+        Dim configFolderPath As String
+        Try
+            ' 1. Ottieni il percorso della directory di avvio dell'applicazione
+            Dim startupPath As String = Application.StartupPath
+            ' Combina con il nome della sottocartella "config"
+            configFolderPath = Path.Combine(startupPath, "config")
+
+            ' 2. Controlla se la sottocartella "config" esiste. Se no, creala.
+            If Not Directory.Exists(configFolderPath) Then
+                Directory.CreateDirectory(configFolderPath)
+                ' You might want to log or notify that the folder was created
+            End If
+
+            ' 3. Ottieni tutti i file .xml dalla cartella "config"
+            Dim foundXmlFiles As String() = Directory.GetFiles(configFolderPath, "*.xml")
+
+            ' 4. Popola la ListBox Lsb_FileConfig
+            If foundXmlFiles.Length > 0 Then
+                For Each fullFilePath As String In foundXmlFiles
+                    ' Aggiungi solo il nome del file (non il percorso completo) alla ListBox
+                    Lsb_FileConfig.Items.Add(Path.GetFileName(fullFilePath))
+                Next
+            Else
+                ' 5. Se nessun file XML è stato trovato, mostra un messaggio nella ListBox
+                Lsb_FileConfig.Items.Add("No XML files found.")
+            End If
+
+        Catch exIO As IOException
+            MessageBox.Show($"I/O error while accessing the 'config' folder: {exIO.Message}", "I/O Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Lsb_FileConfig.Items.Add("Error accessing 'config' folder.")
+        Catch exUnauthorized As UnauthorizedAccessException
+            MessageBox.Show($"Access denied to the 'config' folder: {exUnauthorized.Message}", "Permissions Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Lsb_FileConfig.Items.Add("Access denied to 'config' folder.")
+        Catch ex As Exception
+            MessageBox.Show($"An unexpected error occurred: {ex.Message}", "Unexpected Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Lsb_FileConfig.Items.Add("Unexpected error.")
+        End Try
+    End Sub
+
+
+
     Private Sub VisibleGroups(isVisible As Boolean)
         Grp_SpeedConf.Visible = isVisible
         Grp_UnitConfig.Visible = isVisible
         Grp_UnitData.Visible = isVisible
         Grp_UnitParam.Visible = isVisible
         Grp_KHK.Visible = isVisible
-        Grp_Imbalance.Visible = isVisible
+        Grp_Preset.Visible = isVisible
+        LoadXmlConfigFiles()
     End Sub
 
     Private Sub ToggleService(isService As Boolean)
@@ -867,16 +979,18 @@ Public Class Program_Form
     Private Sub Btn_RefreshData_Click(sender As Object, e As EventArgs) Handles Btn_RefreshData.Click
         Refresh_Data()
     End Sub
-
     Private Sub RB_left_CheckedChanged(sender As Object, e As EventArgs) Handles RB_left.CheckedChanged
         If RB_left.Checked = True Then
             PcBx_Quark.Image = My.Resources._412_DRAW_QUARK_FL_D
+            'MessageBox.Show("In case of F7 filter check that it is on the fresh position (LEFT)", "Update Notification", MessageBoxButtons.OK, MessageBoxIcon.Information)
         End If
     End Sub
 
     Private Sub RB_right_CheckedChanged(sender As Object, e As EventArgs) Handles RB_right.CheckedChanged
         If RB_right.Checked = True Then
             PcBx_Quark.Image = My.Resources._411_DRAW_QUARK_FL_C
+            'MessageBox.Show("In case of F7 filter check that it is on the fresh position (RIGHT)", "Update Notification", MessageBoxButtons.OK, MessageBoxIcon.Information)
+
         End If
     End Sub
 
@@ -884,11 +998,9 @@ Public Class Program_Form
 
         If CB_ImbEnable.Checked Then
             customerData.UpdateSpeedSettings(num_F_Speed1.Value, num_R_Speed1.Value, 1)
-            num_Imbalance_Setpoint1.Value = customerData.IMBALANCESetPoint1
         Else
             num_R_Speed1.Value = num_F_Speed1.Value
             customerData.UpdateSpeedSettings(num_F_Speed1.Value, num_R_Speed1.Value, 1)
-            num_Imbalance_Setpoint1.Value = customerData.IMBALANCESetPoint1
         End If
 
     End Sub
@@ -897,11 +1009,9 @@ Public Class Program_Form
 
         If CB_ImbEnable.Checked Then
             customerData.UpdateSpeedSettings(num_F_Speed2.Value, num_R_Speed2.Value, 2)
-            num_Imbalance_Setpoint2.Value = customerData.IMBALANCESetPoint2
         Else
             num_R_Speed2.Value = num_F_Speed2.Value
             customerData.UpdateSpeedSettings(num_F_Speed2.Value, num_R_Speed2.Value, 2)
-            num_Imbalance_Setpoint2.Value = customerData.IMBALANCESetPoint2
         End If
 
     End Sub
@@ -910,11 +1020,9 @@ Public Class Program_Form
 
         If CB_ImbEnable.Checked Then
             customerData.UpdateSpeedSettings(num_F_Speed3.Value, num_R_Speed3.Value, 3)
-            num_Imbalance_Setpoint3.Value = customerData.IMBALANCESetPoint3
         Else
             num_R_Speed3.Value = num_F_Speed3.Value
             customerData.UpdateSpeedSettings(num_F_Speed3.Value, num_R_Speed3.Value, 3)
-            num_Imbalance_Setpoint3.Value = customerData.IMBALANCESetPoint3
         End If
 
     End Sub
@@ -924,11 +1032,11 @@ Public Class Program_Form
 
         If CB_ImbEnable.Checked Then
             customerData.UpdateSpeedSettings(num_F_Speed1.Value, num_R_Speed1.Value, 1)
-            num_Imbalance_Setpoint1.Value = customerData.IMBALANCESetPoint1
+
         Else
             num_F_Speed1.Value = num_R_Speed1.Value
             customerData.UpdateSpeedSettings(num_F_Speed1.Value, num_R_Speed1.Value, 1)
-            num_Imbalance_Setpoint1.Value = customerData.IMBALANCESetPoint1
+
         End If
 
     End Sub
@@ -937,11 +1045,11 @@ Public Class Program_Form
 
         If CB_ImbEnable.Checked Then
             customerData.UpdateSpeedSettings(num_F_Speed2.Value, num_R_Speed2.Value, 2)
-            num_Imbalance_Setpoint2.Value = customerData.IMBALANCESetPoint2
+
         Else
             num_F_Speed2.Value = num_R_Speed2.Value
             customerData.UpdateSpeedSettings(num_F_Speed2.Value, num_R_Speed2.Value, 2)
-            num_Imbalance_Setpoint2.Value = customerData.IMBALANCESetPoint2
+
         End If
 
     End Sub
@@ -950,11 +1058,11 @@ Public Class Program_Form
 
         If CB_ImbEnable.Checked Then
             customerData.UpdateSpeedSettings(num_F_Speed3.Value, num_R_Speed3.Value, 3)
-            num_Imbalance_Setpoint3.Value = customerData.IMBALANCESetPoint3
+
         Else
             num_F_Speed3.Value = num_R_Speed3.Value
             customerData.UpdateSpeedSettings(num_F_Speed3.Value, num_R_Speed3.Value, 3)
-            num_Imbalance_Setpoint3.Value = customerData.IMBALANCESetPoint3
+
         End If
 
     End Sub
@@ -1089,26 +1197,285 @@ Public Class Program_Form
     Private Sub FK_Speed_ValueChanged(sender As Object, e As EventArgs) Handles num_FK_Speed.ValueChanged
         If CB_ImbEnable.Checked Then
             customerData.UpdateSpeedSettings(num_FK_Speed.Value, num_RK_Speed.Value, 0)
-            num_KHKImbalance_Setpoint.Value = customerData.KHKIMBALANCESetPoint
+
         Else
             num_RK_Speed.Value = num_FK_Speed.Value
             customerData.UpdateSpeedSettings(num_FK_Speed.Value, num_RK_Speed.Value, 0)
-            num_KHKImbalance_Setpoint.Value = customerData.KHKIMBALANCESetPoint
+
         End If
     End Sub
 
     Private Sub RK_Speed_ValueChanged(sender As Object, e As EventArgs) Handles num_RK_Speed.ValueChanged
         If CB_ImbEnable.Checked Then
             customerData.UpdateSpeedSettings(num_FK_Speed.Value, num_RK_Speed.Value, 0)
-            num_KHKImbalance_Setpoint.Value = customerData.KHKIMBALANCESetPoint
+
         Else
             num_FK_Speed.Value = num_RK_Speed.Value
             customerData.UpdateSpeedSettings(num_FK_Speed.Value, num_RK_Speed.Value, 0)
-            num_KHKImbalance_Setpoint.Value = customerData.KHKIMBALANCESetPoint
+
         End If
     End Sub
 
+    Private Sub Btn_Add_Click(sender As Object, e As EventArgs) Handles Btn_Add.Click
+        ' 1. Chiedi all'utente il nome base per il file di configurazione
+        Dim baseName As String = Interaction.InputBox("Enter the base name for the configuration file (e.g., MyConfig):", "Save Configuration As")
 
+        ' Controlla se l'utente ha annullato o inserito una stringa vuota
+        If String.IsNullOrWhiteSpace(baseName) Then
+            Return ' Esce se nessun nome è stato fornito o l'utente ha annullato
+        End If
+
+        ' Rimuovi ".xml" se l'utente lo ha accidentalmente digitato, per evitare file tipo "nome.xml.xml"
+        If baseName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase) Then
+            baseName = baseName.Substring(0, baseName.Length - 4)
+        End If
+
+        ' Controlla di nuovo se il nome base è diventato vuoto (es. se l'utente ha scritto solo ".xml")
+        If String.IsNullOrWhiteSpace(baseName) Then
+            MessageBox.Show("Filename cannot be empty or just '.xml'. Please provide a valid base name.", "Invalid Filename", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            Return
+        End If
+
+        ' Validazione basilare dei caratteri del nome file
+        Dim invalidChars() As Char = Path.GetInvalidFileNameChars()
+        If baseName.IndexOfAny(invalidChars) >= 0 Then
+            MessageBox.Show($"The filename '{baseName}' contains invalid characters. Please use a valid name.", "Invalid Filename", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Return
+        End If
+
+        ' Costruisci il nome del file completo e i percorsi
+        Dim fileNameWithExtension As String = baseName & ".xml"
+        Dim configFolderPath As String = Path.Combine(Application.StartupPath, "config")
+        Dim fullFilePath As String = Path.Combine(configFolderPath, fileNameWithExtension)
+
+        ' Assicura che la cartella "config" esista
+        If Not Directory.Exists(configFolderPath) Then
+            Try
+                Directory.CreateDirectory(configFolderPath)
+            Catch ex As Exception
+                MessageBox.Show($"Error creating 'config' directory: {ex.Message}", "Directory Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                Return
+            End Try
+        End If
+
+        ' Controlla se il file esiste già e chiedi conferma per sovrascrivere
+        If File.Exists(fullFilePath) Then
+            Dim overwriteResult As DialogResult = MessageBox.Show(
+                $"The file '{fileNameWithExtension}' already exists in the 'config' folder. Do you want to overwrite it?",
+                "File Exists",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning
+            )
+            If overwriteResult = DialogResult.No Then
+                Return ' L'utente ha scelto di non sovrascrivere
+            End If
+        End If
+
+        ' 2. Ottieni i dati correnti dell'applicazione da salvare.
+        '    Questa funzione DEVE essere implementata correttamente come discusso in precedenza,
+        '    per popolare un oggetto CustomerData con lo stato attuale della UI.
+        Dim dataToSave As CustomerData = GetCurrentApplicationData()
+
+        ' Controlla se GetCurrentApplicationData ha restituito qualcosa (dovrebbe sempre farlo se implementata bene)
+        If dataToSave Is Nothing Then
+            MessageBox.Show("Could not retrieve current data to save. Please ensure data is available and GetCurrentApplicationData() is working correctly.", "Data Retrieval Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Return
+        End If
+
+        ' NOTA IMPORTANTE:
+        ' La riga 'dataToSave.Configuration = baseName' è stata intenzionalmente omessa qui.
+        ' La funzione GetCurrentApplicationData() è ora responsabile dell'impostazione corretta
+        ' della proprietà 'Configuration' all'interno dell'oggetto 'dataToSave'
+        ' (ad esempio, basandosi sullo stato di RB_left.Checked / RB_right.Checked),
+        ' se questa proprietà deve riflettere lo stato della UI piuttosto che solo il nome del file.
+        ' Il 'baseName' è usato solo per il nome del file su disco.
+
+        ' 3. Serializza l'oggetto CustomerData in XML e salvalo nel file
+        Try
+            Dim serializer As New XmlSerializer(GetType(CustomerData)) ' Specifica il tipo da serializzare
+
+            ' Using assicura che lo StreamWriter venga chiuso e rilasciato correttamente
+            Using writer As New StreamWriter(fullFilePath)
+                serializer.Serialize(writer, dataToSave)
+            End Using
+
+            MessageBox.Show($"Configuration '{fileNameWithExtension}' saved successfully in the 'config' folder.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information)
+
+            ' 4. Aggiorna la ListBox (Lsb_FileConfig) per mostrare il nuovo file salvato
+            LoadXmlConfigFiles() ' Chiama la subroutine esistente per ricaricare i file nella ListBox
+
+        Catch exSerialization As InvalidOperationException
+            ' Errori specifici della serializzazione (es. la classe CustomerData non è serializzabile come previsto)
+            MessageBox.Show($"Serialization error: {exSerialization.Message}{vbCrLf}{vbCrLf}Ensure the CustomerData class is public and suitable for XML serialization.", "Serialization Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        Catch exIO As IOException
+            ' Errori di Input/Output durante la scrittura del file
+            MessageBox.Show($"File I/O error while saving '{fileNameWithExtension}': {exIO.Message}", "File Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        Catch ex As Exception
+            ' Qualsiasi altra eccezione imprevista
+            MessageBox.Show($"An unexpected error occurred while saving configuration: {ex.Message}", "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+    Private Sub Btn_Apply_Click(sender As Object, e As EventArgs) Handles Btn_Apply.Click
+        ' 1. Controlla se un file è selezionato nella ListBox Lsb_FileConfig
+        If Lsb_FileConfig.SelectedItem Is Nothing Then
+            MessageBox.Show("Please select a configuration file from the list to apply.", "No File Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Return
+        End If
+
+        Dim selectedFileName As String = Lsb_FileConfig.SelectedItem.ToString()
+        If selectedFileName = "No XML files found." OrElse selectedFileName = "Error accessing 'config' folder." OrElse selectedFileName = "Access denied to 'config' folder." OrElse selectedFileName = "Unexpected error." Then
+            MessageBox.Show("Please select a valid configuration file.", "Invalid Selection", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            Return
+        End If
+
+        ' 2. Costruisci il percorso completo del file XML selezionato
+        Dim configFolderPath As String = Path.Combine(Application.StartupPath, "config")
+        Dim fullFilePath As String = Path.Combine(configFolderPath, selectedFileName)
+
+        ' 3. Verifica che il file esista effettivamente
+        If Not File.Exists(fullFilePath) Then
+            MessageBox.Show($"The selected configuration file '{selectedFileName}' was not found in the 'config' folder.", "File Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            ' Opzionale: ricarica la lista se il file è sparito
+            ' LoadXmlConfigFiles()
+            Return
+        End If
+
+        ' 4. Deserializza il file XML in un oggetto CustomerData
+        Dim loadedConfigData As CustomerData = Nothing
+        Try
+            Dim serializer As New XmlSerializer(GetType(CustomerData))
+            Using reader As New StreamReader(fullFilePath)
+                loadedConfigData = CType(serializer.Deserialize(reader), CustomerData)
+            End Using
+        Catch ex As Exception
+            MessageBox.Show($"Error loading or parsing the configuration file '{selectedFileName}':{vbCrLf}{ex.Message}", "Load Configuration Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Return
+        End Try
+
+        If loadedConfigData Is Nothing Then
+                MessageBox.Show($"Could not deserialize data from '{selectedFileName}'. The file might be corrupted or not a valid configuration file.", "Deserialization Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                Return
+            End If
+
+            ' 5. Applica i valori dall'oggetto caricato (loadedConfigData) a Me.customerData
+            '    Questo è l'oggetto "vivo" del tuo form.
+            Try
+                ' --- Applica le impostazioni di configurazione generali ---
+                Me.customerData.FSC_CAF_Speed1 = loadedConfigData.FSC_CAF_Speed1
+                Me.customerData.FSC_CAF_Speed2 = loadedConfigData.FSC_CAF_Speed2
+                Me.customerData.FSC_CAF_Speed3 = loadedConfigData.FSC_CAF_Speed3
+
+                Me.customerData.CAP_Speed1 = loadedConfigData.CAP_Speed1
+                Me.customerData.CAP_Speed2 = loadedConfigData.CAP_Speed2
+                Me.customerData.CAP_Speed3 = loadedConfigData.CAP_Speed3
+
+                Me.customerData.BoostTimer = loadedConfigData.BoostTimer
+                Me.customerData.FilterTimer = loadedConfigData.FilterTimer
+                Me.customerData.FireKitTimer = loadedConfigData.FireKitTimer
+
+                Me.customerData.CO2SetPoint = loadedConfigData.CO2SetPoint
+                Me.customerData.RHSetPoint = loadedConfigData.RHSetPoint
+                Me.customerData.VOCSetPoint = loadedConfigData.VOCSetPoint
+                Me.customerData.TempSetPoint = loadedConfigData.TempSetPoint
+                Me.customerData.SUM_WINSetPoint = loadedConfigData.SUM_WINSetPoint
+
+                Me.customerData.Configuration = loadedConfigData.Configuration ' Per LEFT/RIGHT
+
+                ' Impostazioni KHK
+                Me.customerData.KHK_ENABLE = loadedConfigData.KHK_ENABLE
+                Me.customerData.KHK_NC = loadedConfigData.KHK_NC
+                Me.customerData.KHK_NO = loadedConfigData.KHK_NO
+                Me.customerData.KHK_VALUE = loadedConfigData.KHK_VALUE
+                Me.customerData.KHK_SET_POINT = loadedConfigData.KHK_SET_POINT
+                Me.customerData.KHKIMBALANCESetPoint = loadedConfigData.KHKIMBALANCESetPoint
+
+                ' Impostazioni Sbilanciamento
+                Me.customerData.IMBALANCE_ENABLE = loadedConfigData.IMBALANCE_ENABLE
+                Me.customerData.IMBALANCESetPoint1 = loadedConfigData.IMBALANCESetPoint1
+                Me.customerData.IMBALANCESetPoint2 = loadedConfigData.IMBALANCESetPoint2
+                Me.customerData.IMBALANCESetPoint3 = loadedConfigData.IMBALANCESetPoint3
+
+                ' --- Applica condizionatamente i dati specifici della macchina ---
+                ' Questi verranno aggiornati solo se il file di configurazione caricato
+                ' contiene effettivamente valori non vuoti per essi.
+                ' Dato che abbiamo deciso di non salvarli, questa condizione solitamente
+                ' non sovrascriverà i valori attuali della macchina con stringhe vuote.
+                If Not String.IsNullOrEmpty(loadedConfigData.VersionHW) Then
+                    Me.customerData.VersionHW = loadedConfigData.VersionHW
+                End If
+                If Not String.IsNullOrEmpty(loadedConfigData.VersionSW) Then
+                    Me.customerData.VersionSW = loadedConfigData.VersionSW
+                End If
+                If Not String.IsNullOrEmpty(loadedConfigData.SerialNumber) Then
+                    Me.customerData.SerialNumber = loadedConfigData.SerialNumber
+                End If
+
+                ' 6. Aggiorna l'interfaccia utente per riflettere i nuovi dati in Me.customerData
+                UpdateFormControls()
+
+                MessageBox.Show($"Configuration '{selectedFileName}' applied successfully.", "Configuration Applied", MessageBoxButtons.OK, MessageBoxIcon.Information)
+
+            Catch ex As Exception
+                MessageBox.Show($"An error occurred while applying the configuration: {ex.Message}", "Apply Configuration Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            End Try
+    End Sub
+
+    Private Sub Btn_Rem_Click(sender As Object, e As EventArgs) Handles Btn_Rem.Click
+        ' 1. Controlla se un elemento è selezionato nella ListBox
+        If Lsb_FileConfig.SelectedItem Is Nothing Then
+            MessageBox.Show("Please select a configuration file from the list to remove.", "No File Selected", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Return
+        End If
+
+        Dim selectedFileName As String = Lsb_FileConfig.SelectedItem.ToString()
+
+        ' 2. Controlla che l'elemento selezionato non sia un messaggio informativo
+        Dim informationalMessages As New List(Of String) From {
+        "No XML files found.",
+        "Error accessing 'config' folder.",
+        "Access denied to 'config' folder.",
+        "Unexpected error."
+    }
+
+        If informationalMessages.Contains(selectedFileName) Then
+            MessageBox.Show("The selected item is not a configuration file. Please select an actual file to remove.", "Invalid Selection", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            Return
+        End If
+
+        ' 3. Costruisci il percorso completo del file
+        Dim configFolderPath As String = Path.Combine(Application.StartupPath, "config")
+        Dim fullFilePath As String = Path.Combine(configFolderPath, selectedFileName)
+
+        ' 4. Chiedi conferma all'utente prima di cancellare
+        Dim confirmationMessage As String = $"Are you sure you want to permanently delete the file '{selectedFileName}'?" & vbCrLf & "This action cannot be undone."
+        Dim confirmationResult As DialogResult = MessageBox.Show(confirmationMessage, "Confirm Deletion", MessageBoxButtons.YesNo, MessageBoxIcon.Warning)
+
+        ' 5. Se l'utente conferma, procedi con la cancellazione
+        If confirmationResult = DialogResult.Yes Then
+            Try
+                ' Verifica ulteriormente se il file esiste prima di tentare la cancellazione
+                If File.Exists(fullFilePath) Then
+                    File.Delete(fullFilePath)
+                    MessageBox.Show($"File '{selectedFileName}' has been deleted successfully.", "File Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                Else
+                    MessageBox.Show($"The file '{selectedFileName}' could not be found. It might have been already deleted.", "File Not Found", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
+                End If
+            Catch exIO As IOException
+                ' Gestisce errori comuni di I/O, come file in uso o problemi di permessi
+                MessageBox.Show($"An I/O error occurred while trying to delete '{selectedFileName}':{vbCrLf}{exIO.Message}{vbCrLf}The file might be in use by another process, or you might not have the necessary permissions.", "Deletion Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Catch exUnauthorized As UnauthorizedAccessException
+                ' Gestisce specificamente errori di permessi negati
+                MessageBox.Show($"Access denied. You do not have permission to delete the file '{selectedFileName}'.", "Permission Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Catch ex As Exception
+                ' Gestisce qualsiasi altra eccezione imprevista
+                MessageBox.Show($"An unexpected error occurred while trying to delete '{selectedFileName}':{vbCrLf}{ex.Message}", "Deletion Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            End Try
+
+            ' 6. Aggiorna la ListBox in ogni caso (per riflettere la cancellazione o se il file non è stato trovato)
+            LoadXmlConfigFiles()
+        End If
+    End Sub
 End Class
 
 

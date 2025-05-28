@@ -26,19 +26,11 @@ Partial Class Program_Form
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Program_Form))
         Me.SerialPort1 = New System.IO.Ports.SerialPort(Me.components)
         Me.TP_Configurator = New System.Windows.Forms.TabPage()
-        Me.Grp_Imbalance = New System.Windows.Forms.GroupBox()
-        Me.Label13 = New System.Windows.Forms.Label()
-        Me.Label17 = New System.Windows.Forms.Label()
-        Me.Label14 = New System.Windows.Forms.Label()
-        Me.num_KHKImbalance_Setpoint = New System.Windows.Forms.NumericUpDown()
-        Me.lb_ImbalanceLevel3 = New System.Windows.Forms.Label()
-        Me.num_Imbalance_Setpoint3 = New System.Windows.Forms.NumericUpDown()
-        Me.Label15 = New System.Windows.Forms.Label()
-        Me.lb_ImbalanceLevel2 = New System.Windows.Forms.Label()
-        Me.num_Imbalance_Setpoint2 = New System.Windows.Forms.NumericUpDown()
-        Me.Label10 = New System.Windows.Forms.Label()
-        Me.lb_ImbalanceLevel1 = New System.Windows.Forms.Label()
-        Me.num_Imbalance_Setpoint1 = New System.Windows.Forms.NumericUpDown()
+        Me.Grp_Preset = New System.Windows.Forms.GroupBox()
+        Me.Lsb_FileConfig = New System.Windows.Forms.ListBox()
+        Me.Btn_Rem = New System.Windows.Forms.Button()
+        Me.Btn_Add = New System.Windows.Forms.Button()
+        Me.Btn_Apply = New System.Windows.Forms.Button()
         Me.Btn_FirmwareUpdate = New System.Windows.Forms.Button()
         Me.lb_SaveProg = New System.Windows.Forms.Label()
         Me.PB_SaveData = New System.Windows.Forms.ProgressBar()
@@ -143,11 +135,7 @@ Partial Class Program_Form
         Me.SerialDataTimer = New System.Windows.Forms.Timer(Me.components)
         Me.lb_QKvers = New System.Windows.Forms.Label()
         Me.TP_Configurator.SuspendLayout()
-        Me.Grp_Imbalance.SuspendLayout()
-        CType(Me.num_KHKImbalance_Setpoint, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.num_Imbalance_Setpoint3, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.num_Imbalance_Setpoint2, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.num_Imbalance_Setpoint1, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.Grp_Preset.SuspendLayout()
         Me.Grp_UnitConfig.SuspendLayout()
         CType(Me.PcBx_Quark, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Grp_UnitParam.SuspendLayout()
@@ -186,7 +174,7 @@ Partial Class Program_Form
         '
         'TP_Configurator
         '
-        Me.TP_Configurator.Controls.Add(Me.Grp_Imbalance)
+        Me.TP_Configurator.Controls.Add(Me.Grp_Preset)
         Me.TP_Configurator.Controls.Add(Me.Btn_FirmwareUpdate)
         Me.TP_Configurator.Controls.Add(Me.lb_SaveProg)
         Me.TP_Configurator.Controls.Add(Me.PB_SaveData)
@@ -206,162 +194,60 @@ Partial Class Program_Form
         Me.TP_Configurator.Location = New System.Drawing.Point(4, 22)
         Me.TP_Configurator.Name = "TP_Configurator"
         Me.TP_Configurator.Padding = New System.Windows.Forms.Padding(3)
-        Me.TP_Configurator.Size = New System.Drawing.Size(870, 481)
+        Me.TP_Configurator.Size = New System.Drawing.Size(1073, 481)
         Me.TP_Configurator.TabIndex = 0
         Me.TP_Configurator.Text = "Configurator"
         Me.TP_Configurator.UseVisualStyleBackColor = True
         '
-        'Grp_Imbalance
+        'Grp_Preset
         '
-        Me.Grp_Imbalance.Controls.Add(Me.Label13)
-        Me.Grp_Imbalance.Controls.Add(Me.Label17)
-        Me.Grp_Imbalance.Controls.Add(Me.Label14)
-        Me.Grp_Imbalance.Controls.Add(Me.num_KHKImbalance_Setpoint)
-        Me.Grp_Imbalance.Controls.Add(Me.lb_ImbalanceLevel3)
-        Me.Grp_Imbalance.Controls.Add(Me.num_Imbalance_Setpoint3)
-        Me.Grp_Imbalance.Controls.Add(Me.Label15)
-        Me.Grp_Imbalance.Controls.Add(Me.lb_ImbalanceLevel2)
-        Me.Grp_Imbalance.Controls.Add(Me.num_Imbalance_Setpoint2)
-        Me.Grp_Imbalance.Controls.Add(Me.Label10)
-        Me.Grp_Imbalance.Controls.Add(Me.lb_ImbalanceLevel1)
-        Me.Grp_Imbalance.Controls.Add(Me.num_Imbalance_Setpoint1)
-        Me.Grp_Imbalance.Location = New System.Drawing.Point(361, 347)
-        Me.Grp_Imbalance.Margin = New System.Windows.Forms.Padding(2)
-        Me.Grp_Imbalance.Name = "Grp_Imbalance"
-        Me.Grp_Imbalance.Padding = New System.Windows.Forms.Padding(2)
-        Me.Grp_Imbalance.Size = New System.Drawing.Size(225, 129)
-        Me.Grp_Imbalance.TabIndex = 7
-        Me.Grp_Imbalance.TabStop = False
-        Me.Grp_Imbalance.Text = "Imbalance"
-        Me.Grp_Imbalance.Visible = False
+        Me.Grp_Preset.Controls.Add(Me.Lsb_FileConfig)
+        Me.Grp_Preset.Controls.Add(Me.Btn_Rem)
+        Me.Grp_Preset.Controls.Add(Me.Btn_Add)
+        Me.Grp_Preset.Controls.Add(Me.Btn_Apply)
+        Me.Grp_Preset.Location = New System.Drawing.Point(871, 7)
+        Me.Grp_Preset.Name = "Grp_Preset"
+        Me.Grp_Preset.Size = New System.Drawing.Size(196, 377)
+        Me.Grp_Preset.TabIndex = 16
+        Me.Grp_Preset.TabStop = False
+        Me.Grp_Preset.Text = "Preset Conf."
         '
-        'Label13
+        'Lsb_FileConfig
         '
-        Me.Label13.AutoSize = True
-        Me.Label13.Location = New System.Drawing.Point(183, 89)
-        Me.Label13.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
-        Me.Label13.Name = "Label13"
-        Me.Label13.Size = New System.Drawing.Size(15, 13)
-        Me.Label13.TabIndex = 14
-        Me.Label13.Text = "%"
+        Me.Lsb_FileConfig.FormattingEnabled = True
+        Me.Lsb_FileConfig.Location = New System.Drawing.Point(7, 20)
+        Me.Lsb_FileConfig.Name = "Lsb_FileConfig"
+        Me.Lsb_FileConfig.Size = New System.Drawing.Size(183, 186)
+        Me.Lsb_FileConfig.TabIndex = 1
         '
-        'Label17
+        'Btn_Rem
         '
-        Me.Label17.AutoSize = True
-        Me.Label17.Location = New System.Drawing.Point(183, 66)
-        Me.Label17.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
-        Me.Label17.Name = "Label17"
-        Me.Label17.Size = New System.Drawing.Size(15, 13)
-        Me.Label17.TabIndex = 17
-        Me.Label17.Text = "%"
+        Me.Btn_Rem.Font = New System.Drawing.Font("Microsoft Sans Serif", 15.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Btn_Rem.Location = New System.Drawing.Point(147, 226)
+        Me.Btn_Rem.Name = "Btn_Rem"
+        Me.Btn_Rem.Size = New System.Drawing.Size(43, 42)
+        Me.Btn_Rem.TabIndex = 0
+        Me.Btn_Rem.Text = "-"
+        Me.Btn_Rem.UseVisualStyleBackColor = True
         '
-        'Label14
+        'Btn_Add
         '
-        Me.Label14.AutoSize = True
-        Me.Label14.Location = New System.Drawing.Point(7, 91)
-        Me.Label14.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
-        Me.Label14.Name = "Label14"
-        Me.Label14.Size = New System.Drawing.Size(110, 13)
-        Me.Label14.TabIndex = 13
-        Me.Label14.Text = "Imbalance KHK Level"
+        Me.Btn_Add.Font = New System.Drawing.Font("Microsoft Sans Serif", 15.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Btn_Add.Location = New System.Drawing.Point(98, 226)
+        Me.Btn_Add.Name = "Btn_Add"
+        Me.Btn_Add.Size = New System.Drawing.Size(43, 42)
+        Me.Btn_Add.TabIndex = 0
+        Me.Btn_Add.Text = "+"
+        Me.Btn_Add.UseVisualStyleBackColor = True
         '
-        'num_KHKImbalance_Setpoint
+        'Btn_Apply
         '
-        Me.num_KHKImbalance_Setpoint.Enabled = False
-        Me.num_KHKImbalance_Setpoint.Location = New System.Drawing.Point(121, 89)
-        Me.num_KHKImbalance_Setpoint.Margin = New System.Windows.Forms.Padding(2)
-        Me.num_KHKImbalance_Setpoint.Maximum = New Decimal(New Integer() {70, 0, 0, 0})
-        Me.num_KHKImbalance_Setpoint.Minimum = New Decimal(New Integer() {70, 0, 0, -2147483648})
-        Me.num_KHKImbalance_Setpoint.Name = "num_KHKImbalance_Setpoint"
-        Me.num_KHKImbalance_Setpoint.Size = New System.Drawing.Size(55, 20)
-        Me.num_KHKImbalance_Setpoint.TabIndex = 12
-        Me.num_KHKImbalance_Setpoint.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
-        '
-        'lb_ImbalanceLevel3
-        '
-        Me.lb_ImbalanceLevel3.AutoSize = True
-        Me.lb_ImbalanceLevel3.Location = New System.Drawing.Point(23, 66)
-        Me.lb_ImbalanceLevel3.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
-        Me.lb_ImbalanceLevel3.Name = "lb_ImbalanceLevel3"
-        Me.lb_ImbalanceLevel3.Size = New System.Drawing.Size(94, 13)
-        Me.lb_ImbalanceLevel3.TabIndex = 16
-        Me.lb_ImbalanceLevel3.Text = "Imbalance Level 3"
-        '
-        'num_Imbalance_Setpoint3
-        '
-        Me.num_Imbalance_Setpoint3.Enabled = False
-        Me.num_Imbalance_Setpoint3.Location = New System.Drawing.Point(121, 64)
-        Me.num_Imbalance_Setpoint3.Margin = New System.Windows.Forms.Padding(2)
-        Me.num_Imbalance_Setpoint3.Maximum = New Decimal(New Integer() {70, 0, 0, 0})
-        Me.num_Imbalance_Setpoint3.Minimum = New Decimal(New Integer() {70, 0, 0, -2147483648})
-        Me.num_Imbalance_Setpoint3.Name = "num_Imbalance_Setpoint3"
-        Me.num_Imbalance_Setpoint3.Size = New System.Drawing.Size(55, 20)
-        Me.num_Imbalance_Setpoint3.TabIndex = 15
-        Me.num_Imbalance_Setpoint3.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
-        '
-        'Label15
-        '
-        Me.Label15.AutoSize = True
-        Me.Label15.Location = New System.Drawing.Point(183, 42)
-        Me.Label15.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
-        Me.Label15.Name = "Label15"
-        Me.Label15.Size = New System.Drawing.Size(15, 13)
-        Me.Label15.TabIndex = 14
-        Me.Label15.Text = "%"
-        '
-        'lb_ImbalanceLevel2
-        '
-        Me.lb_ImbalanceLevel2.AutoSize = True
-        Me.lb_ImbalanceLevel2.Location = New System.Drawing.Point(23, 42)
-        Me.lb_ImbalanceLevel2.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
-        Me.lb_ImbalanceLevel2.Name = "lb_ImbalanceLevel2"
-        Me.lb_ImbalanceLevel2.Size = New System.Drawing.Size(94, 13)
-        Me.lb_ImbalanceLevel2.TabIndex = 13
-        Me.lb_ImbalanceLevel2.Text = "Imbalance Level 2"
-        '
-        'num_Imbalance_Setpoint2
-        '
-        Me.num_Imbalance_Setpoint2.Enabled = False
-        Me.num_Imbalance_Setpoint2.Location = New System.Drawing.Point(121, 40)
-        Me.num_Imbalance_Setpoint2.Margin = New System.Windows.Forms.Padding(2)
-        Me.num_Imbalance_Setpoint2.Maximum = New Decimal(New Integer() {70, 0, 0, 0})
-        Me.num_Imbalance_Setpoint2.Minimum = New Decimal(New Integer() {70, 0, 0, -2147483648})
-        Me.num_Imbalance_Setpoint2.Name = "num_Imbalance_Setpoint2"
-        Me.num_Imbalance_Setpoint2.Size = New System.Drawing.Size(55, 20)
-        Me.num_Imbalance_Setpoint2.TabIndex = 12
-        Me.num_Imbalance_Setpoint2.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
-        '
-        'Label10
-        '
-        Me.Label10.AutoSize = True
-        Me.Label10.Location = New System.Drawing.Point(183, 19)
-        Me.Label10.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
-        Me.Label10.Name = "Label10"
-        Me.Label10.Size = New System.Drawing.Size(15, 13)
-        Me.Label10.TabIndex = 9
-        Me.Label10.Text = "%"
-        '
-        'lb_ImbalanceLevel1
-        '
-        Me.lb_ImbalanceLevel1.AutoSize = True
-        Me.lb_ImbalanceLevel1.Location = New System.Drawing.Point(23, 19)
-        Me.lb_ImbalanceLevel1.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
-        Me.lb_ImbalanceLevel1.Name = "lb_ImbalanceLevel1"
-        Me.lb_ImbalanceLevel1.Size = New System.Drawing.Size(94, 13)
-        Me.lb_ImbalanceLevel1.TabIndex = 8
-        Me.lb_ImbalanceLevel1.Text = "Imbalance Level 1"
-        '
-        'num_Imbalance_Setpoint1
-        '
-        Me.num_Imbalance_Setpoint1.Enabled = False
-        Me.num_Imbalance_Setpoint1.Location = New System.Drawing.Point(121, 17)
-        Me.num_Imbalance_Setpoint1.Margin = New System.Windows.Forms.Padding(2)
-        Me.num_Imbalance_Setpoint1.Maximum = New Decimal(New Integer() {71, 0, 0, 0})
-        Me.num_Imbalance_Setpoint1.Minimum = New Decimal(New Integer() {71, 0, 0, -2147483648})
-        Me.num_Imbalance_Setpoint1.Name = "num_Imbalance_Setpoint1"
-        Me.num_Imbalance_Setpoint1.Size = New System.Drawing.Size(55, 20)
-        Me.num_Imbalance_Setpoint1.TabIndex = 7
-        Me.num_Imbalance_Setpoint1.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        Me.Btn_Apply.Location = New System.Drawing.Point(6, 226)
+        Me.Btn_Apply.Name = "Btn_Apply"
+        Me.Btn_Apply.Size = New System.Drawing.Size(86, 42)
+        Me.Btn_Apply.TabIndex = 0
+        Me.Btn_Apply.Text = "Apply"
+        Me.Btn_Apply.UseVisualStyleBackColor = True
         '
         'Btn_FirmwareUpdate
         '
@@ -1361,7 +1247,7 @@ Partial Class Program_Form
         'PcBx_Logo
         '
         Me.PcBx_Logo.Image = Global.Quark_Configurator.My.Resources.Resources.SMART_ICON
-        Me.PcBx_Logo.Location = New System.Drawing.Point(254, 64)
+        Me.PcBx_Logo.Location = New System.Drawing.Point(381, 96)
         Me.PcBx_Logo.Name = "PcBx_Logo"
         Me.PcBx_Logo.Size = New System.Drawing.Size(332, 320)
         Me.PcBx_Logo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom
@@ -1375,7 +1261,7 @@ Partial Class Program_Form
         Me.Tab_Main.Location = New System.Drawing.Point(12, 12)
         Me.Tab_Main.Name = "Tab_Main"
         Me.Tab_Main.SelectedIndex = 0
-        Me.Tab_Main.Size = New System.Drawing.Size(878, 507)
+        Me.Tab_Main.Size = New System.Drawing.Size(1081, 507)
         Me.Tab_Main.TabIndex = 7
         '
         'TP_Shell
@@ -1387,7 +1273,7 @@ Partial Class Program_Form
         Me.TP_Shell.Controls.Add(Me.Btn_SendData)
         Me.TP_Shell.Location = New System.Drawing.Point(4, 22)
         Me.TP_Shell.Name = "TP_Shell"
-        Me.TP_Shell.Size = New System.Drawing.Size(870, 481)
+        Me.TP_Shell.Size = New System.Drawing.Size(1073, 481)
         Me.TP_Shell.TabIndex = 1
         Me.TP_Shell.Text = "Shell"
         Me.TP_Shell.UseVisualStyleBackColor = True
@@ -1444,7 +1330,7 @@ Partial Class Program_Form
         'lb_QKvers
         '
         Me.lb_QKvers.AutoSize = True
-        Me.lb_QKvers.Location = New System.Drawing.Point(749, 8)
+        Me.lb_QKvers.Location = New System.Drawing.Point(884, 9)
         Me.lb_QKvers.Name = "lb_QKvers"
         Me.lb_QKvers.Size = New System.Drawing.Size(96, 13)
         Me.lb_QKvers.TabIndex = 8
@@ -1454,7 +1340,7 @@ Partial Class Program_Form
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(905, 527)
+        Me.ClientSize = New System.Drawing.Size(1098, 527)
         Me.Controls.Add(Me.lb_QKvers)
         Me.Controls.Add(Me.Tab_Main)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D
@@ -1465,12 +1351,7 @@ Partial Class Program_Form
         Me.Text = "Avensys Quark Configurator"
         Me.TP_Configurator.ResumeLayout(False)
         Me.TP_Configurator.PerformLayout()
-        Me.Grp_Imbalance.ResumeLayout(False)
-        Me.Grp_Imbalance.PerformLayout()
-        CType(Me.num_KHKImbalance_Setpoint, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.num_Imbalance_Setpoint3, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.num_Imbalance_Setpoint2, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.num_Imbalance_Setpoint1, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.Grp_Preset.ResumeLayout(False)
         Me.Grp_UnitConfig.ResumeLayout(False)
         Me.Grp_UnitConfig.PerformLayout()
         CType(Me.PcBx_Quark, System.ComponentModel.ISupportInitialize).EndInit()
@@ -1589,10 +1470,6 @@ Partial Class Program_Form
     Friend WithEvents lb_KHKenable As Label
     Friend WithEvents RB_NO As RadioButton
     Friend WithEvents RB_NC As RadioButton
-    Friend WithEvents lb_ImbalanceLevel1 As Label
-    Friend WithEvents num_Imbalance_Setpoint1 As NumericUpDown
-    Friend WithEvents Label10 As Label
-    Friend WithEvents Grp_Imbalance As GroupBox
     Friend WithEvents lb_ImbalanceEnable As Label
     Friend WithEvents CB_ImbEnable As CheckBox
     Friend WithEvents Btn_FirmwareUpdate As Button
@@ -1602,17 +1479,8 @@ Partial Class Program_Form
     Friend WithEvents lb_KHKContactBehavoir As Label
     Friend WithEvents Label11 As Label
     Friend WithEvents CB_BPDisable As CheckBox
-    Friend WithEvents Label13 As Label
-    Friend WithEvents Label14 As Label
-    Friend WithEvents num_KHKImbalance_Setpoint As NumericUpDown
     Friend WithEvents CB_SaveLog As CheckBox
     Friend WithEvents CB_Timestamp As CheckBox
-    Friend WithEvents Label17 As Label
-    Friend WithEvents lb_ImbalanceLevel3 As Label
-    Friend WithEvents num_Imbalance_Setpoint3 As NumericUpDown
-    Friend WithEvents Label15 As Label
-    Friend WithEvents lb_ImbalanceLevel2 As Label
-    Friend WithEvents num_Imbalance_Setpoint2 As NumericUpDown
     Friend WithEvents NumericUpDown6 As NumericUpDown
     Friend WithEvents NumericUpDown5 As NumericUpDown
     Friend WithEvents NumericUpDown4 As NumericUpDown
@@ -1630,4 +1498,9 @@ Partial Class Program_Form
     Friend WithEvents num_RK_Speed As NumericUpDown
     Friend WithEvents Label23 As Label
     Friend WithEvents Grp_KHK As GroupBox
+    Friend WithEvents Grp_Preset As GroupBox
+    Friend WithEvents Btn_Apply As Button
+    Friend WithEvents Btn_Rem As Button
+    Friend WithEvents Btn_Add As Button
+    Friend WithEvents Lsb_FileConfig As ListBox
 End Class
