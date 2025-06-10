@@ -5,6 +5,7 @@ Imports System.Text
 Imports System.Text.RegularExpressions
 Imports System.Threading.Tasks
 Imports System.Xml.Serialization
+Imports System.Globalization
 
 Public Class Program_Form
     Dim isConnected As Boolean = False
@@ -24,7 +25,11 @@ Public Class Program_Form
     Private WithEvents PortWatcher As ManagementEventWatcher
     Private isService = False
     ReadOnly hiddenPages As New List(Of TabPage)()
-    ReadOnly logBuffer As New StringBuilder()
+    Private logBuffer As New Text.StringBuilder()
+    Private currentDateTime As DateTime
+    Private updatingDateTime As Boolean = False
+    Private dateTimeStep As Integer = 0
+    Private sentPcTimestamp As Boolean = False
 
     Private Function GetCurrentApplicationData() As CustomerData
         Dim dataToReturn As New CustomerData() ' Creiamo una nuova istanza per il salvataggio
@@ -249,42 +254,37 @@ Public Class Program_Form
         End If
 
 
-        If customerData.KHK_VALUE > 1 And customerData.KHK_VALUE < 6 Then
-            If customerData.KHK_VALUE = 2 Then
-                CB_KHKenable.Checked = False
-                RB_NC.Checked = True
-                RB_NO.Checked = False
-                RB_NC.Enabled = False
-                RB_NO.Enabled = False
-            End If
-            If customerData.KHK_VALUE = 3 Then
-                CB_KHKenable.Checked = True
-                RB_NC.Checked = True
-                RB_NO.Checked = False
-                RB_NC.Enabled = True
-                RB_NO.Enabled = True
-            End If
-            If customerData.KHK_VALUE = 4 Then
-                CB_KHKenable.Checked = False
-                RB_NC.Checked = False
-                RB_NO.Checked = True
-                RB_NC.Enabled = False
-                RB_NO.Enabled = False
-            End If
-            If customerData.KHK_VALUE = 5 Then
-                CB_KHKenable.Checked = True
-                RB_NC.Checked = False
-                RB_NO.Checked = True
-                RB_NC.Enabled = True
-                RB_NO.Enabled = True
-            End If
+        ' Estrai lo stato di KHK Enable (Bit 0)
+        If (customerData.KHK_VALUE And &H1) = &H1 Then
+            CB_KHKenable.Checked = True
         Else
             CB_KHKenable.Checked = False
-            RB_NC.Checked = True
-            RB_NO.Checked = False
-            RB_NC.Enabled = False
-            RB_NO.Enabled = False
         End If
+
+        ' Estrai lo stato del Comportamento Contatto (Bit 1)
+        If (customerData.KHK_VALUE And &H2) = &H2 Then
+            RB_NC.Checked = True
+            RB_NO.Checked = False ' Assicura che l'altro radio button sia deselezionato
+        Else
+            RB_NO.Checked = True
+            RB_NC.Checked = False ' Assicura che l'altro radio button sia deselezionato
+        End If
+
+        ' Estrai lo stato per "Disable Temperature Control" (Bit 2)
+        ' La logica del timer nel firmware si ATTIVA se il bit 2 di KHK_VALUE è 0.
+        ' Quindi, se il bit 2 letto da KHK_VALUE è 1, significa che l'utente aveva scelto di DISABILITARE il controllo/timer.
+        If (customerData.KHK_VALUE And &H4) = &H4 Then
+            CB_DisableTemperatureControl.Checked = True ' Il bit 2 è 1 -> Disabilita controllo/timer è SPUNTATO
+        Else
+            CB_DisableTemperatureControl.Checked = False ' Il bit 2 è 0 -> Disabilita controllo/timer è NON SPUNTATO (quindi controllo/timer è abilitato)
+        End If
+
+        ' Abilita/Disabilita i controlli dipendenti in base allo stato di CB_KHKenable
+        num_FK_Speed.Enabled = CB_KHKenable.Checked
+        num_RK_Speed.Enabled = CB_KHKenable.Checked
+        RB_NC.Enabled = CB_KHKenable.Checked
+        RB_NO.Enabled = CB_KHKenable.Checked
+        CB_DisableTemperatureControl.Enabled = CB_KHKenable.Checked
 
         If (customerData.IMBALANCESetPoint1 < -70 AndAlso customerData.IMBALANCESetPoint1 > 70) Then
             Invoke(Sub() customerData.IMBALANCESetPoint1 = 0)
@@ -491,6 +491,7 @@ Public Class Program_Form
         Grp_UnitParam.Visible = isVisible
         Grp_KHK.Visible = isVisible
         Grp_Preset.Visible = isVisible
+        Grp_DateTime.Visible = isVisible
         LoadXmlConfigFiles()
     End Sub
 
@@ -578,13 +579,77 @@ Public Class Program_Form
         num_TempSetpoint.Enabled = False
         num_SWSetpoint.Enabled = False
         num_SWSetpoint.Maximum = 99
+        updatingDateTime = False
         customerData.Clear()
         Invoke(Sub() tb_COMStrem.Text = String.Empty)
         UpdateFormControls()
     End Sub
 
-
     Private Async Sub SerialDataTimer_Tick(sender As Object, e As EventArgs) Handles SerialDataTimer.Tick
+        ' 1) Acquisisco tutto ciò che arriva
+        Dim chunk As String = SerialPort1.ReadExisting()
+        If chunk.Length > 0 Then
+            logBuffer.Append(chunk)
+            Invoke(Sub() tb_COMStrem.AppendText(chunk))
+        End If
+
+        ' 2) Se siamo in update, gestisco i due passi
+        If updatingDateTime Then
+            Select Case dateTimeStep
+
+                Case 1
+                    ' attendo “Waiting for data from PC:”
+                    If tb_COMStrem.Text.Contains("Waiting for data from PC:") Then
+                        ' costruisco il timestamp
+                        Dim pcNow As DateTime = DateTime.Now
+                        Dim wd As Integer = ((CInt(pcNow.DayOfWeek) + 6) Mod 7) + 1
+                        Dim msg As String = $"{pcNow.Year},{pcNow.Month},{pcNow.Day}," &
+                                        $"{wd},{pcNow.Hour},{pcNow.Minute},{pcNow.Second}"
+                        ' 2) invio timestamp con WriteLine
+                        InviaStringa(msg)
+                        'dateTimeStep = 2
+                        ResetInactivityTimer()
+                    End If
+
+                Case 2
+                    ' attendo la risposta “Data: … Ora: …”
+                    If tb_COMStrem.Text.Contains("Data:") Then
+                        ' prendo l’ultima riga completa
+                        Dim allLines() As String = tb_COMStrem.Text _
+                        .Split(New String() {vbCrLf, vbLf}, StringSplitOptions.RemoveEmptyEntries)
+                        ' Prendo l’ultima riga e la trimmo
+                        Dim line As String = allLines(allLines.Length - 1).Trim()
+
+                        ' parsifico
+                        Dim parts() As String = Regex.Split(line, "Ora:")
+                        If parts.Length = 2 Then
+                            Dim datePart As String = parts(0).Replace("Data:", "").Trim()
+                            Dim timePart As String = parts(1).Trim()
+                            Dim dt As DateTime
+                            If DateTime.TryParseExact($"{datePart} {timePart}",
+                                                   "dd/MM/yy HH:mm:ss",
+                                                   CultureInfo.InvariantCulture,
+                                                   DateTimeStyles.None,
+                                                   dt) Then
+                                currentDateTime = dt
+                                Invoke(Sub()
+                                           lb_DateTimeTimer.Text = currentDateTime.ToString("dd/MM/yy HH:mm:ss")
+                                           TimerDateTime.Start()  ' riavvio il timer +1s
+                                       End Sub)
+                            End If
+                        End If
+
+                        ' termino la sequenza update
+                        updatingDateTime = False
+                        BtnUpdateDateTime.Enabled = True
+                    End If
+
+            End Select
+
+            ' finché non ho completato, esco subito
+            Return
+        End If
+
 
         Dim savestep As Integer
 
@@ -760,6 +825,7 @@ Public Class Program_Form
                 character6Sent = True
                 ResetInactivityTimer()
             ElseIf character2Sent AndAlso character6Sent AndAlso Not parameterRead Then
+                InviaStringa("")
                 ExtractConfigData()
                 ResetInactivityTimer()
                 parameterRead = True
@@ -816,11 +882,41 @@ Public Class Program_Form
                 ' Rimuovi la riga dal buffer
                 logBuffer.Remove(0, lineEndIndex + 1)
 
-                ' Scrivi la linea nel log e aggiorna l'interfaccia grafica
-                Invoke(Sub()
-                           tb_COMStrem.AppendText(completeLine & Environment.NewLine)
-                           AppendLogData(completeLine) ' Scrive solo righe complete nel log
-                       End Sub)
+                ' Se è la riga di data/ora, la parsifico qui
+                If completeLine.StartsWith("Data:") Then
+                               ' Esempio: "Data: 09/06/25  Ora: 14:23:45"
+                               Dim parts() As String = Regex.Split(completeLine, "Ora:")
+                               If parts.Length = 2 Then
+                                   Dim datePart As String = parts(0).Replace("Data:", "").Trim()
+                                   Dim timePart As String = parts(1).Trim()
+                                   Dim dt As DateTime
+                        If DateTime.TryParseExact($"{datePart} {timePart}",
+                                              "dd/MM/yy HH:mm:ss",
+                                              CultureInfo.InvariantCulture,
+                                              DateTimeStyles.None,
+                                              dt) Then
+                            currentDateTime = dt
+                            ' Aggiorno immediatamente la label sulla UI
+                            Invoke(Sub()
+                                       lb_DateTimeTimer.Text = currentDateTime.ToString("dd/MM/yy HH:mm:ss")
+
+                                       ' Avvio il timer per +1s a ogni tick
+                                       TimerDateTime.Start()
+                                   End Sub)
+                        End If
+                        updatingDateTime = False
+                        Invoke(Sub()
+                                   BtnUpdateDateTime.Enabled = True
+                               End Sub)
+                    End If
+                           Else
+                               ' Scrivi la linea nel log e aggiorna l'interfaccia grafica
+                               Invoke(Sub()
+                                          tb_COMStrem.AppendText(completeLine & Environment.NewLine)
+                                          AppendLogData(completeLine) ' Scrive solo righe complete nel log
+                                      End Sub)
+                           End If
+
             End While
 
             If logBuffer.Length > 0 AndAlso Not logBuffer.ToString().Contains(vbLf) Then
@@ -835,6 +931,14 @@ Public Class Program_Form
 
 
     End Sub
+
+
+    Private Sub TimerDateTime_Tick(sender As Object, e As EventArgs) Handles TimerDateTime.Tick
+        ' Simulo l'orologio che avanza di 1 secondo
+        currentDateTime = currentDateTime.AddSeconds(1)
+        lb_DateTimeTimer.Text = currentDateTime.ToString("dd/MM/yy HH:mm:ss")
+    End Sub
+
 
     Private Sub Btn_Connect_Click(sender As Object, e As EventArgs) Handles Btn_Connect.Click
         Try
@@ -1099,46 +1203,52 @@ Public Class Program_Form
         lb_status.Text = "Saving data... please wait"
     End Sub
 
+    Private Sub UpdateKHKValue()
+        Dim khkValueTemp As Byte = 0
+
+        If CB_KHKenable.Checked Then
+            khkValueTemp = khkValueTemp Or &H1 ' Bit 0: KHK Abilitato
+        End If
+
+        ' Bit 1: Comportamento Contatto (NC/NO)
+        If RB_NC.Checked Then
+            khkValueTemp = khkValueTemp Or &H2 ' Imposta bit 1 per NC
+        End If
+
+        ' Bit 2: Logica Timer/Uscita KHK (NUOVA LOGICA FIRMWARE)
+        If CB_DisableTemperatureControl.Checked Then
+            khkValueTemp = khkValueTemp Or &H4 ' Imposta bit 2 a 1 (disabilita logica timer nel firmware)
+        Else
+            ' Bit 2 rimane 0 (abilita logica timer nel firmware)
+        End If
+
+        customerData.KHK_VALUE = khkValueTemp
+    End Sub
+
     Private Sub KHK_ENABLE_CheckedChanged(sender As Object, e As EventArgs) Handles CB_KHKenable.CheckedChanged
         num_FK_Speed.Enabled = CB_KHKenable.Checked
         num_RK_Speed.Enabled = CB_KHKenable.Checked
-
-        If CB_KHKenable.Checked = True Then
-            If RB_NC.Checked = True Then
-                customerData.KHK_VALUE = 3
-                RB_NC.Enabled = True
-                RB_NO.Enabled = True
-            Else
-                customerData.KHK_VALUE = 5
-                RB_NC.Enabled = True
-                RB_NO.Enabled = True
-            End If
-        Else
-            If RB_NC.Checked = True Then
-                customerData.KHK_VALUE = 2
-                RB_NC.Enabled = False
-                RB_NO.Enabled = False
-            Else
-                customerData.KHK_VALUE = 4
-                RB_NC.Enabled = False
-                RB_NO.Enabled = False
-            End If
-        End If
+        RB_NC.Enabled = CB_KHKenable.Checked
+        RB_NO.Enabled = CB_KHKenable.Checked
+        CB_DisableTemperatureControl.Enabled = CB_KHKenable.Checked
+        UpdateKHKValue()
     End Sub
 
     Private Sub NC_Button_CheckedChanged(sender As Object, e As EventArgs) Handles RB_NC.CheckedChanged
-        If CB_KHKenable.Checked = True Then
-            If RB_NC.Checked = True Then
-                customerData.KHK_VALUE = 3
-            End If
-        End If
+        If RB_NC.Checked Then UpdateKHKValue()
     End Sub
 
     Private Sub NO_Button_CheckedChanged(sender As Object, e As EventArgs) Handles RB_NO.CheckedChanged
-        If CB_KHKenable.Checked = True Then
-            If RB_NO.Checked = True Then
-                customerData.KHK_VALUE = 5
-            End If
+        If RB_NO.Checked Then UpdateKHKValue()
+    End Sub
+
+    Private Sub CB_DisableTemperatureControl_CheckedChanged(sender As Object, e As EventArgs) Handles CB_DisableTemperatureControl.CheckedChanged
+        UpdateKHKValue()
+
+        ' Mostra il messaggio di avviso SOLO quando la checkbox viene SPUNTATA
+        If CB_DisableTemperatureControl.Checked Then
+            MessageBox.Show("By ticking you are accepting your responsibility of keeping the return branch temperature not higher than 40 °C",
+                            "Responsibility Acceptance", MessageBoxButtons.OK, MessageBoxIcon.Warning)
         End If
     End Sub
 
@@ -1476,6 +1586,38 @@ Public Class Program_Form
             LoadXmlConfigFiles()
         End If
     End Sub
+
+    Private Sub BtnUpdateDateTime_Click(sender As Object, e As EventArgs) Handles BtnUpdateDateTime.Click
+        If Not SerialPort1.IsOpen Then
+            MessageBox.Show("Porta seriale non aperta.", "Errore", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            Return
+        End If
+
+        ' ── RESET COMPLETO PRIMA DI RIPARTIRE ──
+        updatingDateTime = False
+        dateTimeStep = 0
+        sentPcTimestamp = False
+
+        logBuffer.Clear()               ' buffer interno
+        tb_COMStrem.Clear()             ' TextBox di log
+        SerialPort1.DiscardInBuffer()   ' scarta byte pendenti
+        SerialPort1.DiscardOutBuffer()  ' scarta dati in uscita
+
+        ' ── GARANTISCO IL TIMER ATTIVO ──
+        If Not SerialDataTimer.Enabled Then SerialDataTimer.Start()
+
+        ' ── INIZIO SEQUENZA ──
+        updatingDateTime = True
+        dateTimeStep = 1
+        ' Invio 'A' **con newline** per sbloccare subito il firmware
+        InviaStringa("A")
+        ResetInactivityTimer()
+
+        BtnUpdateDateTime.Enabled = False
+
+    End Sub
+
+
 End Class
 
 

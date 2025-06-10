@@ -26,6 +26,24 @@ Partial Class Program_Form
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Program_Form))
         Me.SerialPort1 = New System.IO.Ports.SerialPort(Me.components)
         Me.TP_Configurator = New System.Windows.Forms.TabPage()
+        Me.Grp_DateTime = New System.Windows.Forms.GroupBox()
+        Me.BtnUpdateDateTime = New System.Windows.Forms.Button()
+        Me.lb_DateTimeTimer = New System.Windows.Forms.Label()
+        Me.Grp_KHK = New System.Windows.Forms.GroupBox()
+        Me.Label13 = New System.Windows.Forms.Label()
+        Me.Label10 = New System.Windows.Forms.Label()
+        Me.Label14 = New System.Windows.Forms.Label()
+        Me.CB_DisableTemperatureControl = New System.Windows.Forms.CheckBox()
+        Me.lb_KHKenable = New System.Windows.Forms.Label()
+        Me.lb_KHKContactBehavoir = New System.Windows.Forms.Label()
+        Me.Label23 = New System.Windows.Forms.Label()
+        Me.num_FK_Speed = New System.Windows.Forms.NumericUpDown()
+        Me.num_RK_Speed = New System.Windows.Forms.NumericUpDown()
+        Me.lb_KHKSetpoint = New System.Windows.Forms.Label()
+        Me.RB_NO = New System.Windows.Forms.RadioButton()
+        Me.Label12 = New System.Windows.Forms.Label()
+        Me.CB_KHKenable = New System.Windows.Forms.CheckBox()
+        Me.RB_NC = New System.Windows.Forms.RadioButton()
         Me.Grp_Preset = New System.Windows.Forms.GroupBox()
         Me.Lsb_FileConfig = New System.Windows.Forms.ListBox()
         Me.Btn_Rem = New System.Windows.Forms.Button()
@@ -71,17 +89,6 @@ Partial Class Program_Form
         Me.lb_HW_vers = New System.Windows.Forms.Label()
         Me.lb_SerialNumber = New System.Windows.Forms.Label()
         Me.Grp_SpeedConf = New System.Windows.Forms.GroupBox()
-        Me.Grp_KHK = New System.Windows.Forms.GroupBox()
-        Me.lb_KHKenable = New System.Windows.Forms.Label()
-        Me.lb_KHKContactBehavoir = New System.Windows.Forms.Label()
-        Me.Label23 = New System.Windows.Forms.Label()
-        Me.num_FK_Speed = New System.Windows.Forms.NumericUpDown()
-        Me.num_RK_Speed = New System.Windows.Forms.NumericUpDown()
-        Me.lb_KHKSetpoint = New System.Windows.Forms.Label()
-        Me.RB_NO = New System.Windows.Forms.RadioButton()
-        Me.Label12 = New System.Windows.Forms.Label()
-        Me.CB_KHKenable = New System.Windows.Forms.CheckBox()
-        Me.RB_NC = New System.Windows.Forms.RadioButton()
         Me.Label25 = New System.Windows.Forms.Label()
         Me.Label24 = New System.Windows.Forms.Label()
         Me.NumericUpDown6 = New System.Windows.Forms.NumericUpDown()
@@ -134,7 +141,12 @@ Partial Class Program_Form
         Me.Btn_SendData = New System.Windows.Forms.Button()
         Me.SerialDataTimer = New System.Windows.Forms.Timer(Me.components)
         Me.lb_QKvers = New System.Windows.Forms.Label()
+        Me.TimerDateTime = New System.Windows.Forms.Timer(Me.components)
         Me.TP_Configurator.SuspendLayout()
+        Me.Grp_DateTime.SuspendLayout()
+        Me.Grp_KHK.SuspendLayout()
+        CType(Me.num_FK_Speed, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.num_RK_Speed, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Grp_Preset.SuspendLayout()
         Me.Grp_UnitConfig.SuspendLayout()
         CType(Me.PcBx_Quark, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -149,9 +161,6 @@ Partial Class Program_Form
         CType(Me.num_BoostTimer, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Grp_UnitData.SuspendLayout()
         Me.Grp_SpeedConf.SuspendLayout()
-        Me.Grp_KHK.SuspendLayout()
-        CType(Me.num_FK_Speed, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.num_RK_Speed, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.NumericUpDown6, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.num_Speed3CAP, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.NumericUpDown5, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -174,6 +183,8 @@ Partial Class Program_Form
         '
         'TP_Configurator
         '
+        Me.TP_Configurator.Controls.Add(Me.Grp_DateTime)
+        Me.TP_Configurator.Controls.Add(Me.Grp_KHK)
         Me.TP_Configurator.Controls.Add(Me.Grp_Preset)
         Me.TP_Configurator.Controls.Add(Me.Btn_FirmwareUpdate)
         Me.TP_Configurator.Controls.Add(Me.lb_SaveProg)
@@ -198,6 +209,205 @@ Partial Class Program_Form
         Me.TP_Configurator.TabIndex = 0
         Me.TP_Configurator.Text = "Configurator"
         Me.TP_Configurator.UseVisualStyleBackColor = True
+        '
+        'Grp_DateTime
+        '
+        Me.Grp_DateTime.Controls.Add(Me.BtnUpdateDateTime)
+        Me.Grp_DateTime.Controls.Add(Me.lb_DateTimeTimer)
+        Me.Grp_DateTime.Location = New System.Drawing.Point(362, 345)
+        Me.Grp_DateTime.Name = "Grp_DateTime"
+        Me.Grp_DateTime.Size = New System.Drawing.Size(224, 50)
+        Me.Grp_DateTime.TabIndex = 18
+        Me.Grp_DateTime.TabStop = False
+        Me.Grp_DateTime.Text = "Date and Time"
+        Me.Grp_DateTime.Visible = False
+        '
+        'BtnUpdateDateTime
+        '
+        Me.BtnUpdateDateTime.Location = New System.Drawing.Point(143, 10)
+        Me.BtnUpdateDateTime.Name = "BtnUpdateDateTime"
+        Me.BtnUpdateDateTime.Size = New System.Drawing.Size(75, 34)
+        Me.BtnUpdateDateTime.TabIndex = 2
+        Me.BtnUpdateDateTime.Text = "Update DateTime"
+        Me.BtnUpdateDateTime.UseVisualStyleBackColor = True
+        '
+        'lb_DateTimeTimer
+        '
+        Me.lb_DateTimeTimer.AutoSize = True
+        Me.lb_DateTimeTimer.Location = New System.Drawing.Point(6, 25)
+        Me.lb_DateTimeTimer.Name = "lb_DateTimeTimer"
+        Me.lb_DateTimeTimer.Size = New System.Drawing.Size(94, 13)
+        Me.lb_DateTimeTimer.TabIndex = 17
+        Me.lb_DateTimeTimer.Text = "Now on the Quark"
+        '
+        'Grp_KHK
+        '
+        Me.Grp_KHK.Controls.Add(Me.Label13)
+        Me.Grp_KHK.Controls.Add(Me.Label10)
+        Me.Grp_KHK.Controls.Add(Me.Label14)
+        Me.Grp_KHK.Controls.Add(Me.CB_DisableTemperatureControl)
+        Me.Grp_KHK.Controls.Add(Me.lb_KHKenable)
+        Me.Grp_KHK.Controls.Add(Me.lb_KHKContactBehavoir)
+        Me.Grp_KHK.Controls.Add(Me.Label23)
+        Me.Grp_KHK.Controls.Add(Me.num_FK_Speed)
+        Me.Grp_KHK.Controls.Add(Me.num_RK_Speed)
+        Me.Grp_KHK.Controls.Add(Me.lb_KHKSetpoint)
+        Me.Grp_KHK.Controls.Add(Me.RB_NO)
+        Me.Grp_KHK.Controls.Add(Me.Label12)
+        Me.Grp_KHK.Controls.Add(Me.CB_KHKenable)
+        Me.Grp_KHK.Controls.Add(Me.RB_NC)
+        Me.Grp_KHK.Location = New System.Drawing.Point(14, 401)
+        Me.Grp_KHK.Name = "Grp_KHK"
+        Me.Grp_KHK.Size = New System.Drawing.Size(572, 74)
+        Me.Grp_KHK.TabIndex = 14
+        Me.Grp_KHK.TabStop = False
+        Me.Grp_KHK.Text = "KHK"
+        '
+        'Label13
+        '
+        Me.Label13.AutoSize = True
+        Me.Label13.Location = New System.Drawing.Point(206, 22)
+        Me.Label13.Name = "Label13"
+        Me.Label13.Size = New System.Drawing.Size(39, 13)
+        Me.Label13.TabIndex = 14
+        Me.Label13.Text = "Return"
+        '
+        'Label10
+        '
+        Me.Label10.AutoSize = True
+        Me.Label10.Location = New System.Drawing.Point(327, 21)
+        Me.Label10.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.Label10.Name = "Label10"
+        Me.Label10.Size = New System.Drawing.Size(141, 13)
+        Me.Label10.TabIndex = 14
+        Me.Label10.Text = "Disable Temperature Control"
+        '
+        'Label14
+        '
+        Me.Label14.AutoSize = True
+        Me.Label14.Location = New System.Drawing.Point(129, 22)
+        Me.Label14.Name = "Label14"
+        Me.Label14.Size = New System.Drawing.Size(39, 13)
+        Me.Label14.TabIndex = 15
+        Me.Label14.Text = "Supply"
+        '
+        'CB_DisableTemperatureControl
+        '
+        Me.CB_DisableTemperatureControl.AutoSize = True
+        Me.CB_DisableTemperatureControl.Location = New System.Drawing.Point(308, 21)
+        Me.CB_DisableTemperatureControl.Margin = New System.Windows.Forms.Padding(2)
+        Me.CB_DisableTemperatureControl.Name = "CB_DisableTemperatureControl"
+        Me.CB_DisableTemperatureControl.Size = New System.Drawing.Size(15, 14)
+        Me.CB_DisableTemperatureControl.TabIndex = 13
+        Me.CB_DisableTemperatureControl.UseVisualStyleBackColor = True
+        '
+        'lb_KHKenable
+        '
+        Me.lb_KHKenable.AutoSize = True
+        Me.lb_KHKenable.Location = New System.Drawing.Point(36, 22)
+        Me.lb_KHKenable.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.lb_KHKenable.Name = "lb_KHKenable"
+        Me.lb_KHKenable.Size = New System.Drawing.Size(65, 13)
+        Me.lb_KHKenable.TabIndex = 5
+        Me.lb_KHKenable.Text = "Enable KHK"
+        '
+        'lb_KHKContactBehavoir
+        '
+        Me.lb_KHKContactBehavoir.AutoSize = True
+        Me.lb_KHKContactBehavoir.Location = New System.Drawing.Point(303, 48)
+        Me.lb_KHKContactBehavoir.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.lb_KHKContactBehavoir.Name = "lb_KHKContactBehavoir"
+        Me.lb_KHKContactBehavoir.Size = New System.Drawing.Size(89, 13)
+        Me.lb_KHKContactBehavoir.TabIndex = 12
+        Me.lb_KHKContactBehavoir.Text = "Contact Behavior"
+        '
+        'Label23
+        '
+        Me.Label23.AutoSize = True
+        Me.Label23.Location = New System.Drawing.Point(258, 46)
+        Me.Label23.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.Label23.Name = "Label23"
+        Me.Label23.Size = New System.Drawing.Size(15, 13)
+        Me.Label23.TabIndex = 9
+        Me.Label23.Text = "%"
+        '
+        'num_FK_Speed
+        '
+        Me.num_FK_Speed.Enabled = False
+        Me.num_FK_Speed.Location = New System.Drawing.Point(128, 44)
+        Me.num_FK_Speed.Margin = New System.Windows.Forms.Padding(2)
+        Me.num_FK_Speed.Minimum = New Decimal(New Integer() {20, 0, 0, 0})
+        Me.num_FK_Speed.Name = "num_FK_Speed"
+        Me.num_FK_Speed.Size = New System.Drawing.Size(53, 20)
+        Me.num_FK_Speed.TabIndex = 8
+        Me.num_FK_Speed.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        Me.num_FK_Speed.Value = New Decimal(New Integer() {20, 0, 0, 0})
+        '
+        'num_RK_Speed
+        '
+        Me.num_RK_Speed.Enabled = False
+        Me.num_RK_Speed.Location = New System.Drawing.Point(206, 44)
+        Me.num_RK_Speed.Margin = New System.Windows.Forms.Padding(2)
+        Me.num_RK_Speed.Minimum = New Decimal(New Integer() {20, 0, 0, 0})
+        Me.num_RK_Speed.Name = "num_RK_Speed"
+        Me.num_RK_Speed.Size = New System.Drawing.Size(51, 20)
+        Me.num_RK_Speed.TabIndex = 8
+        Me.num_RK_Speed.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        Me.num_RK_Speed.Value = New Decimal(New Integer() {20, 0, 0, 0})
+        '
+        'lb_KHKSetpoint
+        '
+        Me.lb_KHKSetpoint.AutoSize = True
+        Me.lb_KHKSetpoint.Location = New System.Drawing.Point(49, 48)
+        Me.lb_KHKSetpoint.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.lb_KHKSetpoint.Name = "lb_KHKSetpoint"
+        Me.lb_KHKSetpoint.Size = New System.Drawing.Size(75, 13)
+        Me.lb_KHKSetpoint.TabIndex = 12
+        Me.lb_KHKSetpoint.Text = "KHK Set Point"
+        '
+        'RB_NO
+        '
+        Me.RB_NO.AutoSize = True
+        Me.RB_NO.Location = New System.Drawing.Point(435, 46)
+        Me.RB_NO.Margin = New System.Windows.Forms.Padding(2)
+        Me.RB_NO.Name = "RB_NO"
+        Me.RB_NO.Size = New System.Drawing.Size(41, 17)
+        Me.RB_NO.TabIndex = 7
+        Me.RB_NO.TabStop = True
+        Me.RB_NO.Text = "NO"
+        Me.RB_NO.UseVisualStyleBackColor = True
+        '
+        'Label12
+        '
+        Me.Label12.AutoSize = True
+        Me.Label12.Location = New System.Drawing.Point(181, 46)
+        Me.Label12.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.Label12.Name = "Label12"
+        Me.Label12.Size = New System.Drawing.Size(15, 13)
+        Me.Label12.TabIndex = 9
+        Me.Label12.Text = "%"
+        '
+        'CB_KHKenable
+        '
+        Me.CB_KHKenable.AutoSize = True
+        Me.CB_KHKenable.Location = New System.Drawing.Point(17, 22)
+        Me.CB_KHKenable.Margin = New System.Windows.Forms.Padding(2)
+        Me.CB_KHKenable.Name = "CB_KHKenable"
+        Me.CB_KHKenable.Size = New System.Drawing.Size(15, 14)
+        Me.CB_KHKenable.TabIndex = 4
+        Me.CB_KHKenable.UseVisualStyleBackColor = True
+        '
+        'RB_NC
+        '
+        Me.RB_NC.AutoSize = True
+        Me.RB_NC.Location = New System.Drawing.Point(394, 46)
+        Me.RB_NC.Margin = New System.Windows.Forms.Padding(2)
+        Me.RB_NC.Name = "RB_NC"
+        Me.RB_NC.Size = New System.Drawing.Size(40, 17)
+        Me.RB_NC.TabIndex = 6
+        Me.RB_NC.TabStop = True
+        Me.RB_NC.Text = "NC"
+        Me.RB_NC.UseVisualStyleBackColor = True
         '
         'Grp_Preset
         '
@@ -665,7 +875,6 @@ Partial Class Program_Form
         '
         'Grp_SpeedConf
         '
-        Me.Grp_SpeedConf.Controls.Add(Me.Grp_KHK)
         Me.Grp_SpeedConf.Controls.Add(Me.Label25)
         Me.Grp_SpeedConf.Controls.Add(Me.Label24)
         Me.Grp_SpeedConf.Controls.Add(Me.NumericUpDown6)
@@ -702,137 +911,10 @@ Partial Class Program_Form
         Me.Grp_SpeedConf.Controls.Add(Me.lb_Speed1FSC)
         Me.Grp_SpeedConf.Location = New System.Drawing.Point(14, 170)
         Me.Grp_SpeedConf.Name = "Grp_SpeedConf"
-        Me.Grp_SpeedConf.Size = New System.Drawing.Size(342, 306)
+        Me.Grp_SpeedConf.Size = New System.Drawing.Size(342, 231)
         Me.Grp_SpeedConf.TabIndex = 7
         Me.Grp_SpeedConf.TabStop = False
         Me.Grp_SpeedConf.Text = "Speed Configuration"
-        '
-        'Grp_KHK
-        '
-        Me.Grp_KHK.Controls.Add(Me.lb_KHKenable)
-        Me.Grp_KHK.Controls.Add(Me.lb_KHKContactBehavoir)
-        Me.Grp_KHK.Controls.Add(Me.Label23)
-        Me.Grp_KHK.Controls.Add(Me.num_FK_Speed)
-        Me.Grp_KHK.Controls.Add(Me.num_RK_Speed)
-        Me.Grp_KHK.Controls.Add(Me.lb_KHKSetpoint)
-        Me.Grp_KHK.Controls.Add(Me.RB_NO)
-        Me.Grp_KHK.Controls.Add(Me.Label12)
-        Me.Grp_KHK.Controls.Add(Me.CB_KHKenable)
-        Me.Grp_KHK.Controls.Add(Me.RB_NC)
-        Me.Grp_KHK.Location = New System.Drawing.Point(6, 226)
-        Me.Grp_KHK.Name = "Grp_KHK"
-        Me.Grp_KHK.Size = New System.Drawing.Size(330, 74)
-        Me.Grp_KHK.TabIndex = 14
-        Me.Grp_KHK.TabStop = False
-        Me.Grp_KHK.Text = "KHK"
-        '
-        'lb_KHKenable
-        '
-        Me.lb_KHKenable.AutoSize = True
-        Me.lb_KHKenable.Location = New System.Drawing.Point(22, 21)
-        Me.lb_KHKenable.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
-        Me.lb_KHKenable.Name = "lb_KHKenable"
-        Me.lb_KHKenable.Size = New System.Drawing.Size(65, 13)
-        Me.lb_KHKenable.TabIndex = 5
-        Me.lb_KHKenable.Text = "Enable KHK"
-        '
-        'lb_KHKContactBehavoir
-        '
-        Me.lb_KHKContactBehavoir.AutoSize = True
-        Me.lb_KHKContactBehavoir.Location = New System.Drawing.Point(125, 22)
-        Me.lb_KHKContactBehavoir.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
-        Me.lb_KHKContactBehavoir.Name = "lb_KHKContactBehavoir"
-        Me.lb_KHKContactBehavoir.Size = New System.Drawing.Size(89, 13)
-        Me.lb_KHKContactBehavoir.TabIndex = 12
-        Me.lb_KHKContactBehavoir.Text = "Contact Behavior"
-        '
-        'Label23
-        '
-        Me.Label23.AutoSize = True
-        Me.Label23.Location = New System.Drawing.Point(254, 48)
-        Me.Label23.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
-        Me.Label23.Name = "Label23"
-        Me.Label23.Size = New System.Drawing.Size(15, 13)
-        Me.Label23.TabIndex = 9
-        Me.Label23.Text = "%"
-        '
-        'num_FK_Speed
-        '
-        Me.num_FK_Speed.Enabled = False
-        Me.num_FK_Speed.Location = New System.Drawing.Point(124, 46)
-        Me.num_FK_Speed.Margin = New System.Windows.Forms.Padding(2)
-        Me.num_FK_Speed.Minimum = New Decimal(New Integer() {20, 0, 0, 0})
-        Me.num_FK_Speed.Name = "num_FK_Speed"
-        Me.num_FK_Speed.Size = New System.Drawing.Size(53, 20)
-        Me.num_FK_Speed.TabIndex = 8
-        Me.num_FK_Speed.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
-        Me.num_FK_Speed.Value = New Decimal(New Integer() {20, 0, 0, 0})
-        '
-        'num_RK_Speed
-        '
-        Me.num_RK_Speed.Enabled = False
-        Me.num_RK_Speed.Location = New System.Drawing.Point(202, 46)
-        Me.num_RK_Speed.Margin = New System.Windows.Forms.Padding(2)
-        Me.num_RK_Speed.Minimum = New Decimal(New Integer() {20, 0, 0, 0})
-        Me.num_RK_Speed.Name = "num_RK_Speed"
-        Me.num_RK_Speed.Size = New System.Drawing.Size(51, 20)
-        Me.num_RK_Speed.TabIndex = 8
-        Me.num_RK_Speed.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
-        Me.num_RK_Speed.Value = New Decimal(New Integer() {20, 0, 0, 0})
-        '
-        'lb_KHKSetpoint
-        '
-        Me.lb_KHKSetpoint.AutoSize = True
-        Me.lb_KHKSetpoint.Location = New System.Drawing.Point(0, 47)
-        Me.lb_KHKSetpoint.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
-        Me.lb_KHKSetpoint.Name = "lb_KHKSetpoint"
-        Me.lb_KHKSetpoint.Size = New System.Drawing.Size(75, 13)
-        Me.lb_KHKSetpoint.TabIndex = 12
-        Me.lb_KHKSetpoint.Text = "KHK Set Point"
-        '
-        'RB_NO
-        '
-        Me.RB_NO.AutoSize = True
-        Me.RB_NO.Location = New System.Drawing.Point(257, 21)
-        Me.RB_NO.Margin = New System.Windows.Forms.Padding(2)
-        Me.RB_NO.Name = "RB_NO"
-        Me.RB_NO.Size = New System.Drawing.Size(41, 17)
-        Me.RB_NO.TabIndex = 7
-        Me.RB_NO.TabStop = True
-        Me.RB_NO.Text = "NO"
-        Me.RB_NO.UseVisualStyleBackColor = True
-        '
-        'Label12
-        '
-        Me.Label12.AutoSize = True
-        Me.Label12.Location = New System.Drawing.Point(177, 48)
-        Me.Label12.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
-        Me.Label12.Name = "Label12"
-        Me.Label12.Size = New System.Drawing.Size(15, 13)
-        Me.Label12.TabIndex = 9
-        Me.Label12.Text = "%"
-        '
-        'CB_KHKenable
-        '
-        Me.CB_KHKenable.AutoSize = True
-        Me.CB_KHKenable.Location = New System.Drawing.Point(3, 21)
-        Me.CB_KHKenable.Margin = New System.Windows.Forms.Padding(2)
-        Me.CB_KHKenable.Name = "CB_KHKenable"
-        Me.CB_KHKenable.Size = New System.Drawing.Size(15, 14)
-        Me.CB_KHKenable.TabIndex = 4
-        Me.CB_KHKenable.UseVisualStyleBackColor = True
-        '
-        'RB_NC
-        '
-        Me.RB_NC.AutoSize = True
-        Me.RB_NC.Location = New System.Drawing.Point(216, 21)
-        Me.RB_NC.Margin = New System.Windows.Forms.Padding(2)
-        Me.RB_NC.Name = "RB_NC"
-        Me.RB_NC.Size = New System.Drawing.Size(40, 17)
-        Me.RB_NC.TabIndex = 6
-        Me.RB_NC.TabStop = True
-        Me.RB_NC.Text = "NC"
-        Me.RB_NC.UseVisualStyleBackColor = True
         '
         'Label25
         '
@@ -1330,11 +1412,15 @@ Partial Class Program_Form
         'lb_QKvers
         '
         Me.lb_QKvers.AutoSize = True
-        Me.lb_QKvers.Location = New System.Drawing.Point(884, 9)
+        Me.lb_QKvers.Location = New System.Drawing.Point(953, 9)
         Me.lb_QKvers.Name = "lb_QKvers"
         Me.lb_QKvers.Size = New System.Drawing.Size(96, 13)
         Me.lb_QKvers.TabIndex = 8
         Me.lb_QKvers.Text = "Software Version : "
+        '
+        'TimerDateTime
+        '
+        Me.TimerDateTime.Interval = 1000
         '
         'Program_Form
         '
@@ -1351,6 +1437,12 @@ Partial Class Program_Form
         Me.Text = "Avensys Quark Configurator"
         Me.TP_Configurator.ResumeLayout(False)
         Me.TP_Configurator.PerformLayout()
+        Me.Grp_DateTime.ResumeLayout(False)
+        Me.Grp_DateTime.PerformLayout()
+        Me.Grp_KHK.ResumeLayout(False)
+        Me.Grp_KHK.PerformLayout()
+        CType(Me.num_FK_Speed, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.num_RK_Speed, System.ComponentModel.ISupportInitialize).EndInit()
         Me.Grp_Preset.ResumeLayout(False)
         Me.Grp_UnitConfig.ResumeLayout(False)
         Me.Grp_UnitConfig.PerformLayout()
@@ -1369,10 +1461,6 @@ Partial Class Program_Form
         Me.Grp_UnitData.PerformLayout()
         Me.Grp_SpeedConf.ResumeLayout(False)
         Me.Grp_SpeedConf.PerformLayout()
-        Me.Grp_KHK.ResumeLayout(False)
-        Me.Grp_KHK.PerformLayout()
-        CType(Me.num_FK_Speed, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.num_RK_Speed, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.NumericUpDown6, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.num_Speed3CAP, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.NumericUpDown5, System.ComponentModel.ISupportInitialize).EndInit()
@@ -1503,4 +1591,12 @@ Partial Class Program_Form
     Friend WithEvents Btn_Rem As Button
     Friend WithEvents Btn_Add As Button
     Friend WithEvents Lsb_FileConfig As ListBox
+    Friend WithEvents Label13 As Label
+    Friend WithEvents Label10 As Label
+    Friend WithEvents Label14 As Label
+    Friend WithEvents CB_DisableTemperatureControl As CheckBox
+    Friend WithEvents lb_DateTimeTimer As Label
+    Friend WithEvents BtnUpdateDateTime As Button
+    Friend WithEvents TimerDateTime As Timer
+    Friend WithEvents Grp_DateTime As GroupBox
 End Class
