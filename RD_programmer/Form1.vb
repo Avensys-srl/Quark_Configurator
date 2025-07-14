@@ -30,6 +30,14 @@ Public Class Program_Form
     Private updatingDateTime As Boolean = False
     Private dateTimeStep As Integer = 0
     Private sentPcTimestamp As Boolean = False
+    Private liveDataBuffer As New List(Of String)
+    Private readingLiveData As Boolean = False
+    Private Const LiveStartMarker As String = "------ START READ LIVE DATA ------"
+    Private Const LiveEndMarker As String = "------ END READ LIVE DATA ------"
+
+    Private WithEvents LiveDataTimer As New Timer() With {
+    .Interval = 3000  ' 3 secondi
+}
 
     Private Function GetCurrentApplicationData() As CustomerData
         Dim dataToReturn As New CustomerData() ' Creiamo una nuova istanza per il salvataggio
@@ -83,6 +91,8 @@ Public Class Program_Form
             dataToReturn.IMBALANCE_ENABLE = 0
         End If
 
+        dataToReturn.SMOKE_VALUE = Me.customerData.SMOKE_VALUE
+
         ' --- Popolamento della proprietà 'Configuration' (LEFT/RIGHT) ---
         If RB_left.Checked Then
             dataToReturn.Configuration = "LEFT" ' O un identificatore più strutturato se necessario
@@ -91,6 +101,11 @@ Public Class Program_Form
         Else
             dataToReturn.Configuration = String.Empty ' O un default se nessuno è selezionato
         End If
+
+        dataToReturn.IAQ_Reference = Me.customerData.IAQ_Reference
+        dataToReturn.IAQ_Imbalance = Me.customerData.IAQ_Imbalance
+
+
 
         ' --- Popolamento dei dati "read-only" (Versioni, Seriale) da Me.customerData ---
         ' Questi valori sono tipicamente letti dal dispositivo e non modificati dall'utente per il salvataggio.
@@ -261,6 +276,7 @@ Public Class Program_Form
             CB_KHKenable.Checked = False
         End If
 
+
         ' Estrai lo stato del Comportamento Contatto (Bit 1)
         If (customerData.KHK_VALUE And &H2) = &H2 Then
             RB_NC.Checked = True
@@ -286,27 +302,39 @@ Public Class Program_Form
         RB_NO.Enabled = CB_KHKenable.Checked
         CB_DisableTemperatureControl.Enabled = CB_KHKenable.Checked
 
-        If (customerData.IMBALANCESetPoint1 < -70 AndAlso customerData.IMBALANCESetPoint1 > 70) Then
+        If (customerData.SMOKE_VALUE = 0) Then
+            Invoke(Sub() CB_SmokeEnable.Checked = False)
+        ElseIf (customerData.SMOKE_VALUE = 1) Then
+            Invoke(Sub() CB_SmokeEnable.Checked = True)
+            Invoke(Sub() RB_SmokeNC.Checked = True)
+            Invoke(Sub() RB_SmokeNO.Checked = False)
+        Else
+            customerData.SMOKE_VALUE = 2
+            Invoke(Sub() CB_SmokeEnable.Checked = True)
+            Invoke(Sub() RB_SmokeNC.Checked = False)
+            Invoke(Sub() RB_SmokeNO.Checked = True)
+        End If
+
+        UpdateSmokeControls()
+
+        If (customerData.IMBALANCESetPoint1 < -70 OrElse customerData.IMBALANCESetPoint1 > 70) Then
             Invoke(Sub() customerData.IMBALANCESetPoint1 = 0)
         End If
 
-        If (customerData.IMBALANCESetPoint2 < -70 AndAlso customerData.IMBALANCESetPoint2 > 70) Then
+        If (customerData.IMBALANCESetPoint2 < -70 OrElse customerData.IMBALANCESetPoint2 > 70) Then
             Invoke(Sub() customerData.IMBALANCESetPoint2 = 0)
         End If
 
-        If (customerData.IMBALANCESetPoint3 < -70 AndAlso customerData.IMBALANCESetPoint3 > 70) Then
+        If (customerData.IMBALANCESetPoint3 < -70 OrElse customerData.IMBALANCESetPoint3 > 70) Then
             Invoke(Sub() customerData.IMBALANCESetPoint3 = 0)
         End If
 
-        If customerData.IMBALANCE_ENABLE = 1 Then
-            CB_ImbEnable.Checked = True
-        Else
-            CB_ImbEnable.Checked = False
-        End If
+        CB_ImbEnable.Checked = (customerData.IMBALANCE_ENABLE = 1)
 
-        If (customerData.KHKIMBALANCESetPoint < -70 AndAlso customerData.KHKIMBALANCESetPoint > 70) Then
+        If (customerData.KHKIMBALANCESetPoint < -70 OrElse customerData.KHKIMBALANCESetPoint > 70) Then
             Invoke(Sub() customerData.KHKIMBALANCESetPoint = 0)
         End If
+
 
 
         'INIZIO Setting Velocità
@@ -314,6 +342,7 @@ Public Class Program_Form
         Dim velocitaCalcolate2 = customerData.GetCalculatedSpeeds(2)
         Dim velocitaCalcolate3 = customerData.GetCalculatedSpeeds(3)
         Dim velocitaCalcolateK = customerData.GetCalculatedSpeeds(0)
+        Dim velocitaCalcolateIAQ = customerData.GetCalculatedSpeeds(4)
 
 
         If customerData.FSC_CAF_Speed1 > 24 Then
@@ -351,6 +380,16 @@ Public Class Program_Form
             Invoke(Sub() num_RK_Speed.Value = 100)
             Invoke(Sub() customerData.KHK_SET_POINT = 100)
         End If
+
+        If customerData.IAQ_Reference > 25 And customerData.IAQ_Reference <= 100 Then
+            Invoke(Sub() num_F_IAQSpeed.Value = velocitaCalcolateIAQ.SpeedF)
+            Invoke(Sub() num_R_IAQSpeed.Value = velocitaCalcolateIAQ.SpeedR)
+        Else
+            Invoke(Sub() num_F_IAQSpeed.Value = 100)
+            Invoke(Sub() num_R_IAQSpeed.Value = 100)
+            Invoke(Sub() customerData.IAQ_Reference = 100)
+        End If
+
         ' FINE Setting Velocità
 
 
@@ -365,6 +404,12 @@ Public Class Program_Form
             Invoke(Sub() lb_SW_vers.Text = "Software Version: " + customerData.VersionSW)
         Else
             Invoke(Sub() lb_SW_vers.Text = "Software Version:")
+        End If
+
+        If customerData.Accessories IsNot Nothing AndAlso customerData.Accessories.Length <> 0 Then
+            Invoke(Sub() TB_acc.Text = customerData.Accessories)
+        Else
+            Invoke(Sub() TB_acc.Text = "-----")
         End If
 
         If customerData.SerialNumber IsNot Nothing AndAlso customerData.SerialNumber.Length <> 0 Then
@@ -492,6 +537,9 @@ Public Class Program_Form
         Grp_KHK.Visible = isVisible
         Grp_Preset.Visible = isVisible
         Grp_DateTime.Visible = isVisible
+        Grp_Smoke.Visible = isVisible
+        Grp_Live.Visible = isVisible
+        Grp_Acc.Visible = isVisible
         LoadXmlConfigFiles()
     End Sub
 
@@ -567,6 +615,11 @@ Public Class Program_Form
         num_F_Speed1.Enabled = False
         num_F_Speed2.Enabled = False
         num_F_Speed3.Enabled = False
+        num_F_IAQSpeed.Enabled = False
+        num_R_Speed1.Enabled = False
+        num_R_Speed2.Enabled = False
+        num_R_Speed3.Enabled = False
+        num_R_IAQSpeed.Enabled = False
         num_Speed1CAP.Enabled = False
         num_Speed2CAP.Enabled = False
         num_Speed3CAP.Enabled = False
@@ -580,6 +633,7 @@ Public Class Program_Form
         num_SWSetpoint.Enabled = False
         num_SWSetpoint.Maximum = 99
         updatingDateTime = False
+        CB_SmokeEnable.Checked = False
         customerData.Clear()
         Invoke(Sub() tb_COMStrem.Text = String.Empty)
         UpdateFormControls()
@@ -754,7 +808,7 @@ Public Class Program_Form
                         ResetInactivityTimer()
                     End If
                 Case 17
-                    If tb_COMStrem.Text.Contains("Please set KHK configuration") Then
+                    If tb_COMStrem.Text.Contains("Please set KHK conf. (2=Ds NC, 3=En NC, 4=Ds No, 5=Ds NC ) : ") Then
                         InviaStringa(customerData.KHK_VALUE.ToString())
                         writeStep += 1
                         ResetInactivityTimer()
@@ -795,6 +849,24 @@ Public Class Program_Form
                         writeStep += 1
                         ResetInactivityTimer()
                     End If
+                Case 24
+                    If tb_COMStrem.Text.Contains("Please set IMBALANCE IAQ value  (min:-70, max:70) :") Then
+                        InviaStringa(customerData.IAQ_Imbalance.ToString())
+                        writeStep += 1
+                        ResetInactivityTimer()
+                    End If
+                Case 25
+                    If tb_COMStrem.Text.Contains("Please set IAQ value  (min:20, max:100) :") Then
+                        InviaStringa(customerData.IAQ_Reference.ToString())
+                        writeStep += 1
+                        ResetInactivityTimer()
+                    End If
+                Case 26
+                    If tb_COMStrem.Text.Contains("Please set Smoke conf. (1=En NC, 2=En NO, 0=Dis) :") Then
+                        InviaStringa(customerData.SMOKE_VALUE.ToString())
+                        writeStep += 1
+                        ResetInactivityTimer()
+                    End If
                 Case Else
                     Await Task.Delay(6000)
                     isWriting = False
@@ -807,7 +879,7 @@ Public Class Program_Form
             End Select
 
             If (isWriting) Then
-                savestep = (writeStep - 1) / 23 * 100
+                savestep = (writeStep - 1) / 26 * 100
                 PB_SaveData.Value = savestep
                 lb_SaveProg.Text = savestep.ToString() + " %"
             End If
@@ -847,9 +919,11 @@ Public Class Program_Form
         num_F_Speed1.Enabled = True
         num_F_Speed2.Enabled = True
         num_F_Speed3.Enabled = True
+        num_F_IAQSpeed.Enabled = True
         num_R_Speed1.Enabled = True
         num_R_Speed2.Enabled = True
         num_R_Speed3.Enabled = True
+        num_R_IAQSpeed.Enabled = True
         num_BoostTimer.Enabled = True
         num_FilterTimer.Enabled = True
         num_RHSetpoint.Enabled = True
@@ -881,6 +955,45 @@ Public Class Program_Form
 
                 ' Rimuovi la riga dal buffer
                 logBuffer.Remove(0, lineEndIndex + 1)
+
+                ' Start/End LIVE DATA
+                If completeLine = LiveStartMarker Then
+                    readingLiveData = True
+                    liveDataBuffer.Clear()
+                    Continue While
+                ElseIf completeLine = LiveEndMarker Then
+                    readingLiveData = False
+                    ' Parse e aggiorna UI
+                    Dim live = ParseLiveDataBlock(liveDataBuffer)
+
+                    ' 3) se live contiene dati validi, aggiorna la UI
+                    If live IsNot Nothing Then
+                        If Me.IsHandleCreated AndAlso Not Me.IsDisposed Then
+                            Me.Invoke(Sub()
+                                          ' Esempio: aggiorna due label
+                                          lblTFresh.Text = $"{live.TemperatureFresh:F1} °C"
+                                          lblRFresh.Text = $"{live.HumidityRight:F0} %"
+                                          lblTReturn.Text = $"{live.TemperatureReturn:F1} °C"
+                                          lblRReturn.Text = $"{live.HumidityLeft:F0} %"
+                                          lblTSupply.Text = $"{live.TemperatureSupply:F1} °C"
+                                          lblTExhaust.Text = $"{live.TemperatureExhaust:F1} °C"
+                                          lblVSupply.Text = $"{live.FeedbackVMotorF:F1} V"
+                                          lblRPMSupply.Text = $"{live.RPMMotorF:D4} rpm"
+                                          lblVReturn.Text = $"{live.FeedbackVMotorR:F1} V"
+                                          lblRPMReturn.Text = $"{live.RPMMotorR:D4} rpm"
+                                          TB_alarm.Text = live.GetAlarmCodes
+                                      End Sub)
+                        End If
+                    End If
+
+                    liveDataBuffer.Clear()
+                    Continue While
+                ElseIf readingLiveData Then
+                    liveDataBuffer.Add(completeLine)
+                    Continue While
+                End If
+
+
 
                 ' Se è la riga di data/ora, la parsifico qui
                 If completeLine.StartsWith("Data:") Then
@@ -1019,6 +1132,8 @@ Public Class Program_Form
                         customerData.VersionSW = value
                     Case "2.05-Serial Number"
                         customerData.SerialNumber = value
+                    Case "2.14-PreConf.Acces"
+                        customerData.Accessories = value
                     Case "FSC_CAF speed 1"
                         Integer.TryParse(numericValue, customerData.FSC_CAF_Speed1)
                     Case "FSC_CAF speed 2"
@@ -1072,6 +1187,16 @@ Public Class Program_Form
                         SByte.TryParse(numericValue, customerData.IMBALANCESetPoint2)
                     Case "IMBALANCE 3 Set Point"
                         SByte.TryParse(numericValue, customerData.IMBALANCESetPoint3)
+                    Case "IAQ Set Point"
+                        Integer.TryParse(numericValue, customerData.IAQ_Reference)
+                    Case "IMBALANCE IAQ"
+                        SByte.TryParse(numericValue, customerData.IAQ_Imbalance)
+                    Case "INPUT 2"
+                        SByte.TryParse(value, numero)
+                        If numero < 0 AndAlso numero > 2 Then
+                            numero = 0
+                        End If
+                        customerData.SMOKE_VALUE = numero
                 End Select
             End If
         Next
@@ -1171,15 +1296,33 @@ Public Class Program_Form
 
     End Sub
 
+    Private Sub num_F_IAQSpeed_ValueChanged(sender As Object, e As EventArgs) Handles num_F_IAQSpeed.ValueChanged
+        If CB_ImbEnable.Checked Then
+            customerData.UpdateSpeedSettings(num_F_IAQSpeed.Value, num_R_IAQSpeed.Value, 4)
+        Else
+            num_R_IAQSpeed.Value = num_F_IAQSpeed.Value
+            customerData.UpdateSpeedSettings(num_F_IAQSpeed.Value, num_R_IAQSpeed.Value, 4)
+        End If
+    End Sub
 
-    Private Sub Speed1CAP_ValueChanged(sender As Object, e As EventArgs) Handles num_Speed1CAP.ValueChanged, NumericUpDown4.ValueChanged
+    Private Sub num_R_IAQSpeed_ValueChanged(sender As Object, e As EventArgs) Handles num_R_IAQSpeed.ValueChanged
+        If CB_ImbEnable.Checked Then
+            customerData.UpdateSpeedSettings(num_F_IAQSpeed.Value, num_R_IAQSpeed.Value, 4)
+        Else
+            num_F_IAQSpeed.Value = num_R_IAQSpeed.Value
+            customerData.UpdateSpeedSettings(num_F_IAQSpeed.Value, num_R_IAQSpeed.Value, 4)
+        End If
+    End Sub
+
+
+    Private Sub Speed1CAP_ValueChanged(sender As Object, e As EventArgs) Handles num_Speed1CAP.ValueChanged
 
         If num_Speed1CAP.Value > num_Speed2CAP.Value Then
             num_Speed2CAP.Value = num_Speed1CAP.Value
         End If
     End Sub
 
-    Private Sub Speed2CAP_ValueChanged(sender As Object, e As EventArgs) Handles num_Speed2CAP.ValueChanged, NumericUpDown5.ValueChanged
+    Private Sub Speed2CAP_ValueChanged(sender As Object, e As EventArgs) Handles num_Speed2CAP.ValueChanged
 
         If num_Speed2CAP.Value > num_Speed3CAP.Value Then
             num_Speed3CAP.Value = num_Speed2CAP.Value
@@ -1189,7 +1332,7 @@ Public Class Program_Form
         End If
     End Sub
 
-    Private Sub Speed3CAP_ValueChanged(sender As Object, e As EventArgs) Handles num_Speed3CAP.ValueChanged, NumericUpDown6.ValueChanged
+    Private Sub Speed3CAP_ValueChanged(sender As Object, e As EventArgs) Handles num_Speed3CAP.ValueChanged
 
         If num_Speed3CAP.Value < num_Speed2CAP.Value Then
             num_Speed2CAP.Value = num_Speed3CAP.Value
@@ -1223,6 +1366,22 @@ Public Class Program_Form
         End If
 
         customerData.KHK_VALUE = khkValueTemp
+    End Sub
+
+    Private Sub UpdateSmokeValue()
+        Dim SmokeValueTemp As Byte = 0
+
+        If Not CB_SmokeEnable.Checked Then
+            SmokeValueTemp = 0
+        Else
+            If RB_SmokeNC.Checked Then
+                SmokeValueTemp = 1
+            Else
+                SmokeValueTemp = 2
+            End If
+        End If
+
+        customerData.SMOKE_VALUE = SmokeValueTemp
     End Sub
 
     Private Sub KHK_ENABLE_CheckedChanged(sender As Object, e As EventArgs) Handles CB_KHKenable.CheckedChanged
@@ -1262,10 +1421,12 @@ Public Class Program_Form
             num_F_Speed2.Value = customerData.FSC_CAF_Speed2
             num_F_Speed3.Value = customerData.FSC_CAF_Speed3
             num_FK_Speed.Value = customerData.KHK_SET_POINT
+            num_F_IAQSpeed.Value = customerData.IAQ_Reference
             num_R_Speed1.Value = num_F_Speed1.Value
             num_R_Speed2.Value = num_F_Speed2.Value
             num_R_Speed3.Value = num_F_Speed3.Value
             num_RK_Speed.Value = num_FK_Speed.Value
+            num_R_IAQSpeed.Value = num_F_IAQSpeed.Value
         End If
 
     End Sub
@@ -1504,14 +1665,20 @@ Public Class Program_Form
                 Me.customerData.IMBALANCE_ENABLE = loadedConfigData.IMBALANCE_ENABLE
                 Me.customerData.IMBALANCESetPoint1 = loadedConfigData.IMBALANCESetPoint1
                 Me.customerData.IMBALANCESetPoint2 = loadedConfigData.IMBALANCESetPoint2
-                Me.customerData.IMBALANCESetPoint3 = loadedConfigData.IMBALANCESetPoint3
+            Me.customerData.IMBALANCESetPoint3 = loadedConfigData.IMBALANCESetPoint3
 
-                ' --- Applica condizionatamente i dati specifici della macchina ---
-                ' Questi verranno aggiornati solo se il file di configurazione caricato
-                ' contiene effettivamente valori non vuoti per essi.
-                ' Dato che abbiamo deciso di non salvarli, questa condizione solitamente
-                ' non sovrascriverà i valori attuali della macchina con stringhe vuote.
-                If Not String.IsNullOrEmpty(loadedConfigData.VersionHW) Then
+            'Impostazioni IAQ
+            Me.customerData.IAQ_Imbalance = loadedConfigData.IAQ_Imbalance
+            Me.customerData.IAQ_Reference = loadedConfigData.IAQ_Reference
+
+            Me.customerData.SMOKE_VALUE = loadedConfigData.SMOKE_VALUE
+
+            ' --- Applica condizionatamente i dati specifici della macchina ---
+            ' Questi verranno aggiornati solo se il file di configurazione caricato
+            ' contiene effettivamente valori non vuoti per essi.
+            ' Dato che abbiamo deciso di non salvarli, questa condizione solitamente
+            ' non sovrascriverà i valori attuali della macchina con stringhe vuote.
+            If Not String.IsNullOrEmpty(loadedConfigData.VersionHW) Then
                     Me.customerData.VersionHW = loadedConfigData.VersionHW
                 End If
                 If Not String.IsNullOrEmpty(loadedConfigData.VersionSW) Then
@@ -1521,10 +1688,10 @@ Public Class Program_Form
                     Me.customerData.SerialNumber = loadedConfigData.SerialNumber
                 End If
 
-                ' 6. Aggiorna l'interfaccia utente per riflettere i nuovi dati in Me.customerData
-                UpdateFormControls()
+            ' 6. Aggiorna l'interfaccia utente per riflettere i nuovi dati in Me.customerData
+            UpdateFormControls()
 
-                MessageBox.Show($"Configuration '{selectedFileName}' applied successfully.", "Configuration Applied", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show($"Configuration '{selectedFileName}' applied successfully.", "Configuration Applied", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
             Catch ex As Exception
                 MessageBox.Show($"An error occurred while applying the configuration: {ex.Message}", "Apply Configuration Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -1617,7 +1784,126 @@ Public Class Program_Form
 
     End Sub
 
+    Private Sub UpdateSmokeControls()
+        RB_SmokeNC.Enabled = CB_SmokeEnable.Checked
+        RB_SmokeNO.Enabled = CB_SmokeEnable.Checked
+    End Sub
+
+    Private Sub CB_SmokeEnable_CheckedChanged(sender As Object, e As EventArgs) Handles CB_SmokeEnable.CheckedChanged
+        UpdateSmokeControls()
+        UpdateSmokeValue()
+    End Sub
+
+    Private Sub RB_SmokeNC_CheckedChanged(sender As Object, e As EventArgs) Handles RB_SmokeNC.CheckedChanged
+        UpdateSmokeValue()
+    End Sub
+
+    Private Sub RB_SmokeNO_CheckedChanged(sender As Object, e As EventArgs) Handles RB_SmokeNO.CheckedChanged
+        UpdateSmokeValue()
+    End Sub
+    Private Function ParseLiveDataBlock(lines As List(Of String)) As LiveData
+        Dim data As New LiveData()
+        Dim alarmPattern As New Regex("Alarm\[\s*(\d+)\s*\]\s*:\s*(\d+)")
+        For Each l In lines
+            Dim parts = l.Split({":"c}, 2)
+            If parts.Length <> 2 Then Continue For
+            Dim key = parts(0).Trim(), val = parts(1).Trim()
+            Select Case True
+                Case key.StartsWith("Temperature Fresh")
+                    data.TemperatureFresh = Double.Parse(val, CultureInfo.InvariantCulture)
+                Case key.StartsWith("Temperature Return")
+                    data.TemperatureReturn = Double.Parse(val, CultureInfo.InvariantCulture)
+                Case key.StartsWith("Temperature Supply")
+                    data.TemperatureSupply = Double.Parse(val, CultureInfo.InvariantCulture)
+                Case key.StartsWith("Temperature Exhaust")
+                    data.TemperatureExhaust = Double.Parse(val, CultureInfo.InvariantCulture)
+                Case key.StartsWith("Humidity Left")
+                    data.HumidityLeft = Integer.Parse(val)
+                Case key.StartsWith("Humidity Right")
+                    data.HumidityRight = Integer.Parse(val)
+                Case key.StartsWith("Feedback V Motor R")
+                    data.FeedbackVMotorR = Double.Parse(val, CultureInfo.InvariantCulture)
+                Case key.StartsWith("RPM Motor R")
+                    data.RPMMotorR = Integer.Parse(val)
+                Case key.StartsWith("Feedback V Motor F")
+                    data.FeedbackVMotorF = Double.Parse(val, CultureInfo.InvariantCulture)
+                Case key.StartsWith("RPM Motor F")
+                    data.RPMMotorF = Integer.Parse(val)
+                Case Else
+                    Dim m = alarmPattern.Match(l)
+                    If m.Success Then
+                        Dim idx = Integer.Parse(m.Groups(1).Value)
+                        Dim v = Byte.Parse(m.Groups(2).Value)
+                        If idx >= 0 AndAlso idx < data.Alarms.Length Then
+                            data.Alarms(idx) = v
+                        End If
+                    End If
+            End Select
+        Next
+
+        ' Se **tutti** i sensori e gli allarmi risultano a zero, scarta il blocco
+        If data.TemperatureFresh = 0 AndAlso
+   data.TemperatureReturn = 0 AndAlso
+   data.TemperatureSupply = 0 AndAlso
+   data.TemperatureExhaust = 0 AndAlso
+   data.HumidityLeft = 0 AndAlso
+   data.HumidityRight = 0 AndAlso
+   data.FeedbackVMotorR = 0 AndAlso
+   data.FeedbackVMotorF = 0 AndAlso
+   data.RPMMotorR = 0 AndAlso
+   data.RPMMotorF = 0 AndAlso
+   Array.TrueForAll(data.Alarms, Function(b) b = 0) Then
+            Return Nothing
+        End If
+
+        Return data
+    End Function
+
+    Private Sub CB_LiveData_CheckedChanged(sender As Object, e As EventArgs) Handles CB_LiveData.CheckedChanged
+        If CB_LiveData.Checked Then
+            LiveDataTimer.Start()
+            Btn_RefreshData.Enabled = False
+            Btn_Disconnect.Enabled = False
+            Btn_SaveData.Enabled = False
+            Btn_ResAcc.Enabled = False
+            lb_status.Text = "Live-data polling enabled : disable to save, refresh or disconnect unit"
+        Else
+            LiveDataTimer.Stop()
+            Btn_RefreshData.Enabled = True
+            Btn_Disconnect.Enabled = True
+            Btn_SaveData.Enabled = True
+            Btn_ResAcc.Enabled = True
+            lb_status.Text = "Live-data stopped successfully."
+        End If
+    End Sub
+    Private Sub LiveDataTimer_Tick(sender As Object, e As EventArgs) Handles LiveDataTimer.Tick
+        If SerialPort1.IsOpen Then
+            InviaStringa("b")
+        End If
+    End Sub
+
+    Private Sub Btn_ResAcc_Click(sender As Object, e As EventArgs) Handles Btn_ResAcc.Click
+        If SerialPort1.IsOpen Then
+            InviaStringa("c")
+        End If
+    End Sub
+
+    Private Sub Program_Form_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
+        ' Se live‐data è ancora attivo, disattivalo prima di chiudere
+        If CB_LiveData.Checked Then
+            ' 1) Ferma il timer che manda "b" ogni 2 secondi
+            LiveDataTimer.Stop()     ' o qualunque Timer stai usando
+
+            ' 2) (Opzionale) Invia un comando per disattivare il live‐data sul dispositivo
+            '    se il firmware richiede una “b” di spegnimento, altrimenti ometti.
+            'InviaStringa("b")      
+
+            ' 3) Togli il check per tenere lo stato UI coerente
+            CB_LiveData.Checked = False
+        End If
+    End Sub
 
 End Class
+
 
 

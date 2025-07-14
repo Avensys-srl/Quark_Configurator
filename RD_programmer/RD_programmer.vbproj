@@ -142,6 +142,7 @@
     <Import Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LiveData.vb" />
     <Compile Include="CustomerData.vb" />
     <Compile Include="Form1.vb">
       <SubType>Form</SubType>

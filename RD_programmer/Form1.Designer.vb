@@ -26,6 +26,36 @@ Partial Class Program_Form
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Program_Form))
         Me.SerialPort1 = New System.IO.Ports.SerialPort(Me.components)
         Me.TP_Configurator = New System.Windows.Forms.TabPage()
+        Me.Grp_Acc = New System.Windows.Forms.GroupBox()
+        Me.Btn_ResAcc = New System.Windows.Forms.Button()
+        Me.TB_acc = New System.Windows.Forms.TextBox()
+        Me.Grp_Live = New System.Windows.Forms.GroupBox()
+        Me.TB_alarm = New System.Windows.Forms.TextBox()
+        Me.Label35 = New System.Windows.Forms.Label()
+        Me.Label33 = New System.Windows.Forms.Label()
+        Me.CB_LiveData = New System.Windows.Forms.CheckBox()
+        Me.lblTExhaust = New System.Windows.Forms.Label()
+        Me.Label32 = New System.Windows.Forms.Label()
+        Me.lblTSupply = New System.Windows.Forms.Label()
+        Me.Label31 = New System.Windows.Forms.Label()
+        Me.lblRReturn = New System.Windows.Forms.Label()
+        Me.lblTReturn = New System.Windows.Forms.Label()
+        Me.lblRPMReturn = New System.Windows.Forms.Label()
+        Me.lblRPMSupply = New System.Windows.Forms.Label()
+        Me.lblRFresh = New System.Windows.Forms.Label()
+        Me.Label30 = New System.Windows.Forms.Label()
+        Me.lblVReturn = New System.Windows.Forms.Label()
+        Me.lblVSupply = New System.Windows.Forms.Label()
+        Me.lblTFresh = New System.Windows.Forms.Label()
+        Me.Label37 = New System.Windows.Forms.Label()
+        Me.Label34 = New System.Windows.Forms.Label()
+        Me.Label29 = New System.Windows.Forms.Label()
+        Me.Grp_Smoke = New System.Windows.Forms.GroupBox()
+        Me.Label28 = New System.Windows.Forms.Label()
+        Me.CB_SmokeEnable = New System.Windows.Forms.CheckBox()
+        Me.Label27 = New System.Windows.Forms.Label()
+        Me.RB_SmokeNO = New System.Windows.Forms.RadioButton()
+        Me.RB_SmokeNC = New System.Windows.Forms.RadioButton()
         Me.Grp_DateTime = New System.Windows.Forms.GroupBox()
         Me.BtnUpdateDateTime = New System.Windows.Forms.Button()
         Me.lb_DateTimeTimer = New System.Windows.Forms.Label()
@@ -99,23 +129,28 @@ Partial Class Program_Form
         Me.CB_ImbEnable = New System.Windows.Forms.CheckBox()
         Me.NumericUpDown4 = New System.Windows.Forms.NumericUpDown()
         Me.num_Speed1CAP = New System.Windows.Forms.NumericUpDown()
+        Me.num_R_IAQSpeed = New System.Windows.Forms.NumericUpDown()
         Me.num_R_Speed3 = New System.Windows.Forms.NumericUpDown()
+        Me.num_F_IAQSpeed = New System.Windows.Forms.NumericUpDown()
         Me.num_F_Speed3 = New System.Windows.Forms.NumericUpDown()
         Me.num_R_Speed2 = New System.Windows.Forms.NumericUpDown()
         Me.num_F_Speed2 = New System.Windows.Forms.NumericUpDown()
         Me.num_R_Speed1 = New System.Windows.Forms.NumericUpDown()
-        Me.Label22 = New System.Windows.Forms.Label()
         Me.num_F_Speed1 = New System.Windows.Forms.NumericUpDown()
+        Me.Label26 = New System.Windows.Forms.Label()
         Me.vlb_Speed3CAP = New System.Windows.Forms.Label()
-        Me.Label21 = New System.Windows.Forms.Label()
+        Me.Label22 = New System.Windows.Forms.Label()
         Me.lb_Speed3CAP = New System.Windows.Forms.Label()
         Me.vlb_Speed2CAP = New System.Windows.Forms.Label()
-        Me.Label20 = New System.Windows.Forms.Label()
+        Me.Label21 = New System.Windows.Forms.Label()
         Me.lb_Speed2CAP = New System.Windows.Forms.Label()
+        Me.Label20 = New System.Windows.Forms.Label()
         Me.vlb_Speed1CAP = New System.Windows.Forms.Label()
+        Me.Label17 = New System.Windows.Forms.Label()
         Me.Label19 = New System.Windows.Forms.Label()
         Me.lb_Speed1CAP = New System.Windows.Forms.Label()
         Me.vlb_Speed3FSC = New System.Windows.Forms.Label()
+        Me.Label15 = New System.Windows.Forms.Label()
         Me.Label18 = New System.Windows.Forms.Label()
         Me.lb_Speed3FSC = New System.Windows.Forms.Label()
         Me.vlb_Speed2FSC = New System.Windows.Forms.Label()
@@ -143,6 +178,9 @@ Partial Class Program_Form
         Me.lb_QKvers = New System.Windows.Forms.Label()
         Me.TimerDateTime = New System.Windows.Forms.Timer(Me.components)
         Me.TP_Configurator.SuspendLayout()
+        Me.Grp_Acc.SuspendLayout()
+        Me.Grp_Live.SuspendLayout()
+        Me.Grp_Smoke.SuspendLayout()
         Me.Grp_DateTime.SuspendLayout()
         Me.Grp_KHK.SuspendLayout()
         CType(Me.num_FK_Speed, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -167,7 +205,9 @@ Partial Class Program_Form
         CType(Me.num_Speed2CAP, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.NumericUpDown4, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.num_Speed1CAP, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.num_R_IAQSpeed, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.num_R_Speed3, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.num_F_IAQSpeed, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.num_F_Speed3, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.num_R_Speed2, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.num_F_Speed2, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -183,6 +223,9 @@ Partial Class Program_Form
         '
         'TP_Configurator
         '
+        Me.TP_Configurator.Controls.Add(Me.Grp_Acc)
+        Me.TP_Configurator.Controls.Add(Me.Grp_Live)
+        Me.TP_Configurator.Controls.Add(Me.Grp_Smoke)
         Me.TP_Configurator.Controls.Add(Me.Grp_DateTime)
         Me.TP_Configurator.Controls.Add(Me.Grp_KHK)
         Me.TP_Configurator.Controls.Add(Me.Grp_Preset)
@@ -209,6 +252,334 @@ Partial Class Program_Form
         Me.TP_Configurator.TabIndex = 0
         Me.TP_Configurator.Text = "Configurator"
         Me.TP_Configurator.UseVisualStyleBackColor = True
+        '
+        'Grp_Acc
+        '
+        Me.Grp_Acc.Controls.Add(Me.Btn_ResAcc)
+        Me.Grp_Acc.Controls.Add(Me.TB_acc)
+        Me.Grp_Acc.Location = New System.Drawing.Point(655, 391)
+        Me.Grp_Acc.Name = "Grp_Acc"
+        Me.Grp_Acc.Size = New System.Drawing.Size(210, 84)
+        Me.Grp_Acc.TabIndex = 21
+        Me.Grp_Acc.TabStop = False
+        Me.Grp_Acc.Text = "Accessories List"
+        '
+        'Btn_ResAcc
+        '
+        Me.Btn_ResAcc.Location = New System.Drawing.Point(159, 19)
+        Me.Btn_ResAcc.Name = "Btn_ResAcc"
+        Me.Btn_ResAcc.Size = New System.Drawing.Size(45, 59)
+        Me.Btn_ResAcc.TabIndex = 1
+        Me.Btn_ResAcc.Text = "Reset List"
+        Me.Btn_ResAcc.UseVisualStyleBackColor = True
+        '
+        'TB_acc
+        '
+        Me.TB_acc.Location = New System.Drawing.Point(7, 19)
+        Me.TB_acc.Multiline = True
+        Me.TB_acc.Name = "TB_acc"
+        Me.TB_acc.ReadOnly = True
+        Me.TB_acc.Size = New System.Drawing.Size(146, 59)
+        Me.TB_acc.TabIndex = 0
+        '
+        'Grp_Live
+        '
+        Me.Grp_Live.Controls.Add(Me.TB_alarm)
+        Me.Grp_Live.Controls.Add(Me.Label35)
+        Me.Grp_Live.Controls.Add(Me.Label33)
+        Me.Grp_Live.Controls.Add(Me.CB_LiveData)
+        Me.Grp_Live.Controls.Add(Me.lblTExhaust)
+        Me.Grp_Live.Controls.Add(Me.Label32)
+        Me.Grp_Live.Controls.Add(Me.lblTSupply)
+        Me.Grp_Live.Controls.Add(Me.Label31)
+        Me.Grp_Live.Controls.Add(Me.lblRReturn)
+        Me.Grp_Live.Controls.Add(Me.lblTReturn)
+        Me.Grp_Live.Controls.Add(Me.lblRPMReturn)
+        Me.Grp_Live.Controls.Add(Me.lblRPMSupply)
+        Me.Grp_Live.Controls.Add(Me.lblRFresh)
+        Me.Grp_Live.Controls.Add(Me.Label30)
+        Me.Grp_Live.Controls.Add(Me.lblVReturn)
+        Me.Grp_Live.Controls.Add(Me.lblVSupply)
+        Me.Grp_Live.Controls.Add(Me.lblTFresh)
+        Me.Grp_Live.Controls.Add(Me.Label37)
+        Me.Grp_Live.Controls.Add(Me.Label34)
+        Me.Grp_Live.Controls.Add(Me.Label29)
+        Me.Grp_Live.Location = New System.Drawing.Point(871, 185)
+        Me.Grp_Live.Name = "Grp_Live"
+        Me.Grp_Live.Size = New System.Drawing.Size(196, 290)
+        Me.Grp_Live.TabIndex = 20
+        Me.Grp_Live.TabStop = False
+        Me.Grp_Live.Text = "LiveData"
+        '
+        'TB_alarm
+        '
+        Me.TB_alarm.Location = New System.Drawing.Point(10, 177)
+        Me.TB_alarm.Multiline = True
+        Me.TB_alarm.Name = "TB_alarm"
+        Me.TB_alarm.ReadOnly = True
+        Me.TB_alarm.Size = New System.Drawing.Size(180, 84)
+        Me.TB_alarm.TabIndex = 19
+        '
+        'Label35
+        '
+        Me.Label35.AutoSize = True
+        Me.Label35.Location = New System.Drawing.Point(7, 159)
+        Me.Label35.Name = "Label35"
+        Me.Label35.Size = New System.Drawing.Size(56, 13)
+        Me.Label35.TabIndex = 18
+        Me.Label35.Text = "Alarm box:"
+        '
+        'Label33
+        '
+        Me.Label33.AutoSize = True
+        Me.Label33.Location = New System.Drawing.Point(33, 266)
+        Me.Label33.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.Label33.Name = "Label33"
+        Me.Label33.Size = New System.Drawing.Size(117, 13)
+        Me.Label33.TabIndex = 17
+        Me.Label33.Text = "Keep live data updated"
+        '
+        'CB_LiveData
+        '
+        Me.CB_LiveData.AutoSize = True
+        Me.CB_LiveData.Location = New System.Drawing.Point(14, 266)
+        Me.CB_LiveData.Margin = New System.Windows.Forms.Padding(2)
+        Me.CB_LiveData.Name = "CB_LiveData"
+        Me.CB_LiveData.Size = New System.Drawing.Size(15, 14)
+        Me.CB_LiveData.TabIndex = 16
+        Me.CB_LiveData.UseVisualStyleBackColor = True
+        '
+        'lblTExhaust
+        '
+        Me.lblTExhaust.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblTExhaust.AutoSize = True
+        Me.lblTExhaust.Location = New System.Drawing.Point(72, 83)
+        Me.lblTExhaust.Name = "lblTExhaust"
+        Me.lblTExhaust.Size = New System.Drawing.Size(42, 13)
+        Me.lblTExhaust.TabIndex = 0
+        Me.lblTExhaust.Text = "00.0 °C"
+        Me.lblTExhaust.TextAlign = System.Drawing.ContentAlignment.TopRight
+        '
+        'Label32
+        '
+        Me.Label32.AutoSize = True
+        Me.Label32.Location = New System.Drawing.Point(7, 83)
+        Me.Label32.Name = "Label32"
+        Me.Label32.Size = New System.Drawing.Size(51, 13)
+        Me.Label32.TabIndex = 0
+        Me.Label32.Text = "Exhaust :"
+        '
+        'lblTSupply
+        '
+        Me.lblTSupply.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblTSupply.AutoSize = True
+        Me.lblTSupply.Location = New System.Drawing.Point(72, 62)
+        Me.lblTSupply.Name = "lblTSupply"
+        Me.lblTSupply.Size = New System.Drawing.Size(42, 13)
+        Me.lblTSupply.TabIndex = 0
+        Me.lblTSupply.Text = "00.0 °C"
+        Me.lblTSupply.TextAlign = System.Drawing.ContentAlignment.TopRight
+        '
+        'Label31
+        '
+        Me.Label31.AutoSize = True
+        Me.Label31.Location = New System.Drawing.Point(7, 62)
+        Me.Label31.Name = "Label31"
+        Me.Label31.Size = New System.Drawing.Size(45, 13)
+        Me.Label31.TabIndex = 0
+        Me.Label31.Text = "Supply :"
+        '
+        'lblRReturn
+        '
+        Me.lblRReturn.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblRReturn.AutoSize = True
+        Me.lblRReturn.Location = New System.Drawing.Point(120, 41)
+        Me.lblRReturn.Name = "lblRReturn"
+        Me.lblRReturn.Size = New System.Drawing.Size(30, 13)
+        Me.lblRReturn.TabIndex = 0
+        Me.lblRReturn.Text = "00 %"
+        Me.lblRReturn.TextAlign = System.Drawing.ContentAlignment.TopRight
+        '
+        'lblTReturn
+        '
+        Me.lblTReturn.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblTReturn.AutoSize = True
+        Me.lblTReturn.Location = New System.Drawing.Point(72, 41)
+        Me.lblTReturn.Name = "lblTReturn"
+        Me.lblTReturn.Size = New System.Drawing.Size(42, 13)
+        Me.lblTReturn.TabIndex = 0
+        Me.lblTReturn.Text = "00.0 °C"
+        Me.lblTReturn.TextAlign = System.Drawing.ContentAlignment.TopRight
+        '
+        'lblRPMReturn
+        '
+        Me.lblRPMReturn.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblRPMReturn.AutoSize = True
+        Me.lblRPMReturn.Location = New System.Drawing.Point(120, 130)
+        Me.lblRPMReturn.Name = "lblRPMReturn"
+        Me.lblRPMReturn.Size = New System.Drawing.Size(51, 13)
+        Me.lblRPMReturn.TabIndex = 0
+        Me.lblRPMReturn.Text = "0000 rpm"
+        Me.lblRPMReturn.TextAlign = System.Drawing.ContentAlignment.TopRight
+        '
+        'lblRPMSupply
+        '
+        Me.lblRPMSupply.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblRPMSupply.AutoSize = True
+        Me.lblRPMSupply.Location = New System.Drawing.Point(120, 111)
+        Me.lblRPMSupply.Name = "lblRPMSupply"
+        Me.lblRPMSupply.Size = New System.Drawing.Size(51, 13)
+        Me.lblRPMSupply.TabIndex = 0
+        Me.lblRPMSupply.Text = "0000 rpm"
+        Me.lblRPMSupply.TextAlign = System.Drawing.ContentAlignment.TopRight
+        '
+        'lblRFresh
+        '
+        Me.lblRFresh.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblRFresh.AutoSize = True
+        Me.lblRFresh.Location = New System.Drawing.Point(120, 20)
+        Me.lblRFresh.Name = "lblRFresh"
+        Me.lblRFresh.Size = New System.Drawing.Size(30, 13)
+        Me.lblRFresh.TabIndex = 0
+        Me.lblRFresh.Text = "00 %"
+        Me.lblRFresh.TextAlign = System.Drawing.ContentAlignment.TopRight
+        '
+        'Label30
+        '
+        Me.Label30.AutoSize = True
+        Me.Label30.Location = New System.Drawing.Point(7, 41)
+        Me.Label30.Name = "Label30"
+        Me.Label30.Size = New System.Drawing.Size(45, 13)
+        Me.Label30.TabIndex = 0
+        Me.Label30.Text = "Return :"
+        '
+        'lblVReturn
+        '
+        Me.lblVReturn.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblVReturn.AutoSize = True
+        Me.lblVReturn.Location = New System.Drawing.Point(72, 130)
+        Me.lblVReturn.Name = "lblVReturn"
+        Me.lblVReturn.Size = New System.Drawing.Size(38, 13)
+        Me.lblVReturn.TabIndex = 0
+        Me.lblVReturn.Text = "00.0 V"
+        Me.lblVReturn.TextAlign = System.Drawing.ContentAlignment.TopRight
+        '
+        'lblVSupply
+        '
+        Me.lblVSupply.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblVSupply.AutoSize = True
+        Me.lblVSupply.Location = New System.Drawing.Point(72, 111)
+        Me.lblVSupply.Name = "lblVSupply"
+        Me.lblVSupply.Size = New System.Drawing.Size(38, 13)
+        Me.lblVSupply.TabIndex = 0
+        Me.lblVSupply.Text = "00.0 V"
+        Me.lblVSupply.TextAlign = System.Drawing.ContentAlignment.TopRight
+        '
+        'lblTFresh
+        '
+        Me.lblTFresh.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblTFresh.AutoSize = True
+        Me.lblTFresh.Location = New System.Drawing.Point(72, 20)
+        Me.lblTFresh.Name = "lblTFresh"
+        Me.lblTFresh.Size = New System.Drawing.Size(42, 13)
+        Me.lblTFresh.TabIndex = 0
+        Me.lblTFresh.Text = "00.0 °C"
+        Me.lblTFresh.TextAlign = System.Drawing.ContentAlignment.TopRight
+        '
+        'Label37
+        '
+        Me.Label37.AutoSize = True
+        Me.Label37.Location = New System.Drawing.Point(7, 130)
+        Me.Label37.Name = "Label37"
+        Me.Label37.Size = New System.Drawing.Size(66, 13)
+        Me.Label37.TabIndex = 0
+        Me.Label37.Text = "Return Fan :"
+        '
+        'Label34
+        '
+        Me.Label34.AutoSize = True
+        Me.Label34.Location = New System.Drawing.Point(7, 111)
+        Me.Label34.Name = "Label34"
+        Me.Label34.Size = New System.Drawing.Size(66, 13)
+        Me.Label34.TabIndex = 0
+        Me.Label34.Text = "Supply Fan :"
+        '
+        'Label29
+        '
+        Me.Label29.AutoSize = True
+        Me.Label29.Location = New System.Drawing.Point(7, 20)
+        Me.Label29.Name = "Label29"
+        Me.Label29.Size = New System.Drawing.Size(39, 13)
+        Me.Label29.TabIndex = 0
+        Me.Label29.Text = "Fresh :"
+        '
+        'Grp_Smoke
+        '
+        Me.Grp_Smoke.Controls.Add(Me.Label28)
+        Me.Grp_Smoke.Controls.Add(Me.CB_SmokeEnable)
+        Me.Grp_Smoke.Controls.Add(Me.Label27)
+        Me.Grp_Smoke.Controls.Add(Me.RB_SmokeNO)
+        Me.Grp_Smoke.Controls.Add(Me.RB_SmokeNC)
+        Me.Grp_Smoke.Location = New System.Drawing.Point(477, 401)
+        Me.Grp_Smoke.Name = "Grp_Smoke"
+        Me.Grp_Smoke.Size = New System.Drawing.Size(172, 74)
+        Me.Grp_Smoke.TabIndex = 19
+        Me.Grp_Smoke.TabStop = False
+        Me.Grp_Smoke.Text = "Smoke Detector (Input 2)"
+        '
+        'Label28
+        '
+        Me.Label28.AutoSize = True
+        Me.Label28.Location = New System.Drawing.Point(28, 21)
+        Me.Label28.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.Label28.Name = "Label28"
+        Me.Label28.Size = New System.Drawing.Size(116, 13)
+        Me.Label28.TabIndex = 17
+        Me.Label28.Text = "Enable Smoke Contact"
+        '
+        'CB_SmokeEnable
+        '
+        Me.CB_SmokeEnable.AutoSize = True
+        Me.CB_SmokeEnable.Location = New System.Drawing.Point(9, 21)
+        Me.CB_SmokeEnable.Margin = New System.Windows.Forms.Padding(2)
+        Me.CB_SmokeEnable.Name = "CB_SmokeEnable"
+        Me.CB_SmokeEnable.Size = New System.Drawing.Size(15, 14)
+        Me.CB_SmokeEnable.TabIndex = 16
+        Me.CB_SmokeEnable.UseVisualStyleBackColor = True
+        '
+        'Label27
+        '
+        Me.Label27.AutoSize = True
+        Me.Label27.Location = New System.Drawing.Point(2, 48)
+        Me.Label27.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.Label27.Name = "Label27"
+        Me.Label27.Size = New System.Drawing.Size(89, 13)
+        Me.Label27.TabIndex = 15
+        Me.Label27.Text = "Contact Behavior"
+        '
+        'RB_SmokeNO
+        '
+        Me.RB_SmokeNO.AutoSize = True
+        Me.RB_SmokeNO.Location = New System.Drawing.Point(133, 46)
+        Me.RB_SmokeNO.Margin = New System.Windows.Forms.Padding(2)
+        Me.RB_SmokeNO.Name = "RB_SmokeNO"
+        Me.RB_SmokeNO.Size = New System.Drawing.Size(40, 17)
+        Me.RB_SmokeNO.TabIndex = 14
+        Me.RB_SmokeNO.TabStop = True
+        Me.RB_SmokeNO.Text = "NC"
+        Me.RB_SmokeNO.UseVisualStyleBackColor = True
+        '
+        'RB_SmokeNC
+        '
+        Me.RB_SmokeNC.AutoSize = True
+        Me.RB_SmokeNC.Location = New System.Drawing.Point(94, 46)
+        Me.RB_SmokeNC.Margin = New System.Windows.Forms.Padding(2)
+        Me.RB_SmokeNC.Name = "RB_SmokeNC"
+        Me.RB_SmokeNC.Size = New System.Drawing.Size(41, 17)
+        Me.RB_SmokeNC.TabIndex = 13
+        Me.RB_SmokeNC.TabStop = True
+        Me.RB_SmokeNC.Text = "NO"
+        Me.RB_SmokeNC.UseVisualStyleBackColor = True
         '
         'Grp_DateTime
         '
@@ -258,10 +629,10 @@ Partial Class Program_Form
         Me.Grp_KHK.Controls.Add(Me.RB_NC)
         Me.Grp_KHK.Location = New System.Drawing.Point(14, 401)
         Me.Grp_KHK.Name = "Grp_KHK"
-        Me.Grp_KHK.Size = New System.Drawing.Size(572, 74)
+        Me.Grp_KHK.Size = New System.Drawing.Size(457, 74)
         Me.Grp_KHK.TabIndex = 14
         Me.Grp_KHK.TabStop = False
-        Me.Grp_KHK.Text = "KHK"
+        Me.Grp_KHK.Text = "KHK (Green Connector)"
         '
         'Label13
         '
@@ -275,7 +646,7 @@ Partial Class Program_Form
         'Label10
         '
         Me.Label10.AutoSize = True
-        Me.Label10.Location = New System.Drawing.Point(327, 21)
+        Me.Label10.Location = New System.Drawing.Point(307, 21)
         Me.Label10.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.Label10.Name = "Label10"
         Me.Label10.Size = New System.Drawing.Size(141, 13)
@@ -294,7 +665,7 @@ Partial Class Program_Form
         'CB_DisableTemperatureControl
         '
         Me.CB_DisableTemperatureControl.AutoSize = True
-        Me.CB_DisableTemperatureControl.Location = New System.Drawing.Point(308, 21)
+        Me.CB_DisableTemperatureControl.Location = New System.Drawing.Point(288, 21)
         Me.CB_DisableTemperatureControl.Margin = New System.Windows.Forms.Padding(2)
         Me.CB_DisableTemperatureControl.Name = "CB_DisableTemperatureControl"
         Me.CB_DisableTemperatureControl.Size = New System.Drawing.Size(15, 14)
@@ -314,7 +685,7 @@ Partial Class Program_Form
         'lb_KHKContactBehavoir
         '
         Me.lb_KHKContactBehavoir.AutoSize = True
-        Me.lb_KHKContactBehavoir.Location = New System.Drawing.Point(303, 48)
+        Me.lb_KHKContactBehavoir.Location = New System.Drawing.Point(283, 48)
         Me.lb_KHKContactBehavoir.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.lb_KHKContactBehavoir.Name = "lb_KHKContactBehavoir"
         Me.lb_KHKContactBehavoir.Size = New System.Drawing.Size(89, 13)
@@ -368,7 +739,7 @@ Partial Class Program_Form
         'RB_NO
         '
         Me.RB_NO.AutoSize = True
-        Me.RB_NO.Location = New System.Drawing.Point(435, 46)
+        Me.RB_NO.Location = New System.Drawing.Point(415, 46)
         Me.RB_NO.Margin = New System.Windows.Forms.Padding(2)
         Me.RB_NO.Name = "RB_NO"
         Me.RB_NO.Size = New System.Drawing.Size(41, 17)
@@ -400,7 +771,7 @@ Partial Class Program_Form
         'RB_NC
         '
         Me.RB_NC.AutoSize = True
-        Me.RB_NC.Location = New System.Drawing.Point(394, 46)
+        Me.RB_NC.Location = New System.Drawing.Point(374, 46)
         Me.RB_NC.Margin = New System.Windows.Forms.Padding(2)
         Me.RB_NC.Name = "RB_NC"
         Me.RB_NC.Size = New System.Drawing.Size(40, 17)
@@ -417,7 +788,7 @@ Partial Class Program_Form
         Me.Grp_Preset.Controls.Add(Me.Btn_Apply)
         Me.Grp_Preset.Location = New System.Drawing.Point(871, 7)
         Me.Grp_Preset.Name = "Grp_Preset"
-        Me.Grp_Preset.Size = New System.Drawing.Size(196, 377)
+        Me.Grp_Preset.Size = New System.Drawing.Size(196, 176)
         Me.Grp_Preset.TabIndex = 16
         Me.Grp_Preset.TabStop = False
         Me.Grp_Preset.Text = "Preset Conf."
@@ -427,15 +798,15 @@ Partial Class Program_Form
         Me.Lsb_FileConfig.FormattingEnabled = True
         Me.Lsb_FileConfig.Location = New System.Drawing.Point(7, 20)
         Me.Lsb_FileConfig.Name = "Lsb_FileConfig"
-        Me.Lsb_FileConfig.Size = New System.Drawing.Size(183, 186)
+        Me.Lsb_FileConfig.Size = New System.Drawing.Size(183, 108)
         Me.Lsb_FileConfig.TabIndex = 1
         '
         'Btn_Rem
         '
         Me.Btn_Rem.Font = New System.Drawing.Font("Microsoft Sans Serif", 15.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Btn_Rem.Location = New System.Drawing.Point(147, 226)
+        Me.Btn_Rem.Location = New System.Drawing.Point(148, 135)
         Me.Btn_Rem.Name = "Btn_Rem"
-        Me.Btn_Rem.Size = New System.Drawing.Size(43, 42)
+        Me.Btn_Rem.Size = New System.Drawing.Size(43, 36)
         Me.Btn_Rem.TabIndex = 0
         Me.Btn_Rem.Text = "-"
         Me.Btn_Rem.UseVisualStyleBackColor = True
@@ -443,18 +814,18 @@ Partial Class Program_Form
         'Btn_Add
         '
         Me.Btn_Add.Font = New System.Drawing.Font("Microsoft Sans Serif", 15.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Btn_Add.Location = New System.Drawing.Point(98, 226)
+        Me.Btn_Add.Location = New System.Drawing.Point(99, 135)
         Me.Btn_Add.Name = "Btn_Add"
-        Me.Btn_Add.Size = New System.Drawing.Size(43, 42)
+        Me.Btn_Add.Size = New System.Drawing.Size(43, 36)
         Me.Btn_Add.TabIndex = 0
         Me.Btn_Add.Text = "+"
         Me.Btn_Add.UseVisualStyleBackColor = True
         '
         'Btn_Apply
         '
-        Me.Btn_Apply.Location = New System.Drawing.Point(6, 226)
+        Me.Btn_Apply.Location = New System.Drawing.Point(7, 135)
         Me.Btn_Apply.Name = "Btn_Apply"
-        Me.Btn_Apply.Size = New System.Drawing.Size(86, 42)
+        Me.Btn_Apply.Size = New System.Drawing.Size(86, 36)
         Me.Btn_Apply.TabIndex = 0
         Me.Btn_Apply.Text = "Apply"
         Me.Btn_Apply.UseVisualStyleBackColor = True
@@ -494,7 +865,7 @@ Partial Class Program_Form
         Me.Grp_UnitConfig.Controls.Add(Me.RB_left)
         Me.Grp_UnitConfig.Location = New System.Drawing.Point(592, 7)
         Me.Grp_UnitConfig.Name = "Grp_UnitConfig"
-        Me.Grp_UnitConfig.Size = New System.Drawing.Size(272, 377)
+        Me.Grp_UnitConfig.Size = New System.Drawing.Size(272, 378)
         Me.Grp_UnitConfig.TabIndex = 12
         Me.Grp_UnitConfig.TabStop = False
         Me.Grp_UnitConfig.Text = "Configuration"
@@ -885,23 +1256,28 @@ Partial Class Program_Form
         Me.Grp_SpeedConf.Controls.Add(Me.CB_ImbEnable)
         Me.Grp_SpeedConf.Controls.Add(Me.NumericUpDown4)
         Me.Grp_SpeedConf.Controls.Add(Me.num_Speed1CAP)
+        Me.Grp_SpeedConf.Controls.Add(Me.num_R_IAQSpeed)
         Me.Grp_SpeedConf.Controls.Add(Me.num_R_Speed3)
+        Me.Grp_SpeedConf.Controls.Add(Me.num_F_IAQSpeed)
         Me.Grp_SpeedConf.Controls.Add(Me.num_F_Speed3)
         Me.Grp_SpeedConf.Controls.Add(Me.num_R_Speed2)
         Me.Grp_SpeedConf.Controls.Add(Me.num_F_Speed2)
         Me.Grp_SpeedConf.Controls.Add(Me.num_R_Speed1)
-        Me.Grp_SpeedConf.Controls.Add(Me.Label22)
         Me.Grp_SpeedConf.Controls.Add(Me.num_F_Speed1)
+        Me.Grp_SpeedConf.Controls.Add(Me.Label26)
         Me.Grp_SpeedConf.Controls.Add(Me.vlb_Speed3CAP)
-        Me.Grp_SpeedConf.Controls.Add(Me.Label21)
+        Me.Grp_SpeedConf.Controls.Add(Me.Label22)
         Me.Grp_SpeedConf.Controls.Add(Me.lb_Speed3CAP)
         Me.Grp_SpeedConf.Controls.Add(Me.vlb_Speed2CAP)
-        Me.Grp_SpeedConf.Controls.Add(Me.Label20)
+        Me.Grp_SpeedConf.Controls.Add(Me.Label21)
         Me.Grp_SpeedConf.Controls.Add(Me.lb_Speed2CAP)
+        Me.Grp_SpeedConf.Controls.Add(Me.Label20)
         Me.Grp_SpeedConf.Controls.Add(Me.vlb_Speed1CAP)
+        Me.Grp_SpeedConf.Controls.Add(Me.Label17)
         Me.Grp_SpeedConf.Controls.Add(Me.Label19)
         Me.Grp_SpeedConf.Controls.Add(Me.lb_Speed1CAP)
         Me.Grp_SpeedConf.Controls.Add(Me.vlb_Speed3FSC)
+        Me.Grp_SpeedConf.Controls.Add(Me.Label15)
         Me.Grp_SpeedConf.Controls.Add(Me.Label18)
         Me.Grp_SpeedConf.Controls.Add(Me.lb_Speed3FSC)
         Me.Grp_SpeedConf.Controls.Add(Me.vlb_Speed2FSC)
@@ -961,7 +1337,7 @@ Partial Class Program_Form
         'NumericUpDown5
         '
         Me.NumericUpDown5.Enabled = False
-        Me.NumericUpDown5.Location = New System.Drawing.Point(210, 171)
+        Me.NumericUpDown5.Location = New System.Drawing.Point(210, 173)
         Me.NumericUpDown5.Maximum = New Decimal(New Integer() {400, 0, 0, 0})
         Me.NumericUpDown5.Minimum = New Decimal(New Integer() {30, 0, 0, 0})
         Me.NumericUpDown5.Name = "NumericUpDown5"
@@ -973,7 +1349,7 @@ Partial Class Program_Form
         'num_Speed2CAP
         '
         Me.num_Speed2CAP.Enabled = False
-        Me.num_Speed2CAP.Location = New System.Drawing.Point(132, 171)
+        Me.num_Speed2CAP.Location = New System.Drawing.Point(132, 173)
         Me.num_Speed2CAP.Maximum = New Decimal(New Integer() {400, 0, 0, 0})
         Me.num_Speed2CAP.Minimum = New Decimal(New Integer() {30, 0, 0, 0})
         Me.num_Speed2CAP.Name = "num_Speed2CAP"
@@ -1006,7 +1382,7 @@ Partial Class Program_Form
         'NumericUpDown4
         '
         Me.NumericUpDown4.Enabled = False
-        Me.NumericUpDown4.Location = New System.Drawing.Point(209, 142)
+        Me.NumericUpDown4.Location = New System.Drawing.Point(209, 146)
         Me.NumericUpDown4.Maximum = New Decimal(New Integer() {400, 0, 0, 0})
         Me.NumericUpDown4.Minimum = New Decimal(New Integer() {30, 0, 0, 0})
         Me.NumericUpDown4.Name = "NumericUpDown4"
@@ -1018,7 +1394,7 @@ Partial Class Program_Form
         'num_Speed1CAP
         '
         Me.num_Speed1CAP.Enabled = False
-        Me.num_Speed1CAP.Location = New System.Drawing.Point(131, 142)
+        Me.num_Speed1CAP.Location = New System.Drawing.Point(131, 146)
         Me.num_Speed1CAP.Maximum = New Decimal(New Integer() {400, 0, 0, 0})
         Me.num_Speed1CAP.Minimum = New Decimal(New Integer() {30, 0, 0, 0})
         Me.num_Speed1CAP.Name = "num_Speed1CAP"
@@ -1027,10 +1403,21 @@ Partial Class Program_Form
         Me.num_Speed1CAP.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
         Me.num_Speed1CAP.Value = New Decimal(New Integer() {30, 0, 0, 0})
         '
+        'num_R_IAQSpeed
+        '
+        Me.num_R_IAQSpeed.Enabled = False
+        Me.num_R_IAQSpeed.Location = New System.Drawing.Point(208, 119)
+        Me.num_R_IAQSpeed.Minimum = New Decimal(New Integer() {25, 0, 0, 0})
+        Me.num_R_IAQSpeed.Name = "num_R_IAQSpeed"
+        Me.num_R_IAQSpeed.Size = New System.Drawing.Size(51, 20)
+        Me.num_R_IAQSpeed.TabIndex = 2
+        Me.num_R_IAQSpeed.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        Me.num_R_IAQSpeed.Value = New Decimal(New Integer() {25, 0, 0, 0})
+        '
         'num_R_Speed3
         '
         Me.num_R_Speed3.Enabled = False
-        Me.num_R_Speed3.Location = New System.Drawing.Point(208, 96)
+        Me.num_R_Speed3.Location = New System.Drawing.Point(208, 92)
         Me.num_R_Speed3.Minimum = New Decimal(New Integer() {25, 0, 0, 0})
         Me.num_R_Speed3.Name = "num_R_Speed3"
         Me.num_R_Speed3.Size = New System.Drawing.Size(51, 20)
@@ -1038,10 +1425,21 @@ Partial Class Program_Form
         Me.num_R_Speed3.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
         Me.num_R_Speed3.Value = New Decimal(New Integer() {25, 0, 0, 0})
         '
+        'num_F_IAQSpeed
+        '
+        Me.num_F_IAQSpeed.Enabled = False
+        Me.num_F_IAQSpeed.Location = New System.Drawing.Point(131, 119)
+        Me.num_F_IAQSpeed.Minimum = New Decimal(New Integer() {25, 0, 0, 0})
+        Me.num_F_IAQSpeed.Name = "num_F_IAQSpeed"
+        Me.num_F_IAQSpeed.Size = New System.Drawing.Size(51, 20)
+        Me.num_F_IAQSpeed.TabIndex = 2
+        Me.num_F_IAQSpeed.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        Me.num_F_IAQSpeed.Value = New Decimal(New Integer() {25, 0, 0, 0})
+        '
         'num_F_Speed3
         '
         Me.num_F_Speed3.Enabled = False
-        Me.num_F_Speed3.Location = New System.Drawing.Point(131, 96)
+        Me.num_F_Speed3.Location = New System.Drawing.Point(131, 92)
         Me.num_F_Speed3.Minimum = New Decimal(New Integer() {25, 0, 0, 0})
         Me.num_F_Speed3.Name = "num_F_Speed3"
         Me.num_F_Speed3.Size = New System.Drawing.Size(51, 20)
@@ -1052,7 +1450,7 @@ Partial Class Program_Form
         'num_R_Speed2
         '
         Me.num_R_Speed2.Enabled = False
-        Me.num_R_Speed2.Location = New System.Drawing.Point(208, 67)
+        Me.num_R_Speed2.Location = New System.Drawing.Point(208, 65)
         Me.num_R_Speed2.Minimum = New Decimal(New Integer() {25, 0, 0, 0})
         Me.num_R_Speed2.Name = "num_R_Speed2"
         Me.num_R_Speed2.Size = New System.Drawing.Size(51, 20)
@@ -1063,7 +1461,7 @@ Partial Class Program_Form
         'num_F_Speed2
         '
         Me.num_F_Speed2.Enabled = False
-        Me.num_F_Speed2.Location = New System.Drawing.Point(130, 67)
+        Me.num_F_Speed2.Location = New System.Drawing.Point(130, 65)
         Me.num_F_Speed2.Minimum = New Decimal(New Integer() {25, 0, 0, 0})
         Me.num_F_Speed2.Name = "num_F_Speed2"
         Me.num_F_Speed2.Size = New System.Drawing.Size(51, 20)
@@ -1082,15 +1480,6 @@ Partial Class Program_Form
         Me.num_R_Speed1.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
         Me.num_R_Speed1.Value = New Decimal(New Integer() {25, 0, 0, 0})
         '
-        'Label22
-        '
-        Me.Label22.AutoSize = True
-        Me.Label22.Location = New System.Drawing.Point(260, 202)
-        Me.Label22.Name = "Label22"
-        Me.Label22.Size = New System.Drawing.Size(20, 13)
-        Me.Label22.TabIndex = 1
-        Me.Label22.Text = "Pa"
-        '
         'num_F_Speed1
         '
         Me.num_F_Speed1.Enabled = False
@@ -1102,23 +1491,32 @@ Partial Class Program_Form
         Me.num_F_Speed1.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
         Me.num_F_Speed1.Value = New Decimal(New Integer() {25, 0, 0, 0})
         '
+        'Label26
+        '
+        Me.Label26.AutoSize = True
+        Me.Label26.Location = New System.Drawing.Point(259, 201)
+        Me.Label26.Name = "Label26"
+        Me.Label26.Size = New System.Drawing.Size(20, 13)
+        Me.Label26.TabIndex = 1
+        Me.Label26.Text = "Pa"
+        '
         'vlb_Speed3CAP
         '
         Me.vlb_Speed3CAP.AutoSize = True
-        Me.vlb_Speed3CAP.Location = New System.Drawing.Point(182, 202)
+        Me.vlb_Speed3CAP.Location = New System.Drawing.Point(181, 202)
         Me.vlb_Speed3CAP.Name = "vlb_Speed3CAP"
         Me.vlb_Speed3CAP.Size = New System.Drawing.Size(20, 13)
         Me.vlb_Speed3CAP.TabIndex = 1
         Me.vlb_Speed3CAP.Text = "Pa"
         '
-        'Label21
+        'Label22
         '
-        Me.Label21.AutoSize = True
-        Me.Label21.Location = New System.Drawing.Point(260, 173)
-        Me.Label21.Name = "Label21"
-        Me.Label21.Size = New System.Drawing.Size(20, 13)
-        Me.Label21.TabIndex = 1
-        Me.Label21.Text = "Pa"
+        Me.Label22.AutoSize = True
+        Me.Label22.Location = New System.Drawing.Point(260, 174)
+        Me.Label22.Name = "Label22"
+        Me.Label22.Size = New System.Drawing.Size(20, 13)
+        Me.Label22.TabIndex = 1
+        Me.Label22.Text = "Pa"
         '
         'lb_Speed3CAP
         '
@@ -1132,43 +1530,61 @@ Partial Class Program_Form
         'vlb_Speed2CAP
         '
         Me.vlb_Speed2CAP.AutoSize = True
-        Me.vlb_Speed2CAP.Location = New System.Drawing.Point(182, 173)
+        Me.vlb_Speed2CAP.Location = New System.Drawing.Point(182, 175)
         Me.vlb_Speed2CAP.Name = "vlb_Speed2CAP"
         Me.vlb_Speed2CAP.Size = New System.Drawing.Size(20, 13)
         Me.vlb_Speed2CAP.TabIndex = 1
         Me.vlb_Speed2CAP.Text = "Pa"
         '
-        'Label20
+        'Label21
         '
-        Me.Label20.AutoSize = True
-        Me.Label20.Location = New System.Drawing.Point(260, 144)
-        Me.Label20.Name = "Label20"
-        Me.Label20.Size = New System.Drawing.Size(20, 13)
-        Me.Label20.TabIndex = 1
-        Me.Label20.Text = "Pa"
+        Me.Label21.AutoSize = True
+        Me.Label21.Location = New System.Drawing.Point(260, 147)
+        Me.Label21.Name = "Label21"
+        Me.Label21.Size = New System.Drawing.Size(20, 13)
+        Me.Label21.TabIndex = 1
+        Me.Label21.Text = "Pa"
         '
         'lb_Speed2CAP
         '
         Me.lb_Speed2CAP.AutoSize = True
-        Me.lb_Speed2CAP.Location = New System.Drawing.Point(6, 173)
+        Me.lb_Speed2CAP.Location = New System.Drawing.Point(6, 175)
         Me.lb_Speed2CAP.Name = "lb_Speed2CAP"
         Me.lb_Speed2CAP.Size = New System.Drawing.Size(71, 13)
         Me.lb_Speed2CAP.TabIndex = 1
         Me.lb_Speed2CAP.Text = "Speed 2 CAP"
         '
+        'Label20
+        '
+        Me.Label20.AutoSize = True
+        Me.Label20.Location = New System.Drawing.Point(260, 120)
+        Me.Label20.Name = "Label20"
+        Me.Label20.Size = New System.Drawing.Size(15, 13)
+        Me.Label20.TabIndex = 1
+        Me.Label20.Text = "%"
+        '
         'vlb_Speed1CAP
         '
         Me.vlb_Speed1CAP.AutoSize = True
-        Me.vlb_Speed1CAP.Location = New System.Drawing.Point(182, 144)
+        Me.vlb_Speed1CAP.Location = New System.Drawing.Point(182, 148)
         Me.vlb_Speed1CAP.Name = "vlb_Speed1CAP"
         Me.vlb_Speed1CAP.Size = New System.Drawing.Size(20, 13)
         Me.vlb_Speed1CAP.TabIndex = 1
         Me.vlb_Speed1CAP.Text = "Pa"
         '
+        'Label17
+        '
+        Me.Label17.AutoSize = True
+        Me.Label17.Location = New System.Drawing.Point(182, 121)
+        Me.Label17.Name = "Label17"
+        Me.Label17.Size = New System.Drawing.Size(15, 13)
+        Me.Label17.TabIndex = 1
+        Me.Label17.Text = "%"
+        '
         'Label19
         '
         Me.Label19.AutoSize = True
-        Me.Label19.Location = New System.Drawing.Point(260, 98)
+        Me.Label19.Location = New System.Drawing.Point(260, 93)
         Me.Label19.Name = "Label19"
         Me.Label19.Size = New System.Drawing.Size(15, 13)
         Me.Label19.TabIndex = 1
@@ -1177,7 +1593,7 @@ Partial Class Program_Form
         'lb_Speed1CAP
         '
         Me.lb_Speed1CAP.AutoSize = True
-        Me.lb_Speed1CAP.Location = New System.Drawing.Point(6, 144)
+        Me.lb_Speed1CAP.Location = New System.Drawing.Point(6, 148)
         Me.lb_Speed1CAP.Name = "lb_Speed1CAP"
         Me.lb_Speed1CAP.Size = New System.Drawing.Size(71, 13)
         Me.lb_Speed1CAP.TabIndex = 1
@@ -1186,16 +1602,25 @@ Partial Class Program_Form
         'vlb_Speed3FSC
         '
         Me.vlb_Speed3FSC.AutoSize = True
-        Me.vlb_Speed3FSC.Location = New System.Drawing.Point(182, 98)
+        Me.vlb_Speed3FSC.Location = New System.Drawing.Point(182, 94)
         Me.vlb_Speed3FSC.Name = "vlb_Speed3FSC"
         Me.vlb_Speed3FSC.Size = New System.Drawing.Size(15, 13)
         Me.vlb_Speed3FSC.TabIndex = 1
         Me.vlb_Speed3FSC.Text = "%"
         '
+        'Label15
+        '
+        Me.Label15.AutoSize = True
+        Me.Label15.Location = New System.Drawing.Point(6, 121)
+        Me.Label15.Name = "Label15"
+        Me.Label15.Size = New System.Drawing.Size(96, 13)
+        Me.Label15.TabIndex = 1
+        Me.Label15.Text = "Sensor max Speed"
+        '
         'Label18
         '
         Me.Label18.AutoSize = True
-        Me.Label18.Location = New System.Drawing.Point(260, 69)
+        Me.Label18.Location = New System.Drawing.Point(259, 66)
         Me.Label18.Name = "Label18"
         Me.Label18.Size = New System.Drawing.Size(15, 13)
         Me.Label18.TabIndex = 1
@@ -1204,7 +1629,7 @@ Partial Class Program_Form
         'lb_Speed3FSC
         '
         Me.lb_Speed3FSC.AutoSize = True
-        Me.lb_Speed3FSC.Location = New System.Drawing.Point(6, 98)
+        Me.lb_Speed3FSC.Location = New System.Drawing.Point(6, 94)
         Me.lb_Speed3FSC.Name = "lb_Speed3FSC"
         Me.lb_Speed3FSC.Size = New System.Drawing.Size(95, 13)
         Me.lb_Speed3FSC.TabIndex = 1
@@ -1213,7 +1638,7 @@ Partial Class Program_Form
         'vlb_Speed2FSC
         '
         Me.vlb_Speed2FSC.AutoSize = True
-        Me.vlb_Speed2FSC.Location = New System.Drawing.Point(182, 69)
+        Me.vlb_Speed2FSC.Location = New System.Drawing.Point(181, 67)
         Me.vlb_Speed2FSC.Name = "vlb_Speed2FSC"
         Me.vlb_Speed2FSC.Size = New System.Drawing.Size(15, 13)
         Me.vlb_Speed2FSC.TabIndex = 1
@@ -1222,7 +1647,7 @@ Partial Class Program_Form
         'Label16
         '
         Me.Label16.AutoSize = True
-        Me.Label16.Location = New System.Drawing.Point(260, 40)
+        Me.Label16.Location = New System.Drawing.Point(260, 39)
         Me.Label16.Name = "Label16"
         Me.Label16.Size = New System.Drawing.Size(15, 13)
         Me.Label16.TabIndex = 1
@@ -1231,7 +1656,7 @@ Partial Class Program_Form
         'lb_Speed2FSC
         '
         Me.lb_Speed2FSC.AutoSize = True
-        Me.lb_Speed2FSC.Location = New System.Drawing.Point(6, 69)
+        Me.lb_Speed2FSC.Location = New System.Drawing.Point(6, 67)
         Me.lb_Speed2FSC.Name = "lb_Speed2FSC"
         Me.lb_Speed2FSC.Size = New System.Drawing.Size(95, 13)
         Me.lb_Speed2FSC.TabIndex = 1
@@ -1240,7 +1665,7 @@ Partial Class Program_Form
         'vlb_Speed1FSC
         '
         Me.vlb_Speed1FSC.AutoSize = True
-        Me.vlb_Speed1FSC.Location = New System.Drawing.Point(182, 43)
+        Me.vlb_Speed1FSC.Location = New System.Drawing.Point(182, 40)
         Me.vlb_Speed1FSC.Name = "vlb_Speed1FSC"
         Me.vlb_Speed1FSC.Size = New System.Drawing.Size(15, 13)
         Me.vlb_Speed1FSC.TabIndex = 1
@@ -1437,6 +1862,12 @@ Partial Class Program_Form
         Me.Text = "Avensys Quark Configurator"
         Me.TP_Configurator.ResumeLayout(False)
         Me.TP_Configurator.PerformLayout()
+        Me.Grp_Acc.ResumeLayout(False)
+        Me.Grp_Acc.PerformLayout()
+        Me.Grp_Live.ResumeLayout(False)
+        Me.Grp_Live.PerformLayout()
+        Me.Grp_Smoke.ResumeLayout(False)
+        Me.Grp_Smoke.PerformLayout()
         Me.Grp_DateTime.ResumeLayout(False)
         Me.Grp_DateTime.PerformLayout()
         Me.Grp_KHK.ResumeLayout(False)
@@ -1467,7 +1898,9 @@ Partial Class Program_Form
         CType(Me.num_Speed2CAP, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.NumericUpDown4, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.num_Speed1CAP, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.num_R_IAQSpeed, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.num_R_Speed3, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.num_F_IAQSpeed, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.num_F_Speed3, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.num_R_Speed2, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.num_F_Speed2, System.ComponentModel.ISupportInitialize).EndInit()
@@ -1575,12 +2008,6 @@ Partial Class Program_Form
     Friend WithEvents num_R_Speed3 As NumericUpDown
     Friend WithEvents num_R_Speed2 As NumericUpDown
     Friend WithEvents num_R_Speed1 As NumericUpDown
-    Friend WithEvents Label22 As Label
-    Friend WithEvents Label21 As Label
-    Friend WithEvents Label20 As Label
-    Friend WithEvents Label19 As Label
-    Friend WithEvents Label18 As Label
-    Friend WithEvents Label16 As Label
     Friend WithEvents Label25 As Label
     Friend WithEvents Label24 As Label
     Friend WithEvents num_RK_Speed As NumericUpDown
@@ -1599,4 +2026,45 @@ Partial Class Program_Form
     Friend WithEvents BtnUpdateDateTime As Button
     Friend WithEvents TimerDateTime As Timer
     Friend WithEvents Grp_DateTime As GroupBox
+    Friend WithEvents num_R_IAQSpeed As NumericUpDown
+    Friend WithEvents num_F_IAQSpeed As NumericUpDown
+    Friend WithEvents Label26 As Label
+    Friend WithEvents Label22 As Label
+    Friend WithEvents Label21 As Label
+    Friend WithEvents Label20 As Label
+    Friend WithEvents Label17 As Label
+    Friend WithEvents Label19 As Label
+    Friend WithEvents Label15 As Label
+    Friend WithEvents Label18 As Label
+    Friend WithEvents Label16 As Label
+    Friend WithEvents Grp_Smoke As GroupBox
+    Friend WithEvents Label28 As Label
+    Friend WithEvents CB_SmokeEnable As CheckBox
+    Friend WithEvents Label27 As Label
+    Friend WithEvents RB_SmokeNO As RadioButton
+    Friend WithEvents RB_SmokeNC As RadioButton
+    Friend WithEvents Grp_Live As GroupBox
+    Friend WithEvents Label32 As Label
+    Friend WithEvents Label31 As Label
+    Friend WithEvents Label30 As Label
+    Friend WithEvents Label29 As Label
+    Friend WithEvents lblTExhaust As Label
+    Friend WithEvents lblTSupply As Label
+    Friend WithEvents lblTReturn As Label
+    Friend WithEvents lblTFresh As Label
+    Friend WithEvents lblRReturn As Label
+    Friend WithEvents lblRFresh As Label
+    Friend WithEvents Label33 As Label
+    Friend WithEvents CB_LiveData As CheckBox
+    Friend WithEvents lblRPMReturn As Label
+    Friend WithEvents lblRPMSupply As Label
+    Friend WithEvents lblVReturn As Label
+    Friend WithEvents lblVSupply As Label
+    Friend WithEvents Label37 As Label
+    Friend WithEvents Label34 As Label
+    Friend WithEvents TB_alarm As TextBox
+    Friend WithEvents Label35 As Label
+    Friend WithEvents Grp_Acc As GroupBox
+    Friend WithEvents Btn_ResAcc As Button
+    Friend WithEvents TB_acc As TextBox
 End Class

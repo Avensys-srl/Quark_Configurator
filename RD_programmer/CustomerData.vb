@@ -29,23 +29,30 @@
     Public Property Configuration As String
     Public Property VersionHW As String
     Public Property VersionSW As String
+    Public Property Accessories As String
     Public Property SerialNumber As String
     Public Property KHK_ENABLE As Boolean
     Public Property KHK_NC As Boolean
     Public Property KHK_NO As Boolean
     Public Property KHK_VALUE As Byte
+    Public Property SMOKE_VALUE As Byte
     Public Property IMBALANCESetPoint1 As SByte
     Public Property IMBALANCE_ENABLE As Byte
     Public Property KHK_SET_POINT As Byte
     Public Property KHKIMBALANCESetPoint As SByte
     Public Property IMBALANCESetPoint2 As SByte
     Public Property IMBALANCESetPoint3 As SByte
+    Public Property IAQ_Reference As Integer
+    Public Property IAQ_Imbalance As SByte
+    Public Property IAQ_F_Speed As Integer
+    Public Property IAQ_R_Speed As Integer
 
     ' --- Costanti per identificare i set di velocità ---
     Public Const SpeedSetting1 As Integer = 1
     Public Const SpeedSetting2 As Integer = 2
     Public Const SpeedSetting3 As Integer = 3
     Public Const SpeedSettingKHK As Integer = 0 ' Usa 0 per identificare KHK
+    Public Const SpeedSettingIAQ As Integer = 4
 
     ' --- Logica di Calcolo Inversa (Privata, per UpdateSpeedSettings) ---
     Private Shared Function CalculateInverseSpeedLogic(ByVal speedF_percent As Integer, ByVal speedR_percent As Integer) As (Reference As Double, Imbalance As Double)
@@ -101,6 +108,9 @@
             Case SpeedSettingKHK
                 Me.KHK_SET_POINT = referenceSpeedByte
                 Me.KHKIMBALANCESetPoint = imbalanceSByte
+            Case SpeedSettingIAQ
+                Me.IAQ_Reference = referenceSpeedInt
+                Me.IAQ_Imbalance = imbalanceSByte
             Case Else
                 Console.WriteLine($"Errore in UpdateSpeedSettings: speedIndex ({speedIndex}) non riconosciuto.")
                 Return False
@@ -136,6 +146,9 @@
             Case SpeedSettingKHK ' 0
                 referencePercent = CDbl(Me.KHK_SET_POINT)
                 imbalancePercent = CDbl(Me.KHKIMBALANCESetPoint)
+            Case SpeedSettingIAQ                      ' <-- nuovo ramo
+                referencePercent = CDbl(Me.IAQ_Reference)
+                imbalancePercent = CDbl(Me.IAQ_Imbalance)
             Case Else
                 Console.WriteLine($"Errore in GetCalculatedSpeeds: speedIndex ({speedIndex}) non riconosciuto.")
                 Return (SpeedF:=0, SpeedR:=0) ' Indica errore o stato non valido
@@ -195,6 +208,8 @@
         FSC_CAF_Speed1 = 25
         FSC_CAF_Speed2 = 25
         FSC_CAF_Speed3 = 25
+        IAQ_Reference = 80
+        IAQ_Imbalance = 0
         CAP_Speed1 = 30
         CAP_Speed2 = 30
         CAP_Speed3 = 30
@@ -214,6 +229,7 @@
         KHK_NC = True
         KHK_NO = False
         KHK_VALUE = 2
+        SMOKE_VALUE = 0
         IMBALANCESetPoint1 = 0
         IMBALANCESetPoint2 = 0
         IMBALANCESetPoint3 = 0
@@ -232,6 +248,9 @@
         Dim calculatedSpeeds0 = Me.GetCalculatedSpeeds(0)
         FK_Speed = calculatedSpeeds0.SpeedF
         RK_Speed = calculatedSpeeds0.SpeedR
+        Dim calcIAQ = Me.GetCalculatedSpeeds(SpeedSettingIAQ)
+        IAQ_F_Speed = calcIAQ.SpeedF
+        IAQ_R_Speed = calcIAQ.SpeedR
     End Sub
 
     ' --- Altre proprietà e metodi ---
