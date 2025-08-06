@@ -1,4 +1,5 @@
-﻿Public Class LiveData
+﻿Imports System.Linq
+Public Class LiveData
 
     Public Property TemperatureFresh As Double
     Public Property TemperatureReturn As Double
@@ -11,14 +12,35 @@
     Public Property FeedbackVMotorF As Double
     Public Property RPMMotorF As Integer
     Public Property Alarms As Byte() = New Byte(12) {}
+    Public Property Belimo1_Inputs As Boolean() = New Boolean(3) {}
+    Public Property Belimo2_Inputs As Boolean() = New Boolean(3) {}
+    Public Property BelimoCurrent As Double
+
+    Public ReadOnly Property IsValid As Boolean
+        Get
+            Return TemperatureFresh > -80 AndAlso
+               TemperatureReturn > -80 AndAlso
+               TemperatureSupply > -80 AndAlso
+               TemperatureExhaust > -80 AndAlso
+               FeedbackVMotorF > 0 AndAlso
+               FeedbackVMotorR > 0 AndAlso
+               RPMMotorF > 0 AndAlso
+               RPMMotorR > 0 AndAlso
+               HumidityLeft >= 0 AndAlso
+               HumidityRight >= 0
+        End Get
+    End Property
 
     Public Overrides Function ToString() As String
-        Return $"TFresh: {TemperatureFresh}°C, TReturn: {TemperatureReturn}°C, " &
-               $"TSupply: {TemperatureSupply}°C, TExhaust: {TemperatureExhaust}°C, " &
-               $"HumL: {HumidityLeft}%, HumR: {HumidityRight}%, " &
-               $"VfbR: {FeedbackVMotorR}V, RPMR: {RPMMotorR}, " &
-               $"VfbF: {FeedbackVMotorF}V, RPMF: {RPMMotorF}, " &
-               $"Alarms: [{String.Join(", ", Alarms)}]"
+        Return $"BelimoCurrent: {BelimoCurrent} mA, " &
+       $"B1_Inputs: [{String.Join(",", Belimo1_Inputs.Select(Function(b) If(b, "1", "0")))}], " &
+       $"B2_Inputs: [{String.Join(",", Belimo2_Inputs.Select(Function(b) If(b, "1", "0")))}], " '&
+        '$"TFresh: {TemperatureFresh}°C, TReturn: {TemperatureReturn}°C, " &
+        '$"TSupply: {TemperatureSupply}°C, TExhaust: {TemperatureExhaust}°C, " &
+        '$"HumL: {HumidityLeft}%, HumR: {HumidityRight}%, " &
+        '$"VfbR: {FeedbackVMotorR}V, RPMR: {RPMMotorR}, " &
+        '$"VfbF: {FeedbackVMotorF}V, RPMF: {RPMMotorF}, " &
+        '$"Alarms: [{String.Join(", ", Alarms)}]"
     End Function
 
     Public Function GetAlarmCodes() As String

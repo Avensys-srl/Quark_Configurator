@@ -88,6 +88,8 @@ Partial Class Program_Form
         Me.lb_Configuration = New System.Windows.Forms.Label()
         Me.RB_left = New System.Windows.Forms.RadioButton()
         Me.Grp_UnitParam = New System.Windows.Forms.GroupBox()
+        Me.num_Belimo = New System.Windows.Forms.NumericUpDown()
+        Me.Label36 = New System.Windows.Forms.Label()
         Me.Label11 = New System.Windows.Forms.Label()
         Me.CB_BPDisable = New System.Windows.Forms.CheckBox()
         Me.num_SWSetpoint = New System.Windows.Forms.NumericUpDown()
@@ -189,6 +191,7 @@ Partial Class Program_Form
         Me.Grp_UnitConfig.SuspendLayout()
         CType(Me.PcBx_Quark, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Grp_UnitParam.SuspendLayout()
+        CType(Me.num_Belimo, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.num_SWSetpoint, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.num_TempSetpoint, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.num_VOCSetpoint, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -342,6 +345,7 @@ Partial Class Program_Form
         'CB_LiveData
         '
         Me.CB_LiveData.AutoSize = True
+        Me.CB_LiveData.Enabled = False
         Me.CB_LiveData.Location = New System.Drawing.Point(14, 266)
         Me.CB_LiveData.Margin = New System.Windows.Forms.Padding(2)
         Me.CB_LiveData.Name = "CB_LiveData"
@@ -585,7 +589,7 @@ Partial Class Program_Form
         '
         Me.Grp_DateTime.Controls.Add(Me.BtnUpdateDateTime)
         Me.Grp_DateTime.Controls.Add(Me.lb_DateTimeTimer)
-        Me.Grp_DateTime.Location = New System.Drawing.Point(362, 345)
+        Me.Grp_DateTime.Location = New System.Drawing.Point(362, 351)
         Me.Grp_DateTime.Name = "Grp_DateTime"
         Me.Grp_DateTime.Size = New System.Drawing.Size(224, 50)
         Me.Grp_DateTime.TabIndex = 18
@@ -913,6 +917,8 @@ Partial Class Program_Form
         '
         'Grp_UnitParam
         '
+        Me.Grp_UnitParam.Controls.Add(Me.num_Belimo)
+        Me.Grp_UnitParam.Controls.Add(Me.Label36)
         Me.Grp_UnitParam.Controls.Add(Me.Label11)
         Me.Grp_UnitParam.Controls.Add(Me.CB_BPDisable)
         Me.Grp_UnitParam.Controls.Add(Me.num_SWSetpoint)
@@ -941,15 +947,37 @@ Partial Class Program_Form
         Me.Grp_UnitParam.Controls.Add(Me.lb_BoostTimer)
         Me.Grp_UnitParam.Location = New System.Drawing.Point(361, 96)
         Me.Grp_UnitParam.Name = "Grp_UnitParam"
-        Me.Grp_UnitParam.Size = New System.Drawing.Size(225, 246)
+        Me.Grp_UnitParam.Size = New System.Drawing.Size(225, 249)
         Me.Grp_UnitParam.TabIndex = 9
         Me.Grp_UnitParam.TabStop = False
         Me.Grp_UnitParam.Text = "Parameter Setting"
         '
+        'num_Belimo
+        '
+        Me.num_Belimo.Enabled = False
+        Me.num_Belimo.Location = New System.Drawing.Point(114, 207)
+        Me.num_Belimo.Maximum = New Decimal(New Integer() {2, 0, 0, 0})
+        Me.num_Belimo.Minimum = New Decimal(New Integer() {1, 0, 0, 0})
+        Me.num_Belimo.Name = "num_Belimo"
+        Me.num_Belimo.Size = New System.Drawing.Size(49, 20)
+        Me.num_Belimo.TabIndex = 9
+        Me.num_Belimo.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        Me.num_Belimo.Value = New Decimal(New Integer() {1, 0, 0, 0})
+        '
+        'Label36
+        '
+        Me.Label36.AutoSize = True
+        Me.Label36.Location = New System.Drawing.Point(6, 210)
+        Me.Label36.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.Label36.Name = "Label36"
+        Me.Label36.Size = New System.Drawing.Size(106, 13)
+        Me.Label36.TabIndex = 8
+        Me.Label36.Text = "FKI Actuator Number"
+        '
         'Label11
         '
         Me.Label11.AutoSize = True
-        Me.Label11.Location = New System.Drawing.Point(6, 219)
+        Me.Label11.Location = New System.Drawing.Point(6, 232)
         Me.Label11.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.Label11.Name = "Label11"
         Me.Label11.Size = New System.Drawing.Size(79, 13)
@@ -959,7 +987,7 @@ Partial Class Program_Form
         'CB_BPDisable
         '
         Me.CB_BPDisable.AutoSize = True
-        Me.CB_BPDisable.Location = New System.Drawing.Point(114, 218)
+        Me.CB_BPDisable.Location = New System.Drawing.Point(114, 232)
         Me.CB_BPDisable.Margin = New System.Windows.Forms.Padding(2)
         Me.CB_BPDisable.Name = "CB_BPDisable"
         Me.CB_BPDisable.Size = New System.Drawing.Size(15, 14)
@@ -969,7 +997,7 @@ Partial Class Program_Form
         'num_SWSetpoint
         '
         Me.num_SWSetpoint.Enabled = False
-        Me.num_SWSetpoint.Location = New System.Drawing.Point(114, 188)
+        Me.num_SWSetpoint.Location = New System.Drawing.Point(114, 183)
         Me.num_SWSetpoint.Maximum = New Decimal(New Integer() {99, 0, 0, 0})
         Me.num_SWSetpoint.Minimum = New Decimal(New Integer() {12, 0, 0, 0})
         Me.num_SWSetpoint.Name = "num_SWSetpoint"
@@ -981,7 +1009,7 @@ Partial Class Program_Form
         'num_TempSetpoint
         '
         Me.num_TempSetpoint.Enabled = False
-        Me.num_TempSetpoint.Location = New System.Drawing.Point(114, 163)
+        Me.num_TempSetpoint.Location = New System.Drawing.Point(114, 159)
         Me.num_TempSetpoint.Maximum = New Decimal(New Integer() {32, 0, 0, 0})
         Me.num_TempSetpoint.Minimum = New Decimal(New Integer() {12, 0, 0, 0})
         Me.num_TempSetpoint.Name = "num_TempSetpoint"
@@ -993,7 +1021,7 @@ Partial Class Program_Form
         'num_VOCSetpoint
         '
         Me.num_VOCSetpoint.Enabled = False
-        Me.num_VOCSetpoint.Location = New System.Drawing.Point(114, 139)
+        Me.num_VOCSetpoint.Location = New System.Drawing.Point(114, 135)
         Me.num_VOCSetpoint.Minimum = New Decimal(New Integer() {2, 0, 0, 0})
         Me.num_VOCSetpoint.Name = "num_VOCSetpoint"
         Me.num_VOCSetpoint.Size = New System.Drawing.Size(49, 20)
@@ -1004,7 +1032,7 @@ Partial Class Program_Form
         'num_RHSetpoint
         '
         Me.num_RHSetpoint.Enabled = False
-        Me.num_RHSetpoint.Location = New System.Drawing.Point(114, 115)
+        Me.num_RHSetpoint.Location = New System.Drawing.Point(114, 111)
         Me.num_RHSetpoint.Maximum = New Decimal(New Integer() {99, 0, 0, 0})
         Me.num_RHSetpoint.Minimum = New Decimal(New Integer() {20, 0, 0, 0})
         Me.num_RHSetpoint.Name = "num_RHSetpoint"
@@ -1016,7 +1044,7 @@ Partial Class Program_Form
         'num_CO2Setpoint
         '
         Me.num_CO2Setpoint.Enabled = False
-        Me.num_CO2Setpoint.Location = New System.Drawing.Point(114, 90)
+        Me.num_CO2Setpoint.Location = New System.Drawing.Point(114, 87)
         Me.num_CO2Setpoint.Maximum = New Decimal(New Integer() {1500, 0, 0, 0})
         Me.num_CO2Setpoint.Minimum = New Decimal(New Integer() {700, 0, 0, 0})
         Me.num_CO2Setpoint.Name = "num_CO2Setpoint"
@@ -1028,7 +1056,7 @@ Partial Class Program_Form
         'num_FKITimer
         '
         Me.num_FKITimer.Enabled = False
-        Me.num_FKITimer.Location = New System.Drawing.Point(114, 67)
+        Me.num_FKITimer.Location = New System.Drawing.Point(114, 63)
         Me.num_FKITimer.Maximum = New Decimal(New Integer() {120, 0, 0, 0})
         Me.num_FKITimer.Minimum = New Decimal(New Integer() {7, 0, 0, 0})
         Me.num_FKITimer.Name = "num_FKITimer"
@@ -1040,7 +1068,7 @@ Partial Class Program_Form
         'num_FilterTimer
         '
         Me.num_FilterTimer.Enabled = False
-        Me.num_FilterTimer.Location = New System.Drawing.Point(114, 43)
+        Me.num_FilterTimer.Location = New System.Drawing.Point(114, 39)
         Me.num_FilterTimer.Maximum = New Decimal(New Integer() {180, 0, 0, 0})
         Me.num_FilterTimer.Minimum = New Decimal(New Integer() {30, 0, 0, 0})
         Me.num_FilterTimer.Name = "num_FilterTimer"
@@ -1052,7 +1080,7 @@ Partial Class Program_Form
         'num_BoostTimer
         '
         Me.num_BoostTimer.Enabled = False
-        Me.num_BoostTimer.Location = New System.Drawing.Point(114, 19)
+        Me.num_BoostTimer.Location = New System.Drawing.Point(114, 15)
         Me.num_BoostTimer.Maximum = New Decimal(New Integer() {240, 0, 0, 0})
         Me.num_BoostTimer.Minimum = New Decimal(New Integer() {15, 0, 0, 0})
         Me.num_BoostTimer.Name = "num_BoostTimer"
@@ -1064,7 +1092,7 @@ Partial Class Program_Form
         'Label9
         '
         Me.Label9.AutoSize = True
-        Me.Label9.Location = New System.Drawing.Point(169, 190)
+        Me.Label9.Location = New System.Drawing.Point(169, 187)
         Me.Label9.Name = "Label9"
         Me.Label9.Size = New System.Drawing.Size(18, 13)
         Me.Label9.TabIndex = 2
@@ -1073,7 +1101,7 @@ Partial Class Program_Form
         'Label8
         '
         Me.Label8.AutoSize = True
-        Me.Label8.Location = New System.Drawing.Point(169, 166)
+        Me.Label8.Location = New System.Drawing.Point(169, 163)
         Me.Label8.Name = "Label8"
         Me.Label8.Size = New System.Drawing.Size(18, 13)
         Me.Label8.TabIndex = 2
@@ -1082,7 +1110,7 @@ Partial Class Program_Form
         'lb_SWSetpoint
         '
         Me.lb_SWSetpoint.AutoSize = True
-        Me.lb_SWSetpoint.Location = New System.Drawing.Point(6, 190)
+        Me.lb_SWSetpoint.Location = New System.Drawing.Point(6, 186)
         Me.lb_SWSetpoint.Name = "lb_SWSetpoint"
         Me.lb_SWSetpoint.Size = New System.Drawing.Size(104, 13)
         Me.lb_SWSetpoint.TabIndex = 2
@@ -1091,7 +1119,7 @@ Partial Class Program_Form
         'Label7
         '
         Me.Label7.AutoSize = True
-        Me.Label7.Location = New System.Drawing.Point(169, 141)
+        Me.Label7.Location = New System.Drawing.Point(169, 138)
         Me.Label7.Name = "Label7"
         Me.Label7.Size = New System.Drawing.Size(27, 13)
         Me.Label7.TabIndex = 2
@@ -1100,7 +1128,7 @@ Partial Class Program_Form
         'lb_TempSetpoint
         '
         Me.lb_TempSetpoint.AutoSize = True
-        Me.lb_TempSetpoint.Location = New System.Drawing.Point(6, 166)
+        Me.lb_TempSetpoint.Location = New System.Drawing.Point(6, 162)
         Me.lb_TempSetpoint.Name = "lb_TempSetpoint"
         Me.lb_TempSetpoint.Size = New System.Drawing.Size(83, 13)
         Me.lb_TempSetpoint.TabIndex = 2
@@ -1109,7 +1137,7 @@ Partial Class Program_Form
         'Label6
         '
         Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(169, 117)
+        Me.Label6.Location = New System.Drawing.Point(169, 114)
         Me.Label6.Name = "Label6"
         Me.Label6.Size = New System.Drawing.Size(15, 13)
         Me.Label6.TabIndex = 2
@@ -1118,7 +1146,7 @@ Partial Class Program_Form
         'lb_VOCSetpoint
         '
         Me.lb_VOCSetpoint.AutoSize = True
-        Me.lb_VOCSetpoint.Location = New System.Drawing.Point(6, 141)
+        Me.lb_VOCSetpoint.Location = New System.Drawing.Point(6, 137)
         Me.lb_VOCSetpoint.Name = "lb_VOCSetpoint"
         Me.lb_VOCSetpoint.Size = New System.Drawing.Size(75, 13)
         Me.lb_VOCSetpoint.TabIndex = 2
@@ -1127,7 +1155,7 @@ Partial Class Program_Form
         'Label5
         '
         Me.Label5.AutoSize = True
-        Me.Label5.Location = New System.Drawing.Point(171, 92)
+        Me.Label5.Location = New System.Drawing.Point(171, 89)
         Me.Label5.Name = "Label5"
         Me.Label5.Size = New System.Drawing.Size(27, 13)
         Me.Label5.TabIndex = 2
@@ -1136,7 +1164,7 @@ Partial Class Program_Form
         'lb_RHSetpoint
         '
         Me.lb_RHSetpoint.AutoSize = True
-        Me.lb_RHSetpoint.Location = New System.Drawing.Point(6, 117)
+        Me.lb_RHSetpoint.Location = New System.Drawing.Point(6, 113)
         Me.lb_RHSetpoint.Name = "lb_RHSetpoint"
         Me.lb_RHSetpoint.Size = New System.Drawing.Size(69, 13)
         Me.lb_RHSetpoint.TabIndex = 2
@@ -1145,7 +1173,7 @@ Partial Class Program_Form
         'Label4
         '
         Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(169, 69)
+        Me.Label4.Location = New System.Drawing.Point(169, 66)
         Me.Label4.Name = "Label4"
         Me.Label4.Size = New System.Drawing.Size(29, 13)
         Me.Label4.TabIndex = 2
@@ -1154,7 +1182,7 @@ Partial Class Program_Form
         'lb_CO2Setpoint
         '
         Me.lb_CO2Setpoint.AutoSize = True
-        Me.lb_CO2Setpoint.Location = New System.Drawing.Point(6, 93)
+        Me.lb_CO2Setpoint.Location = New System.Drawing.Point(6, 89)
         Me.lb_CO2Setpoint.Name = "lb_CO2Setpoint"
         Me.lb_CO2Setpoint.Size = New System.Drawing.Size(74, 13)
         Me.lb_CO2Setpoint.TabIndex = 2
@@ -1163,7 +1191,7 @@ Partial Class Program_Form
         'Label3
         '
         Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(169, 46)
+        Me.Label3.Location = New System.Drawing.Point(169, 43)
         Me.Label3.Name = "Label3"
         Me.Label3.Size = New System.Drawing.Size(29, 13)
         Me.Label3.TabIndex = 2
@@ -1172,7 +1200,7 @@ Partial Class Program_Form
         'lb_FKITimer
         '
         Me.lb_FKITimer.AutoSize = True
-        Me.lb_FKITimer.Location = New System.Drawing.Point(6, 70)
+        Me.lb_FKITimer.Location = New System.Drawing.Point(6, 66)
         Me.lb_FKITimer.Name = "lb_FKITimer"
         Me.lb_FKITimer.Size = New System.Drawing.Size(68, 13)
         Me.lb_FKITimer.TabIndex = 2
@@ -1181,7 +1209,7 @@ Partial Class Program_Form
         'Label1
         '
         Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(169, 20)
+        Me.Label1.Location = New System.Drawing.Point(169, 17)
         Me.Label1.Name = "Label1"
         Me.Label1.Size = New System.Drawing.Size(23, 13)
         Me.Label1.TabIndex = 2
@@ -1190,7 +1218,7 @@ Partial Class Program_Form
         'lb_FilterTimer
         '
         Me.lb_FilterTimer.AutoSize = True
-        Me.lb_FilterTimer.Location = New System.Drawing.Point(6, 46)
+        Me.lb_FilterTimer.Location = New System.Drawing.Point(6, 42)
         Me.lb_FilterTimer.Name = "lb_FilterTimer"
         Me.lb_FilterTimer.Size = New System.Drawing.Size(58, 13)
         Me.lb_FilterTimer.TabIndex = 2
@@ -1199,7 +1227,7 @@ Partial Class Program_Form
         'lb_BoostTimer
         '
         Me.lb_BoostTimer.AutoSize = True
-        Me.lb_BoostTimer.Location = New System.Drawing.Point(6, 20)
+        Me.lb_BoostTimer.Location = New System.Drawing.Point(6, 16)
         Me.lb_BoostTimer.Name = "lb_BoostTimer"
         Me.lb_BoostTimer.Size = New System.Drawing.Size(63, 13)
         Me.lb_BoostTimer.TabIndex = 2
@@ -1880,6 +1908,7 @@ Partial Class Program_Form
         CType(Me.PcBx_Quark, System.ComponentModel.ISupportInitialize).EndInit()
         Me.Grp_UnitParam.ResumeLayout(False)
         Me.Grp_UnitParam.PerformLayout()
+        CType(Me.num_Belimo, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.num_SWSetpoint, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.num_TempSetpoint, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.num_VOCSetpoint, System.ComponentModel.ISupportInitialize).EndInit()
@@ -2067,4 +2096,6 @@ Partial Class Program_Form
     Friend WithEvents Grp_Acc As GroupBox
     Friend WithEvents Btn_ResAcc As Button
     Friend WithEvents TB_acc As TextBox
+    Friend WithEvents num_Belimo As NumericUpDown
+    Friend WithEvents Label36 As Label
 End Class

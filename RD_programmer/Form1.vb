@@ -35,9 +35,6 @@ Public Class Program_Form
     Private Const LiveStartMarker As String = "------ START READ LIVE DATA ------"
     Private Const LiveEndMarker As String = "------ END READ LIVE DATA ------"
 
-    Private WithEvents LiveDataTimer As New Timer() With {
-    .Interval = 3000  ' 3 secondi
-}
 
     Private Function GetCurrentApplicationData() As CustomerData
         Dim dataToReturn As New CustomerData() ' Creiamo una nuova istanza per il salvataggio
@@ -76,6 +73,8 @@ Public Class Program_Form
         Else
             dataToReturn.SUM_WINSetPoint = CInt(num_SWSetpoint.Value)
         End If
+
+        dataToReturn.Belimo = CInt(num_Belimo.Value)
 
         ' --- Popolamento Configurazione KHK ---
         dataToReturn.KHK_ENABLE = CB_KHKenable.Checked
@@ -253,6 +252,12 @@ Public Class Program_Form
             Invoke(Sub() customerData.SUM_WINSetPoint = 12)
         End If
 
+        If customerData.Belimo > 0 And customerData.Belimo <= 2 Then
+            Invoke(Sub() num_Belimo.Value = customerData.Belimo)
+        Else
+            Invoke(Sub() num_Belimo.Value = 1)
+            Invoke(Sub() customerData.Belimo = 1)
+        End If
 
         If customerData.Configuration IsNot Nothing AndAlso customerData.Configuration.Length <> 0 Then
             If customerData.Configuration.Contains("LEFT") Then
@@ -536,7 +541,7 @@ Public Class Program_Form
         Grp_UnitParam.Visible = isVisible
         Grp_KHK.Visible = isVisible
         Grp_Preset.Visible = isVisible
-        Grp_DateTime.Visible = isVisible
+        Grp_DateTime.Visible = False
         Grp_Smoke.Visible = isVisible
         Grp_Live.Visible = isVisible
         Grp_Acc.Visible = isVisible
@@ -631,9 +636,11 @@ Public Class Program_Form
         num_VOCSetpoint.Enabled = False
         num_TempSetpoint.Enabled = False
         num_SWSetpoint.Enabled = False
+        num_Belimo.Enabled = False
         num_SWSetpoint.Maximum = 99
         updatingDateTime = False
         CB_SmokeEnable.Checked = False
+        CB_LiveData.Enabled = False
         customerData.Clear()
         Invoke(Sub() tb_COMStrem.Text = String.Empty)
         UpdateFormControls()
@@ -867,6 +874,12 @@ Public Class Program_Form
                         writeStep += 1
                         ResetInactivityTimer()
                     End If
+                Case 27
+                    If tb_COMStrem.Text.Contains("Please set Belimo number (1 or 2) :") Then
+                        InviaStringa(num_Belimo.Value.ToString())
+                        writeStep += 1
+                        ResetInactivityTimer()
+                    End If
                 Case Else
                     Await Task.Delay(6000)
                     isWriting = False
@@ -879,7 +892,7 @@ Public Class Program_Form
             End Select
 
             If (isWriting) Then
-                savestep = (writeStep - 1) / 26 * 100
+                savestep = (writeStep - 1) / 27 * 100
                 PB_SaveData.Value = savestep
                 lb_SaveProg.Text = savestep.ToString() + " %"
             End If
@@ -929,6 +942,8 @@ Public Class Program_Form
         num_RHSetpoint.Enabled = True
         num_TempSetpoint.Enabled = True
         num_FKITimer.Enabled = True
+        num_Belimo.Enabled = True
+        CB_LiveData.Enabled = True
         If (customerData.SUM_WINSetPoint = 99) Then
             CB_BPDisable.Checked = True
         Else
@@ -967,21 +982,28 @@ Public Class Program_Form
                     Dim live = ParseLiveDataBlock(liveDataBuffer)
 
                     ' 3) se live contiene dati validi, aggiorna la UI
-                    If live IsNot Nothing Then
+                    If live IsNot Nothing AndAlso live.IsValid Then
                         If Me.IsHandleCreated AndAlso Not Me.IsDisposed Then
                             Me.Invoke(Sub()
                                           ' Esempio: aggiorna due label
                                           lblTFresh.Text = $"{live.TemperatureFresh:F1} °C"
-                                          lblRFresh.Text = $"{live.HumidityRight:F0} %"
                                           lblTReturn.Text = $"{live.TemperatureReturn:F1} °C"
-                                          lblRReturn.Text = $"{live.HumidityLeft:F0} %"
                                           lblTSupply.Text = $"{live.TemperatureSupply:F1} °C"
                                           lblTExhaust.Text = $"{live.TemperatureExhaust:F1} °C"
                                           lblVSupply.Text = $"{live.FeedbackVMotorF:F1} V"
                                           lblRPMSupply.Text = $"{live.RPMMotorF:D4} rpm"
                                           lblVReturn.Text = $"{live.FeedbackVMotorR:F1} V"
                                           lblRPMReturn.Text = $"{live.RPMMotorR:D4} rpm"
-                                          TB_alarm.Text = live.GetAlarmCodes
+                                          TB_alarm.Text = live.GetAlarmCodes()
+                                          If customerData.Configuration.Contains("LEFT") Then
+                                              lblRFresh.Text = $"{live.HumidityRight:F0} %"
+                                              lblRReturn.Text = $"{live.HumidityLeft:F0} %"
+                                          Else
+                                              lblRFresh.Text = $"{live.HumidityLeft:F0} %"
+                                              lblRReturn.Text = $"{live.HumidityRight:F0} %"
+                                          End If
+
+
                                       End Sub)
                         End If
                     End If
@@ -1069,6 +1091,7 @@ Public Class Program_Form
 
                 isConnected = SerialPort1.IsOpen
                 lb_status.Text = If(isConnected, "Serial " & COM_List.Text & " port is opened", "Failed to open serial port.")
+                InitializeLiveDataLabels()
                 ToggleControls(isConnected)
                 StartInactivityTimer()
             End If
@@ -1087,6 +1110,7 @@ Public Class Program_Form
             Refresh_Data()
             StopInactivityTimer()
             VisibleGroups(False)
+            InitializeLiveDataLabels()
         Catch ex As Exception
             MsgBox("Error: " & ex.Message)
         End Try
@@ -1191,6 +1215,8 @@ Public Class Program_Form
                         Integer.TryParse(numericValue, customerData.IAQ_Reference)
                     Case "IMBALANCE IAQ"
                         SByte.TryParse(numericValue, customerData.IAQ_Imbalance)
+                    Case "BELIMO"
+                        SByte.TryParse(numericValue, customerData.Belimo)
                     Case "INPUT 2"
                         SByte.TryParse(value, numero)
                         If numero < 0 AndAlso numero > 2 Then
@@ -1487,6 +1513,7 @@ Public Class Program_Form
         End If
     End Sub
 
+
     Private Sub Btn_Add_Click(sender As Object, e As EventArgs) Handles Btn_Add.Click
         ' 1. Chiedi all'utente il nome base per il file di configurazione
         Dim baseName As String = Interaction.InputBox("Enter the base name for the configuration file (e.g., MyConfig):", "Save Configuration As")
@@ -1649,9 +1676,10 @@ Public Class Program_Form
                 Me.customerData.RHSetPoint = loadedConfigData.RHSetPoint
                 Me.customerData.VOCSetPoint = loadedConfigData.VOCSetPoint
                 Me.customerData.TempSetPoint = loadedConfigData.TempSetPoint
-                Me.customerData.SUM_WINSetPoint = loadedConfigData.SUM_WINSetPoint
+            Me.customerData.SUM_WINSetPoint = loadedConfigData.SUM_WINSetPoint
+            Me.customerData.Belimo = loadedConfigData.Belimo
 
-                Me.customerData.Configuration = loadedConfigData.Configuration ' Per LEFT/RIGHT
+            Me.customerData.Configuration = loadedConfigData.Configuration ' Per LEFT/RIGHT
 
                 ' Impostazioni KHK
                 Me.customerData.KHK_ENABLE = loadedConfigData.KHK_ENABLE
@@ -1659,10 +1687,11 @@ Public Class Program_Form
                 Me.customerData.KHK_NO = loadedConfigData.KHK_NO
                 Me.customerData.KHK_VALUE = loadedConfigData.KHK_VALUE
                 Me.customerData.KHK_SET_POINT = loadedConfigData.KHK_SET_POINT
-                Me.customerData.KHKIMBALANCESetPoint = loadedConfigData.KHKIMBALANCESetPoint
+            Me.customerData.KHKIMBALANCESetPoint = loadedConfigData.KHKIMBALANCESetPoint
 
-                ' Impostazioni Sbilanciamento
-                Me.customerData.IMBALANCE_ENABLE = loadedConfigData.IMBALANCE_ENABLE
+
+            ' Impostazioni Sbilanciamento
+            Me.customerData.IMBALANCE_ENABLE = loadedConfigData.IMBALANCE_ENABLE
                 Me.customerData.IMBALANCESetPoint1 = loadedConfigData.IMBALANCESetPoint1
                 Me.customerData.IMBALANCESetPoint2 = loadedConfigData.IMBALANCESetPoint2
             Me.customerData.IMBALANCESetPoint3 = loadedConfigData.IMBALANCESetPoint3
@@ -1804,81 +1833,151 @@ Public Class Program_Form
     Private Function ParseLiveDataBlock(lines As List(Of String)) As LiveData
         Dim data As New LiveData()
         Dim alarmPattern As New Regex("Alarm\[\s*(\d+)\s*\]\s*:\s*(\d+)")
+        Dim validFields As Integer = 0
+
         For Each l In lines
             Dim parts = l.Split({":"c}, 2)
             If parts.Length <> 2 Then Continue For
-            Dim key = parts(0).Trim(), val = parts(1).Trim()
+
+            Dim key = parts(0).Trim()
+            Dim val = parts(1).Trim()
+
             Select Case True
                 Case key.StartsWith("Temperature Fresh")
-                    data.TemperatureFresh = Double.Parse(val, CultureInfo.InvariantCulture)
+                    Dim d As Double
+                    If Double.TryParse(val, NumberStyles.Float, CultureInfo.InvariantCulture, d) Then
+                        data.TemperatureFresh = d
+                        validFields += 1
+                    End If
+
                 Case key.StartsWith("Temperature Return")
-                    data.TemperatureReturn = Double.Parse(val, CultureInfo.InvariantCulture)
+                    Dim d As Double
+                    If Double.TryParse(val, NumberStyles.Float, CultureInfo.InvariantCulture, d) Then
+                        data.TemperatureReturn = d
+                        validFields += 1
+                    End If
+
                 Case key.StartsWith("Temperature Supply")
-                    data.TemperatureSupply = Double.Parse(val, CultureInfo.InvariantCulture)
+                    Dim d As Double
+                    If Double.TryParse(val, NumberStyles.Float, CultureInfo.InvariantCulture, d) Then
+                        data.TemperatureSupply = d
+                        validFields += 1
+                    End If
+
                 Case key.StartsWith("Temperature Exhaust")
-                    data.TemperatureExhaust = Double.Parse(val, CultureInfo.InvariantCulture)
+                    Dim d As Double
+                    If Double.TryParse(val, NumberStyles.Float, CultureInfo.InvariantCulture, d) Then
+                        data.TemperatureExhaust = d
+                        validFields += 1
+                    End If
+
                 Case key.StartsWith("Humidity Left")
-                    data.HumidityLeft = Integer.Parse(val)
+                    Dim i As Integer
+                    If Integer.TryParse(val, i) Then
+                        data.HumidityLeft = i
+                        validFields += 1
+                    End If
+
                 Case key.StartsWith("Humidity Right")
-                    data.HumidityRight = Integer.Parse(val)
+                    Dim i As Integer
+                    If Integer.TryParse(val, i) Then
+                        data.HumidityRight = i
+                        validFields += 1
+                    End If
+
                 Case key.StartsWith("Feedback V Motor R")
-                    data.FeedbackVMotorR = Double.Parse(val, CultureInfo.InvariantCulture)
+                    Dim d As Double
+                    If Double.TryParse(val, NumberStyles.Float, CultureInfo.InvariantCulture, d) Then
+                        data.FeedbackVMotorR = d
+                        validFields += 1
+                    End If
+
                 Case key.StartsWith("RPM Motor R")
-                    data.RPMMotorR = Integer.Parse(val)
+                    Dim i As Integer
+                    If Integer.TryParse(val, i) Then
+                        data.RPMMotorR = i
+                        validFields += 1
+                    End If
+
                 Case key.StartsWith("Feedback V Motor F")
-                    data.FeedbackVMotorF = Double.Parse(val, CultureInfo.InvariantCulture)
+                    Dim d As Double
+                    If Double.TryParse(val, NumberStyles.Float, CultureInfo.InvariantCulture, d) Then
+                        data.FeedbackVMotorF = d
+                        validFields += 1
+                    End If
+
                 Case key.StartsWith("RPM Motor F")
-                    data.RPMMotorF = Integer.Parse(val)
+                    Dim i As Integer
+                    If Integer.TryParse(val, i) Then
+                        data.RPMMotorF = i
+                        validFields += 1
+                    End If
+
+                Case key.StartsWith("Belimo1 Contacts"), key.StartsWith("Belimo2 Contacts")
+                    ' Salta riga header
+                    Continue For
+
+                Case key.StartsWith("IN5")
+                    Dim bits = val.Split({"  "}, StringSplitOptions.RemoveEmptyEntries)
+                    If bits.Length = 4 Then
+                        data.Belimo1_Inputs(0) = bits(0).EndsWith("1")
+                        data.Belimo1_Inputs(1) = bits(1).EndsWith("1")
+                        data.Belimo1_Inputs(2) = bits(2).EndsWith("1")
+                        data.Belimo1_Inputs(3) = bits(3).EndsWith("1")
+                    End If
+
+                Case key.StartsWith("IN1")
+                    Dim bits = val.Split({"  "}, StringSplitOptions.RemoveEmptyEntries)
+                    If bits.Length = 4 Then
+                        data.Belimo2_Inputs(0) = bits(0).EndsWith("1")
+                        data.Belimo2_Inputs(1) = bits(1).EndsWith("1")
+                        data.Belimo2_Inputs(2) = bits(2).EndsWith("1")
+                        data.Belimo2_Inputs(3) = bits(3).EndsWith("1")
+                    End If
+
+                Case key.StartsWith("Belimo Current")
+                    Dim rawVal = val.Replace("mA", "").Trim()
+                    Dim d As Double
+                    If Double.TryParse(rawVal, NumberStyles.Float, CultureInfo.InvariantCulture, d) Then
+                        data.BelimoCurrent = d
+                    End If
+
                 Case Else
                     Dim m = alarmPattern.Match(l)
                     If m.Success Then
                         Dim idx = Integer.Parse(m.Groups(1).Value)
-                        Dim v = Byte.Parse(m.Groups(2).Value)
-                        If idx >= 0 AndAlso idx < data.Alarms.Length Then
+                        Dim v As Byte
+                        If Byte.TryParse(m.Groups(2).Value, v) AndAlso idx >= 0 AndAlso idx < data.Alarms.Length Then
                             data.Alarms(idx) = v
                         End If
                     End If
             End Select
         Next
 
-        ' Se **tutti** i sensori e gli allarmi risultano a zero, scarta il blocco
-        If data.TemperatureFresh = 0 AndAlso
-   data.TemperatureReturn = 0 AndAlso
-   data.TemperatureSupply = 0 AndAlso
-   data.TemperatureExhaust = 0 AndAlso
-   data.HumidityLeft = 0 AndAlso
-   data.HumidityRight = 0 AndAlso
-   data.FeedbackVMotorR = 0 AndAlso
-   data.FeedbackVMotorF = 0 AndAlso
-   data.RPMMotorR = 0 AndAlso
-   data.RPMMotorF = 0 AndAlso
-   Array.TrueForAll(data.Alarms, Function(b) b = 0) Then
+        ' Considera valido solo se almeno X campi fondamentali sono presenti
+        If validFields < 10 Then
             Return Nothing
         End If
 
         Return data
     End Function
 
+
     Private Sub CB_LiveData_CheckedChanged(sender As Object, e As EventArgs) Handles CB_LiveData.CheckedChanged
         If CB_LiveData.Checked Then
-            LiveDataTimer.Start()
+            InviaStringa("b")
             Btn_RefreshData.Enabled = False
             Btn_Disconnect.Enabled = False
             Btn_SaveData.Enabled = False
             Btn_ResAcc.Enabled = False
             lb_status.Text = "Live-data polling enabled : disable to save, refresh or disconnect unit"
         Else
-            LiveDataTimer.Stop()
+            InviaStringa("b")
             Btn_RefreshData.Enabled = True
             Btn_Disconnect.Enabled = True
             Btn_SaveData.Enabled = True
             Btn_ResAcc.Enabled = True
             lb_status.Text = "Live-data stopped successfully."
-        End If
-    End Sub
-    Private Sub LiveDataTimer_Tick(sender As Object, e As EventArgs) Handles LiveDataTimer.Tick
-        If SerialPort1.IsOpen Then
-            InviaStringa("b")
         End If
     End Sub
 
@@ -1891,18 +1990,26 @@ Public Class Program_Form
     Private Sub Program_Form_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
         ' Se live‐data è ancora attivo, disattivalo prima di chiudere
         If CB_LiveData.Checked Then
-            ' 1) Ferma il timer che manda "b" ogni 2 secondi
-            LiveDataTimer.Stop()     ' o qualunque Timer stai usando
-
-            ' 2) (Opzionale) Invia un comando per disattivare il live‐data sul dispositivo
-            '    se il firmware richiede una “b” di spegnimento, altrimenti ometti.
-            'InviaStringa("b")      
-
-            ' 3) Togli il check per tenere lo stato UI coerente
             CB_LiveData.Checked = False
         End If
     End Sub
 
+    Private Sub InitializeLiveDataLabels()
+        lblTFresh.Text = "00.0 °C"
+        lblTReturn.Text = "00.0 °C"
+        lblTSupply.Text = "00.0 °C"
+        lblTExhaust.Text = "00.0 °C"
+
+        lblVSupply.Text = "00.0 V"
+        lblRPMSupply.Text = "0000 rpm"
+        lblVReturn.Text = "00.0 V"
+        lblRPMReturn.Text = "0000 rpm"
+
+        lblRFresh.Text = "00 %"
+        lblRReturn.Text = "00 %"
+
+        TB_alarm.Text = ""
+    End Sub
 End Class
 
 
