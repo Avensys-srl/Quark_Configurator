@@ -417,6 +417,16 @@ Public Class Program_Form
             Invoke(Sub() TB_acc.Text = "-----")
         End If
 
+        If customerData IsNot Nothing AndAlso
+       customerData.Accessories IsNot Nothing AndAlso
+       customerData.Accessories.Contains("EHD") Then
+
+            Me.Invoke(Sub()
+                          lblTAfterHeater.Visible = True
+                          lblTHeater.Visible = True
+                      End Sub)
+        End If
+
         If customerData.SerialNumber IsNot Nothing AndAlso customerData.SerialNumber.Length <> 0 Then
             Invoke(Sub() lb_SerialNumber.Text = "Serial Number: " + customerData.SerialNumber)
             If customerData.SerialNumber.StartsWith("9999") Then
@@ -436,7 +446,13 @@ Public Class Program_Form
             Invoke(Sub() lb_SerialNumber.Text = "Serial Number:")
         End If
 
-
+        If customerData.no_FKI Then
+            num_Belimo.Enabled = False
+            num_FKITimer.Enabled = False
+        Else
+            num_Belimo.Enabled = True
+            num_FKITimer.Enabled = True
+        End If
 
     End Sub
 
@@ -941,8 +957,6 @@ Public Class Program_Form
         num_FilterTimer.Enabled = True
         num_RHSetpoint.Enabled = True
         num_TempSetpoint.Enabled = True
-        num_FKITimer.Enabled = True
-        num_Belimo.Enabled = True
         CB_LiveData.Enabled = True
         If (customerData.SUM_WINSetPoint = 99) Then
             CB_BPDisable.Checked = True
@@ -961,14 +975,12 @@ Public Class Program_Form
             logBuffer.Append(receivedData)
 
             ' Controlla se il buffer contiene una linea completa
-            While logBuffer.ToString().Contains(vbLf)
-                ' Trova la posizione della prima newline
-                Dim lineEndIndex As Integer = logBuffer.ToString().IndexOf(vbLf)
+            While True
+                Dim s As String = logBuffer.ToString()
+                Dim lineEndIndex As Integer = s.IndexOf(vbLf)
+                If lineEndIndex < 0 Then Exit While
 
-                ' Estrai la linea completa
-                Dim completeLine As String = logBuffer.ToString().Substring(0, lineEndIndex).Trim()
-
-                ' Rimuovi la riga dal buffer
+                Dim completeLine As String = s.Substring(0, lineEndIndex).Trim()
                 logBuffer.Remove(0, lineEndIndex + 1)
 
                 ' Start/End LIVE DATA
@@ -990,6 +1002,7 @@ Public Class Program_Form
                                           lblTReturn.Text = $"{live.TemperatureReturn:F1} °C"
                                           lblTSupply.Text = $"{live.TemperatureSupply:F1} °C"
                                           lblTExhaust.Text = $"{live.TemperatureExhaust:F1} °C"
+                                          lblTHeater.Text = $"{live.TemperatureHeater:F1} °C"
                                           lblVSupply.Text = $"{live.FeedbackVMotorF:F1} V"
                                           lblRPMSupply.Text = $"{live.RPMMotorF:D4} rpm"
                                           lblVReturn.Text = $"{live.FeedbackVMotorR:F1} V"
@@ -1223,6 +1236,8 @@ Public Class Program_Form
                             numero = 0
                         End If
                         customerData.SMOKE_VALUE = numero
+                    Case "NO_FKI"
+                        SByte.TryParse(numericValue, customerData.no_FKI)
                 End Select
             End If
         Next
@@ -1365,7 +1380,17 @@ Public Class Program_Form
         End If
     End Sub
 
+    Private Function ShowSaveDisclaimer() As Boolean
+        Dim msg = "Please double-check the number of configured FKI actuators or verify the jumper position." & vbCrLf &
+              "Refer to the manual for the correct jumper setting before proceeding." & vbCrLf & vbCrLf &
+              "Continue with saving?"
+        Return MessageBox.Show(msg, "Important Safety Check",
+                           MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) = DialogResult.OK
+    End Function
+
+
     Private Sub Btn_SaveData_Click(sender As Object, e As EventArgs) Handles Btn_SaveData.Click
+        If Not ShowSaveDisclaimer() Then Exit Sub
         isWriting = True
         PB_SaveData.Visible = isWriting
         lb_SaveProg.Visible = isWriting
@@ -1885,6 +1910,13 @@ Public Class Program_Form
                         validFields += 1
                     End If
 
+                Case key.StartsWith("T Heater")
+                    Dim d As Double
+                    If Double.TryParse(val, NumberStyles.Float, CultureInfo.InvariantCulture, d) Then
+                        data.TemperatureHeater = d
+                        validFields += 1
+                    End If
+
                 Case key.StartsWith("Feedback V Motor R")
                     Dim d As Double
                     If Double.TryParse(val, NumberStyles.Float, CultureInfo.InvariantCulture, d) Then
@@ -1955,7 +1987,7 @@ Public Class Program_Form
         Next
 
         ' Considera valido solo se almeno X campi fondamentali sono presenti
-        If validFields < 10 Then
+        If validFields < 11 Then
             Return Nothing
         End If
 
@@ -1999,6 +2031,9 @@ Public Class Program_Form
         lblTReturn.Text = "00.0 °C"
         lblTSupply.Text = "00.0 °C"
         lblTExhaust.Text = "00.0 °C"
+        lblTHeater.Text = "00.0 °C"
+        lblTHeater.Visible = False
+        lblTAfterHeater.Visible = False
 
         lblVSupply.Text = "00.0 V"
         lblRPMSupply.Text = "0000 rpm"
@@ -2010,6 +2045,8 @@ Public Class Program_Form
 
         TB_alarm.Text = ""
     End Sub
+
+
 End Class
 
 

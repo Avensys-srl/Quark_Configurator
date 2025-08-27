@@ -7,6 +7,7 @@ Public Class LiveData
     Public Property TemperatureExhaust As Double
     Public Property HumidityLeft As Integer
     Public Property HumidityRight As Integer
+    Public Property TemperatureHeater As Double
     Public Property FeedbackVMotorR As Double
     Public Property RPMMotorR As Integer
     Public Property FeedbackVMotorF As Double
@@ -22,10 +23,11 @@ Public Class LiveData
                TemperatureReturn > -80 AndAlso
                TemperatureSupply > -80 AndAlso
                TemperatureExhaust > -80 AndAlso
-               FeedbackVMotorF > 0 AndAlso
-               FeedbackVMotorR > 0 AndAlso
-               RPMMotorF > 0 AndAlso
-               RPMMotorR > 0 AndAlso
+               TemperatureHeater > -80 AndAlso
+               FeedbackVMotorF >= 0 AndAlso
+               FeedbackVMotorR >= 0 AndAlso
+               RPMMotorF >= 0 AndAlso
+               RPMMotorR >= 0 AndAlso
                HumidityLeft >= 0 AndAlso
                HumidityRight >= 0
         End Get

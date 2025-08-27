@@ -179,6 +179,8 @@ Partial Class Program_Form
         Me.SerialDataTimer = New System.Windows.Forms.Timer(Me.components)
         Me.lb_QKvers = New System.Windows.Forms.Label()
         Me.TimerDateTime = New System.Windows.Forms.Timer(Me.components)
+        Me.lblTAfterHeater = New System.Windows.Forms.Label()
+        Me.lblTHeater = New System.Windows.Forms.Label()
         Me.TP_Configurator.SuspendLayout()
         Me.Grp_Acc.SuspendLayout()
         Me.Grp_Live.SuspendLayout()
@@ -291,7 +293,9 @@ Partial Class Program_Form
         Me.Grp_Live.Controls.Add(Me.Label35)
         Me.Grp_Live.Controls.Add(Me.Label33)
         Me.Grp_Live.Controls.Add(Me.CB_LiveData)
+        Me.Grp_Live.Controls.Add(Me.lblTHeater)
         Me.Grp_Live.Controls.Add(Me.lblTExhaust)
+        Me.Grp_Live.Controls.Add(Me.lblTAfterHeater)
         Me.Grp_Live.Controls.Add(Me.Label32)
         Me.Grp_Live.Controls.Add(Me.lblTSupply)
         Me.Grp_Live.Controls.Add(Me.Label31)
@@ -357,7 +361,7 @@ Partial Class Program_Form
         '
         Me.lblTExhaust.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lblTExhaust.AutoSize = True
-        Me.lblTExhaust.Location = New System.Drawing.Point(72, 83)
+        Me.lblTExhaust.Location = New System.Drawing.Point(81, 80)
         Me.lblTExhaust.Name = "lblTExhaust"
         Me.lblTExhaust.Size = New System.Drawing.Size(42, 13)
         Me.lblTExhaust.TabIndex = 0
@@ -367,7 +371,7 @@ Partial Class Program_Form
         'Label32
         '
         Me.Label32.AutoSize = True
-        Me.Label32.Location = New System.Drawing.Point(7, 83)
+        Me.Label32.Location = New System.Drawing.Point(7, 80)
         Me.Label32.Name = "Label32"
         Me.Label32.Size = New System.Drawing.Size(51, 13)
         Me.Label32.TabIndex = 0
@@ -377,7 +381,7 @@ Partial Class Program_Form
         '
         Me.lblTSupply.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lblTSupply.AutoSize = True
-        Me.lblTSupply.Location = New System.Drawing.Point(72, 62)
+        Me.lblTSupply.Location = New System.Drawing.Point(81, 60)
         Me.lblTSupply.Name = "lblTSupply"
         Me.lblTSupply.Size = New System.Drawing.Size(42, 13)
         Me.lblTSupply.TabIndex = 0
@@ -387,7 +391,7 @@ Partial Class Program_Form
         'Label31
         '
         Me.Label31.AutoSize = True
-        Me.Label31.Location = New System.Drawing.Point(7, 62)
+        Me.Label31.Location = New System.Drawing.Point(7, 60)
         Me.Label31.Name = "Label31"
         Me.Label31.Size = New System.Drawing.Size(45, 13)
         Me.Label31.TabIndex = 0
@@ -397,7 +401,7 @@ Partial Class Program_Form
         '
         Me.lblRReturn.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lblRReturn.AutoSize = True
-        Me.lblRReturn.Location = New System.Drawing.Point(120, 41)
+        Me.lblRReturn.Location = New System.Drawing.Point(129, 40)
         Me.lblRReturn.Name = "lblRReturn"
         Me.lblRReturn.Size = New System.Drawing.Size(30, 13)
         Me.lblRReturn.TabIndex = 0
@@ -408,7 +412,7 @@ Partial Class Program_Form
         '
         Me.lblTReturn.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lblTReturn.AutoSize = True
-        Me.lblTReturn.Location = New System.Drawing.Point(72, 41)
+        Me.lblTReturn.Location = New System.Drawing.Point(81, 40)
         Me.lblTReturn.Name = "lblTReturn"
         Me.lblTReturn.Size = New System.Drawing.Size(42, 13)
         Me.lblTReturn.TabIndex = 0
@@ -419,7 +423,7 @@ Partial Class Program_Form
         '
         Me.lblRPMReturn.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lblRPMReturn.AutoSize = True
-        Me.lblRPMReturn.Location = New System.Drawing.Point(120, 130)
+        Me.lblRPMReturn.Location = New System.Drawing.Point(129, 140)
         Me.lblRPMReturn.Name = "lblRPMReturn"
         Me.lblRPMReturn.Size = New System.Drawing.Size(51, 13)
         Me.lblRPMReturn.TabIndex = 0
@@ -430,7 +434,7 @@ Partial Class Program_Form
         '
         Me.lblRPMSupply.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lblRPMSupply.AutoSize = True
-        Me.lblRPMSupply.Location = New System.Drawing.Point(120, 111)
+        Me.lblRPMSupply.Location = New System.Drawing.Point(129, 121)
         Me.lblRPMSupply.Name = "lblRPMSupply"
         Me.lblRPMSupply.Size = New System.Drawing.Size(51, 13)
         Me.lblRPMSupply.TabIndex = 0
@@ -441,7 +445,7 @@ Partial Class Program_Form
         '
         Me.lblRFresh.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lblRFresh.AutoSize = True
-        Me.lblRFresh.Location = New System.Drawing.Point(120, 20)
+        Me.lblRFresh.Location = New System.Drawing.Point(129, 20)
         Me.lblRFresh.Name = "lblRFresh"
         Me.lblRFresh.Size = New System.Drawing.Size(30, 13)
         Me.lblRFresh.TabIndex = 0
@@ -451,7 +455,7 @@ Partial Class Program_Form
         'Label30
         '
         Me.Label30.AutoSize = True
-        Me.Label30.Location = New System.Drawing.Point(7, 41)
+        Me.Label30.Location = New System.Drawing.Point(7, 40)
         Me.Label30.Name = "Label30"
         Me.Label30.Size = New System.Drawing.Size(45, 13)
         Me.Label30.TabIndex = 0
@@ -461,7 +465,7 @@ Partial Class Program_Form
         '
         Me.lblVReturn.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lblVReturn.AutoSize = True
-        Me.lblVReturn.Location = New System.Drawing.Point(72, 130)
+        Me.lblVReturn.Location = New System.Drawing.Point(81, 140)
         Me.lblVReturn.Name = "lblVReturn"
         Me.lblVReturn.Size = New System.Drawing.Size(38, 13)
         Me.lblVReturn.TabIndex = 0
@@ -472,7 +476,7 @@ Partial Class Program_Form
         '
         Me.lblVSupply.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lblVSupply.AutoSize = True
-        Me.lblVSupply.Location = New System.Drawing.Point(72, 111)
+        Me.lblVSupply.Location = New System.Drawing.Point(81, 121)
         Me.lblVSupply.Name = "lblVSupply"
         Me.lblVSupply.Size = New System.Drawing.Size(38, 13)
         Me.lblVSupply.TabIndex = 0
@@ -483,7 +487,7 @@ Partial Class Program_Form
         '
         Me.lblTFresh.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lblTFresh.AutoSize = True
-        Me.lblTFresh.Location = New System.Drawing.Point(72, 20)
+        Me.lblTFresh.Location = New System.Drawing.Point(81, 20)
         Me.lblTFresh.Name = "lblTFresh"
         Me.lblTFresh.Size = New System.Drawing.Size(42, 13)
         Me.lblTFresh.TabIndex = 0
@@ -493,7 +497,7 @@ Partial Class Program_Form
         'Label37
         '
         Me.Label37.AutoSize = True
-        Me.Label37.Location = New System.Drawing.Point(7, 130)
+        Me.Label37.Location = New System.Drawing.Point(7, 140)
         Me.Label37.Name = "Label37"
         Me.Label37.Size = New System.Drawing.Size(66, 13)
         Me.Label37.TabIndex = 0
@@ -502,7 +506,7 @@ Partial Class Program_Form
         'Label34
         '
         Me.Label34.AutoSize = True
-        Me.Label34.Location = New System.Drawing.Point(7, 111)
+        Me.Label34.Location = New System.Drawing.Point(7, 121)
         Me.Label34.Name = "Label34"
         Me.Label34.Size = New System.Drawing.Size(66, 13)
         Me.Label34.TabIndex = 0
@@ -1875,6 +1879,28 @@ Partial Class Program_Form
         '
         Me.TimerDateTime.Interval = 1000
         '
+        'lblTAfterHeater
+        '
+        Me.lblTAfterHeater.AutoSize = True
+        Me.lblTAfterHeater.Location = New System.Drawing.Point(7, 100)
+        Me.lblTAfterHeater.Name = "lblTAfterHeater"
+        Me.lblTAfterHeater.Size = New System.Drawing.Size(70, 13)
+        Me.lblTAfterHeater.TabIndex = 0
+        Me.lblTAfterHeater.Text = "After Heater :"
+        Me.lblTAfterHeater.Visible = False
+        '
+        'lblTHeater
+        '
+        Me.lblTHeater.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblTHeater.AutoSize = True
+        Me.lblTHeater.Location = New System.Drawing.Point(81, 100)
+        Me.lblTHeater.Name = "lblTHeater"
+        Me.lblTHeater.Size = New System.Drawing.Size(42, 13)
+        Me.lblTHeater.TabIndex = 0
+        Me.lblTHeater.Text = "00.0 °C"
+        Me.lblTHeater.TextAlign = System.Drawing.ContentAlignment.TopRight
+        Me.lblTHeater.Visible = False
+        '
         'Program_Form
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -2098,4 +2124,6 @@ Partial Class Program_Form
     Friend WithEvents TB_acc As TextBox
     Friend WithEvents num_Belimo As NumericUpDown
     Friend WithEvents Label36 As Label
+    Friend WithEvents lblTHeater As Label
+    Friend WithEvents lblTAfterHeater As Label
 End Class
