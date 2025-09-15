@@ -34,7 +34,9 @@ Partial Class Program_Form
         Me.Label35 = New System.Windows.Forms.Label()
         Me.Label33 = New System.Windows.Forms.Label()
         Me.CB_LiveData = New System.Windows.Forms.CheckBox()
+        Me.lblTHeater = New System.Windows.Forms.Label()
         Me.lblTExhaust = New System.Windows.Forms.Label()
+        Me.lblTAfterHeater = New System.Windows.Forms.Label()
         Me.Label32 = New System.Windows.Forms.Label()
         Me.lblTSupply = New System.Windows.Forms.Label()
         Me.Label31 = New System.Windows.Forms.Label()
@@ -90,7 +92,9 @@ Partial Class Program_Form
         Me.Grp_UnitParam = New System.Windows.Forms.GroupBox()
         Me.num_Belimo = New System.Windows.Forms.NumericUpDown()
         Me.Label36 = New System.Windows.Forms.Label()
-        Me.Label11 = New System.Windows.Forms.Label()
+        Me.lbl_DisRH = New System.Windows.Forms.Label()
+        Me.CB_RHDisable = New System.Windows.Forms.CheckBox()
+        Me.lbl_DisBypass = New System.Windows.Forms.Label()
         Me.CB_BPDisable = New System.Windows.Forms.CheckBox()
         Me.num_SWSetpoint = New System.Windows.Forms.NumericUpDown()
         Me.num_TempSetpoint = New System.Windows.Forms.NumericUpDown()
@@ -179,8 +183,7 @@ Partial Class Program_Form
         Me.SerialDataTimer = New System.Windows.Forms.Timer(Me.components)
         Me.lb_QKvers = New System.Windows.Forms.Label()
         Me.TimerDateTime = New System.Windows.Forms.Timer(Me.components)
-        Me.lblTAfterHeater = New System.Windows.Forms.Label()
-        Me.lblTHeater = New System.Windows.Forms.Label()
+        Me.flpStatus = New System.Windows.Forms.FlowLayoutPanel()
         Me.TP_Configurator.SuspendLayout()
         Me.Grp_Acc.SuspendLayout()
         Me.Grp_Live.SuspendLayout()
@@ -228,6 +231,7 @@ Partial Class Program_Form
         '
         'TP_Configurator
         '
+        Me.TP_Configurator.Controls.Add(Me.flpStatus)
         Me.TP_Configurator.Controls.Add(Me.Grp_Acc)
         Me.TP_Configurator.Controls.Add(Me.Grp_Live)
         Me.TP_Configurator.Controls.Add(Me.Grp_Smoke)
@@ -253,7 +257,7 @@ Partial Class Program_Form
         Me.TP_Configurator.Location = New System.Drawing.Point(4, 22)
         Me.TP_Configurator.Name = "TP_Configurator"
         Me.TP_Configurator.Padding = New System.Windows.Forms.Padding(3)
-        Me.TP_Configurator.Size = New System.Drawing.Size(1073, 481)
+        Me.TP_Configurator.Size = New System.Drawing.Size(1073, 518)
         Me.TP_Configurator.TabIndex = 0
         Me.TP_Configurator.Text = "Configurator"
         Me.TP_Configurator.UseVisualStyleBackColor = True
@@ -357,6 +361,18 @@ Partial Class Program_Form
         Me.CB_LiveData.TabIndex = 16
         Me.CB_LiveData.UseVisualStyleBackColor = True
         '
+        'lblTHeater
+        '
+        Me.lblTHeater.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblTHeater.AutoSize = True
+        Me.lblTHeater.Location = New System.Drawing.Point(81, 100)
+        Me.lblTHeater.Name = "lblTHeater"
+        Me.lblTHeater.Size = New System.Drawing.Size(42, 13)
+        Me.lblTHeater.TabIndex = 0
+        Me.lblTHeater.Text = "00.0 °C"
+        Me.lblTHeater.TextAlign = System.Drawing.ContentAlignment.TopRight
+        Me.lblTHeater.Visible = False
+        '
         'lblTExhaust
         '
         Me.lblTExhaust.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
@@ -367,6 +383,16 @@ Partial Class Program_Form
         Me.lblTExhaust.TabIndex = 0
         Me.lblTExhaust.Text = "00.0 °C"
         Me.lblTExhaust.TextAlign = System.Drawing.ContentAlignment.TopRight
+        '
+        'lblTAfterHeater
+        '
+        Me.lblTAfterHeater.AutoSize = True
+        Me.lblTAfterHeater.Location = New System.Drawing.Point(7, 100)
+        Me.lblTAfterHeater.Name = "lblTAfterHeater"
+        Me.lblTAfterHeater.Size = New System.Drawing.Size(70, 13)
+        Me.lblTAfterHeater.TabIndex = 0
+        Me.lblTAfterHeater.Text = "After Heater :"
+        Me.lblTAfterHeater.Visible = False
         '
         'Label32
         '
@@ -451,6 +477,7 @@ Partial Class Program_Form
         Me.lblRFresh.TabIndex = 0
         Me.lblRFresh.Text = "00 %"
         Me.lblRFresh.TextAlign = System.Drawing.ContentAlignment.TopRight
+        Me.lblRFresh.Visible = False
         '
         'Label30
         '
@@ -923,7 +950,9 @@ Partial Class Program_Form
         '
         Me.Grp_UnitParam.Controls.Add(Me.num_Belimo)
         Me.Grp_UnitParam.Controls.Add(Me.Label36)
-        Me.Grp_UnitParam.Controls.Add(Me.Label11)
+        Me.Grp_UnitParam.Controls.Add(Me.lbl_DisRH)
+        Me.Grp_UnitParam.Controls.Add(Me.CB_RHDisable)
+        Me.Grp_UnitParam.Controls.Add(Me.lbl_DisBypass)
         Me.Grp_UnitParam.Controls.Add(Me.CB_BPDisable)
         Me.Grp_UnitParam.Controls.Add(Me.num_SWSetpoint)
         Me.Grp_UnitParam.Controls.Add(Me.num_TempSetpoint)
@@ -978,20 +1007,40 @@ Partial Class Program_Form
         Me.Label36.TabIndex = 8
         Me.Label36.Text = "FKI Actuator Number"
         '
-        'Label11
+        'lbl_DisRH
         '
-        Me.Label11.AutoSize = True
-        Me.Label11.Location = New System.Drawing.Point(6, 232)
-        Me.Label11.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
-        Me.Label11.Name = "Label11"
-        Me.Label11.Size = New System.Drawing.Size(79, 13)
-        Me.Label11.TabIndex = 7
-        Me.Label11.Text = "Disable Bypass"
+        Me.lbl_DisRH.AutoSize = True
+        Me.lbl_DisRH.Location = New System.Drawing.Point(144, 232)
+        Me.lbl_DisRH.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.lbl_DisRH.Name = "lbl_DisRH"
+        Me.lbl_DisRH.Size = New System.Drawing.Size(61, 13)
+        Me.lbl_DisRH.TabIndex = 7
+        Me.lbl_DisRH.Text = "Disable RH"
+        '
+        'CB_RHDisable
+        '
+        Me.CB_RHDisable.AutoSize = True
+        Me.CB_RHDisable.Location = New System.Drawing.Point(205, 232)
+        Me.CB_RHDisable.Margin = New System.Windows.Forms.Padding(2)
+        Me.CB_RHDisable.Name = "CB_RHDisable"
+        Me.CB_RHDisable.Size = New System.Drawing.Size(15, 14)
+        Me.CB_RHDisable.TabIndex = 6
+        Me.CB_RHDisable.UseVisualStyleBackColor = True
+        '
+        'lbl_DisBypass
+        '
+        Me.lbl_DisBypass.AutoSize = True
+        Me.lbl_DisBypass.Location = New System.Drawing.Point(6, 232)
+        Me.lbl_DisBypass.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.lbl_DisBypass.Name = "lbl_DisBypass"
+        Me.lbl_DisBypass.Size = New System.Drawing.Size(79, 13)
+        Me.lbl_DisBypass.TabIndex = 7
+        Me.lbl_DisBypass.Text = "Disable Bypass"
         '
         'CB_BPDisable
         '
         Me.CB_BPDisable.AutoSize = True
-        Me.CB_BPDisable.Location = New System.Drawing.Point(114, 232)
+        Me.CB_BPDisable.Location = New System.Drawing.Point(85, 232)
         Me.CB_BPDisable.Margin = New System.Windows.Forms.Padding(2)
         Me.CB_BPDisable.Name = "CB_BPDisable"
         Me.CB_BPDisable.Size = New System.Drawing.Size(15, 14)
@@ -1800,7 +1849,7 @@ Partial Class Program_Form
         Me.Tab_Main.Location = New System.Drawing.Point(12, 12)
         Me.Tab_Main.Name = "Tab_Main"
         Me.Tab_Main.SelectedIndex = 0
-        Me.Tab_Main.Size = New System.Drawing.Size(1081, 507)
+        Me.Tab_Main.Size = New System.Drawing.Size(1081, 544)
         Me.Tab_Main.TabIndex = 7
         '
         'TP_Shell
@@ -1814,7 +1863,7 @@ Partial Class Program_Form
         Me.TP_Shell.Name = "TP_Shell"
         Me.TP_Shell.Size = New System.Drawing.Size(1073, 481)
         Me.TP_Shell.TabIndex = 1
-        Me.TP_Shell.Text = "Shell"
+        Me.TP_Shell.Text = "Service Data"
         Me.TP_Shell.UseVisualStyleBackColor = True
         '
         'CB_Timestamp
@@ -1879,33 +1928,24 @@ Partial Class Program_Form
         '
         Me.TimerDateTime.Interval = 1000
         '
-        'lblTAfterHeater
+        'flpStatus
         '
-        Me.lblTAfterHeater.AutoSize = True
-        Me.lblTAfterHeater.Location = New System.Drawing.Point(7, 100)
-        Me.lblTAfterHeater.Name = "lblTAfterHeater"
-        Me.lblTAfterHeater.Size = New System.Drawing.Size(70, 13)
-        Me.lblTAfterHeater.TabIndex = 0
-        Me.lblTAfterHeater.Text = "After Heater :"
-        Me.lblTAfterHeater.Visible = False
-        '
-        'lblTHeater
-        '
-        Me.lblTHeater.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.lblTHeater.AutoSize = True
-        Me.lblTHeater.Location = New System.Drawing.Point(81, 100)
-        Me.lblTHeater.Name = "lblTHeater"
-        Me.lblTHeater.Size = New System.Drawing.Size(42, 13)
-        Me.lblTHeater.TabIndex = 0
-        Me.lblTHeater.Text = "00.0 °C"
-        Me.lblTHeater.TextAlign = System.Drawing.ContentAlignment.TopRight
-        Me.lblTHeater.Visible = False
+        Me.flpStatus.AutoSize = True
+        Me.flpStatus.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
+        Me.flpStatus.BackColor = System.Drawing.Color.LightGray
+        Me.flpStatus.Dock = System.Windows.Forms.DockStyle.Bottom
+        Me.flpStatus.Location = New System.Drawing.Point(3, 503)
+        Me.flpStatus.Name = "flpStatus"
+        Me.flpStatus.Padding = New System.Windows.Forms.Padding(6)
+        Me.flpStatus.Size = New System.Drawing.Size(1067, 12)
+        Me.flpStatus.TabIndex = 22
+        Me.flpStatus.WrapContents = False
         '
         'Program_Form
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(1098, 527)
+        Me.ClientSize = New System.Drawing.Size(1098, 560)
         Me.Controls.Add(Me.lb_QKvers)
         Me.Controls.Add(Me.Tab_Main)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D
@@ -2053,7 +2093,7 @@ Partial Class Program_Form
     Friend WithEvents num_FK_Speed As NumericUpDown
     Friend WithEvents lb_KHKSetpoint As Label
     Friend WithEvents lb_KHKContactBehavoir As Label
-    Friend WithEvents Label11 As Label
+    Friend WithEvents lbl_DisBypass As Label
     Friend WithEvents CB_BPDisable As CheckBox
     Friend WithEvents CB_SaveLog As CheckBox
     Friend WithEvents CB_Timestamp As CheckBox
@@ -2126,4 +2166,7 @@ Partial Class Program_Form
     Friend WithEvents Label36 As Label
     Friend WithEvents lblTHeater As Label
     Friend WithEvents lblTAfterHeater As Label
+    Friend WithEvents lbl_DisRH As Label
+    Friend WithEvents CB_RHDisable As CheckBox
+    Friend WithEvents flpStatus As FlowLayoutPanel
 End Class

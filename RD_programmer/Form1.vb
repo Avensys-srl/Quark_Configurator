@@ -35,6 +35,23 @@ Public Class Program_Form
     Private Const LiveStartMarker As String = "------ START READ LIVE DATA ------"
     Private Const LiveEndMarker As String = "------ END READ LIVE DATA ------"
 
+    ' === Palette (usa questi colori per coerenza) ===
+    Private Shared ReadOnly ColBlue As Color = Color.FromArgb(37, 99, 235)     ' operativi
+    Private Shared ReadOnly ColGreen As Color = Color.FromArgb(22, 163, 74)    ' ok/boost
+    Private Shared ReadOnly ColAmber As Color = Color.FromArgb(245, 158, 11)   ' override
+    Private Shared ReadOnly ColPurple As Color = Color.FromArgb(124, 58, 237)  ' update
+    Private Shared ReadOnly ColText As Color = Color.White
+    Private Shared ReadOnly ColBack As Color = Color.FromArgb(243, 244, 246)   ' grigino panel
+    Private Shared ReadOnly ColRed As Color = Color.FromArgb(220, 38, 38) ' rosso acceso
+
+
+    ' === Timer opzionale per "pulsare" i badge dinamici (es. Bypass in movimento) ===
+    Private ReadOnly _pulseTimer As New Timer() With {.Interval = 350}
+    Private _pulseToggle As Boolean = False
+
+    ' Manteniamo un riferimento ai badge che vogliamo far lampeggiare
+    Private _lblBypMov As Label = Nothing
+
 
     Private Function GetCurrentApplicationData() As CustomerData
         Dim dataToReturn As New CustomerData() ' Creiamo una nuova istanza per il salvataggio
@@ -561,6 +578,7 @@ Public Class Program_Form
         Grp_Smoke.Visible = isVisible
         Grp_Live.Visible = isVisible
         Grp_Acc.Visible = isVisible
+        flpStatus.Visible = isVisible
         LoadXmlConfigFiles()
     End Sub
 
@@ -729,6 +747,8 @@ Public Class Program_Form
 
 
         Dim savestep As Integer
+
+        CB_LiveData.Enabled = Not isWriting
 
         If isWriting Then
             Select Case writeStep
@@ -964,6 +984,12 @@ Public Class Program_Form
             CB_BPDisable.Checked = False
             num_SWSetpoint.Enabled = True
         End If
+        If (customerData.RHSetPoint = 99) Then
+            CB_RHDisable.Checked = True
+        Else
+            CB_RHDisable.Checked = False
+            num_SWSetpoint.Enabled = True
+        End If
     End Sub
 
 
@@ -1008,15 +1034,14 @@ Public Class Program_Form
                                           lblVReturn.Text = $"{live.FeedbackVMotorR:F1} V"
                                           lblRPMReturn.Text = $"{live.RPMMotorR:D4} rpm"
                                           TB_alarm.Text = live.GetAlarmCodes()
-                                          If customerData.Configuration.Contains("LEFT") Then
-                                              lblRFresh.Text = $"{live.HumidityRight:F0} %"
-                                              lblRReturn.Text = $"{live.HumidityLeft:F0} %"
-                                          Else
+                                          If customerData.Configuration IsNot Nothing AndAlso customerData.Configuration.Contains("LEFT") Then
                                               lblRFresh.Text = $"{live.HumidityLeft:F0} %"
                                               lblRReturn.Text = $"{live.HumidityRight:F0} %"
+                                          ElseIf customerData.Configuration IsNot Nothing AndAlso customerData.Configuration.Contains("RIGHT") Then
+                                              lblRFresh.Text = $"{live.HumidityRight:F0} %"
+                                              lblRReturn.Text = $"{live.HumidityLeft:F0} %"
                                           End If
-
-
+                                          UpdateStatusBar(live)
                                       End Sub)
                         End If
                     End If
@@ -1119,6 +1144,7 @@ Public Class Program_Form
             SerialPort1.Close()
             isConnected = False
             lb_status.Text = "Serial " & SerialPort1.PortName & " port is closed"
+            ClearStatusBar()
             ToggleControls(isConnected)
             Refresh_Data()
             StopInactivityTimer()
@@ -1253,6 +1279,7 @@ Public Class Program_Form
         If RB_left.Checked = True Then
             PcBx_Quark.Image = My.Resources._412_DRAW_QUARK_FL_D
             'MessageBox.Show("In case of F7 filter check that it is on the fresh position (LEFT)", "Update Notification", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            customerData.Configuration = "LEFT"
         End If
     End Sub
 
@@ -1260,7 +1287,7 @@ Public Class Program_Form
         If RB_right.Checked = True Then
             PcBx_Quark.Image = My.Resources._411_DRAW_QUARK_FL_C
             'MessageBox.Show("In case of F7 filter check that it is on the fresh position (RIGHT)", "Update Notification", MessageBoxButtons.OK, MessageBoxIcon.Information)
-
+            customerData.Configuration = "RIGHT"
         End If
     End Sub
 
@@ -1498,10 +1525,12 @@ Public Class Program_Form
             num_SWSetpoint.Maximum = 99
             num_SWSetpoint.Value = 99
             num_SWSetpoint.Enabled = False
+            lbl_DisBypass.ForeColor = Color.Red
         Else
             num_SWSetpoint.Maximum = 32
             num_SWSetpoint.Value = 16
             num_SWSetpoint.Enabled = True
+            lbl_DisBypass.ForeColor = Color.Black
         End If
     End Sub
 
@@ -1974,6 +2003,13 @@ Public Class Program_Form
                         data.BelimoCurrent = d
                     End If
 
+                Case key.StartsWith("Status Unit")
+                    Dim rawVal = val.Trim()
+                    Dim su As UShort
+                    If UShort.TryParse(rawVal, NumberStyles.Integer, Globalization.CultureInfo.InvariantCulture, su) Then
+                        data.StatusUnit = su
+                    End If
+
                 Case Else
                     Dim m = alarmPattern.Match(l)
                     If m.Success Then
@@ -2044,6 +2080,175 @@ Public Class Program_Form
         lblRReturn.Text = "00 %"
 
         TB_alarm.Text = ""
+    End Sub
+
+    Private Sub RHDisable_CheckedChanged(sender As Object, e As EventArgs) Handles CB_RHDisable.CheckedChanged
+        If (CB_RHDisable.Checked = True) Then
+            num_RHSetpoint.Value = 99
+            num_RHSetpoint.Enabled = False
+            lbl_DisRH.ForeColor = Color.Red
+        Else
+            num_RHSetpoint.Value = 80
+            num_RHSetpoint.Enabled = True
+            lbl_DisRH.ForeColor = Color.Black
+        End If
+    End Sub
+
+
+    Private Sub EnsureStatusPanelStyle()
+        flpStatus.BackColor = ColBack
+        flpStatus.Padding = New Padding(6, 6, 6, 6)
+        flpStatus.WrapContents = False
+        flpStatus.AutoSize = True
+        flpStatus.AutoSizeMode = AutoSizeMode.GrowAndShrink
+        flpStatus.Dock = DockStyle.Bottom
+    End Sub
+
+    Private Shared Function RoundedRect(r As Rectangle, radius As Integer) As Drawing2D.GraphicsPath
+        Dim path As New Drawing2D.GraphicsPath()
+        Dim d = radius * 2
+        path.AddArc(r.X, r.Y, d, d, 180, 90)
+        path.AddArc(r.Right - d, r.Y, d, d, 270, 90)
+        path.AddArc(r.Right - d, r.Bottom - d, d, d, 0, 90)
+        path.AddArc(r.X, r.Bottom - d, d, d, 90, 90)
+        path.CloseFigure()
+        Return path
+    End Function
+
+    Private Function MakeBadge(text As String, bg As Color, Optional tooltip As String = "") As Label
+        Dim lb As New Label With {
+        .AutoSize = True,
+        .Padding = New Padding(10, 3, 10, 3),
+        .Margin = New Padding(4, 2, 4, 2),
+        .Font = New Font(Me.Font, FontStyle.Bold),
+        .Text = text,
+        .Cursor = Cursors.Hand,
+        .BackColor = Color.Transparent ' Importante: lasciamo trasparente
+    }
+        If tooltip <> "" Then
+            Dim tt As New ToolTip()
+            tt.SetToolTip(lb, tooltip)
+        End If
+
+        AddHandler lb.Paint,
+        Sub(s, e)
+            e.Graphics.SmoothingMode = Drawing2D.SmoothingMode.AntiAlias
+            Dim r As New Rectangle(0, 0, lb.Width - 1, lb.Height - 1)
+            Dim radius As Integer = 10
+
+            Using path As Drawing2D.GraphicsPath = RoundedRect(r, radius)
+                ' sfondo
+                Using b As New SolidBrush(bg)
+                    e.Graphics.FillPath(b, path)
+                End Using
+                ' bordo nero sottile
+                Using p As New Pen(Color.Black, 1)
+                    e.Graphics.DrawPath(p, path)
+                End Using
+            End Using
+
+            ' testo centrato
+            TextRenderer.DrawText(e.Graphics, lb.Text, lb.Font, r, ColText,
+                                  TextFormatFlags.HorizontalCenter Or TextFormatFlags.VerticalCenter)
+        End Sub
+
+        Return lb
+    End Function
+
+    ' ---- Helper ESTERNO (non locale) per aggiungere badge se condizione vera ----
+    Private Sub AddBadgeIf(flp As FlowLayoutPanel,
+                           cond As Boolean,
+                           txt As String,
+                           col As Color,
+                           tip As String,
+                           Optional clickHandler As EventHandler = Nothing,
+                           Optional ByRef keepRef As Label = Nothing)
+
+        If Not cond Then Return
+        Dim b = MakeBadge(txt, col, tip)
+        If clickHandler IsNot Nothing Then AddHandler b.Click, clickHandler
+        flp.Controls.Add(b)
+        If keepRef IsNot Nothing Then keepRef = b
+    End Sub
+
+    Private Sub PulseTick(sender As Object, e As EventArgs)
+        If _lblBypMov Is Nothing Then Return
+        _pulseToggle = Not _pulseToggle
+        _lblBypMov.Visible = _pulseToggle
+    End Sub
+
+    ' ==================== CHIAMA QUESTA PER AGGIORNARE ====================
+    Public Sub UpdateStatusBar(ld As LiveData)
+        EnsureStatusPanelStyle()
+        flpStatus.SuspendLayout()
+        flpStatus.Controls.Clear()
+        _lblBypMov = Nothing
+
+        ' ---- Mappa stati → badge ----
+        If ld.UnitRun Then
+            AddBadgeIf(flpStatus, True, "RUN", ColBlue, "Unit is running")
+        Else
+            AddBadgeIf(flpStatus, True, "STAND-BY", ColRed, "Unit is in Stand-By")
+        End If
+
+        If ld.BypassRun Then
+            AddBadgeIf(flpStatus, True, "BYP MOV", ColBlue, "Bypass running", Nothing, _lblBypMov)
+        End If
+
+        Dim bypTxt As String = If(ld.BypassClosed, "BYP CLOSE", "BYP OPEN")
+        Dim bypTip As String = If(ld.BypassClosed, "Closed Bypass", "Opened Bypass")
+        AddBadgeIf(flpStatus, True, bypTxt, ColBlue, bypTip)
+
+
+        AddBadgeIf(flpStatus, ld.BoostOperating, "BOOST", ColGreen, "BOOST")
+        AddBadgeIf(flpStatus, ld.BoostKHK, "KHK", ColGreen, "OVR: Kitchen Hood")
+        AddBadgeIf(flpStatus, ld.CmdFanInput, "CMD 0–10V", ColBlue, "External 0–10 V activated")
+        AddBadgeIf(flpStatus, ld.DefrostOperating, "DEFROST", ColBlue, "Defrost activated")
+        AddBadgeIf(flpStatus, ld.PostVentOperating, "POST-VENT", ColBlue, "Post-ventilation activated")
+        AddBadgeIf(flpStatus, ld.ImbalanceOperating, "IMB", ColAmber, "Imbalance")
+
+
+        ' Override raggruppati
+        Dim ovr As New List(Of String)
+        If ld.MaxRH Then ovr.Add("RH")
+        If ld.MaxCO2 Then ovr.Add("CO₂")
+        If ld.MaxVOC Then ovr.Add("VOC")
+        If ovr.Count > 0 Then
+            AddBadgeIf(flpStatus, True, "OVR: " & String.Join(",", ovr), ColAmber, "Override per: " & String.Join(", ", ovr))
+        End If
+
+        AddBadgeIf(flpStatus, ld.InTesting, "TEST", ColBlue, "Test running")
+        AddBadgeIf(flpStatus, ld.DppCheck, "DPP", ColBlue, "DPP checking activated")
+        AddBadgeIf(flpStatus, ld.QrkUpdate, "UPDATE", ColPurple, "Firmware update available")
+        AddBadgeIf(flpStatus, ld.BoostInput2, "BOOST SMOKE", ColBlue, "Smoke detector activated")
+
+        flpStatus.ResumeLayout()
+
+        ' Gestione lampeggio BYP MOV
+        If _lblBypMov IsNot Nothing Then
+            If Not _pulseTimer.Enabled Then
+                AddHandler _pulseTimer.Tick, AddressOf PulseTick
+                _pulseTimer.Start()
+            End If
+        Else
+            If _pulseTimer.Enabled Then
+                _pulseTimer.Stop()
+                RemoveHandler _pulseTimer.Tick, AddressOf PulseTick
+            End If
+        End If
+    End Sub
+
+    Public Sub ClearStatusBar()
+        flpStatus.SuspendLayout()
+        flpStatus.Controls.Clear()
+        flpStatus.ResumeLayout()
+
+        ' Ferma eventuali lampeggi
+        _lblBypMov = Nothing
+        If _pulseTimer.Enabled Then
+            _pulseTimer.Stop()
+            RemoveHandler _pulseTimer.Tick, AddressOf PulseTick
+        End If
     End Sub
 
 
