@@ -2438,11 +2438,63 @@ Public Class Program_Form
         sb.AppendLine($"- Feedback V F/R: {live.FeedbackVMotorF:F1} / {live.FeedbackVMotorR:F1} V")
         sb.AppendLine($"- RPM F/R: {live.RPMMotorF} / {live.RPMMotorR}")
         sb.AppendLine($"- StatusUnit: {live.StatusUnit} (0x{live.StatusUnit:X4})")
+        sb.AppendLine($"  Flags: {FormatStatusUnitFlags(live)}")
+        sb.AppendLine($"- Belimo current: {live.BelimoCurrent:F1} mA")
+        sb.AppendLine($"- Belimo1 inputs: {FormatBelimoInputs(live.Belimo1_Inputs)}")
+        sb.AppendLine($"- Belimo2 inputs: {FormatBelimoInputs(live.Belimo2_Inputs)}")
         Dim alarms = live.GetAlarmCodes()
         If Not String.IsNullOrWhiteSpace(alarms) Then
             sb.AppendLine($"- Alarms: {alarms}")
         End If
         Return sb.ToString()
+    End Function
+
+    Private Function ValidateTemperaturePairs(live As LiveData, ByRef reason As String) As Boolean
+        If live Is Nothing Then
+            reason = "Temperature validation failed: live data missing."
+            Return False
+        End If
+        Dim diffFR = Math.Abs(live.TemperatureFresh - live.TemperatureReturn)
+        Dim diffSE = Math.Abs(live.TemperatureSupply - live.TemperatureExhaust)
+        Dim avgFR = (live.TemperatureFresh + live.TemperatureReturn) / 2.0
+        Dim avgSE = (live.TemperatureSupply + live.TemperatureExhaust) / 2.0
+        Dim diffAvg = Math.Abs(avgFR - avgSE)
+
+        Dim okPairs = diffFR <= 1.5 AndAlso diffSE <= 1.5 AndAlso diffAvg <= 3.5
+        If Not okPairs Then
+            reason = $"Temperature validation failed: |F-R|={diffFR:F1}C, |S-E|={diffSE:F1}C, |avg pairs|={diffAvg:F1}C (limits 1.5/1.5/3.5)."
+        End If
+        Return okPairs
+    End Function
+
+    Private Function FormatStatusUnitFlags(live As LiveData) As String
+        Dim flags As New List(Of String)
+        If live.UnitRun Then flags.Add("RUN")
+        If live.DefrostOperating Then flags.Add("DEFROST")
+        If live.PostVentOperating Then flags.Add("POSTVENT")
+        If live.ImbalanceOperating Then flags.Add("IMBALANCE")
+        If live.BoostOperating Then flags.Add("BOOST")
+        If live.BoostKHK Then flags.Add("BOOST_KHK")
+        If live.BypassRun Then flags.Add("BYP_RUN")
+        If live.BypassClosed Then flags.Add("BYP_CLOSED")
+        If live.CmdFanInput Then flags.Add("CMD_FAN_INPUT")
+        If live.MaxRH Then flags.Add("MAX_RH")
+        If live.MaxCO2 Then flags.Add("MAX_CO2")
+        If live.MaxVOC Then flags.Add("MAX_VOC")
+        If live.InTesting Then flags.Add("IN_TEST")
+        If live.DppCheck Then flags.Add("DPP_CHECK")
+        If live.QrkUpdate Then flags.Add("QRK_UPDATE")
+        If live.BoostInput2 Then flags.Add("BOOST_INPUT2")
+        Return If(flags.Count = 0, "none", String.Join(", ", flags))
+    End Function
+
+    Private Function FormatBelimoInputs(inputs As Boolean()) As String
+        If inputs Is Nothing OrElse inputs.Length = 0 Then Return "n/a"
+        Dim bits As New List(Of String)
+        For i As Integer = 0 To inputs.Length - 1
+            bits.Add(If(inputs(i), "1", "0"))
+        Next
+        Return String.Join(",", bits)
     End Function
 
     Private Function PrepareLogFile(serialNumber As String) As String
@@ -2638,6 +2690,16 @@ Public Class Program_Form
         Await SaveConfigurationAsync(ct)
     End Function
 
+    Private Sub AppendFinalFooter(log As StringBuilder, result As String, startTime As DateTime)
+        Dim endTime = DateTime.Now
+        Dim duration = endTime - startTime
+        log.AppendLine()
+        log.AppendLine("## Test summary")
+        log.AppendLine($"End: {endTime:yyyy-MM-dd HH:mm:ss}")
+        log.AppendLine($"Duration: {duration:hh\:mm\:ss}")
+        log.AppendLine($"Result: {result}")
+    End Sub
+
     Private Async Function RunUnitTestAsync(ct As CancellationToken) As Task
         Dim caughtEx As Exception = Nothing
         Try
@@ -2671,18 +2733,19 @@ Public Class Program_Form
 
             unitTestLogPath = logPath
             Dim log As New StringBuilder()
-            log.AppendLine($"# Test unita {serial}")
-            log.AppendLine($"Avvio: {DateTime.Now:yyyy-MM-dd HH:mm:ss}")
+            Dim logStart = DateTime.Now
+            log.AppendLine($"# Unit test {serial}")
+            log.AppendLine($"Start: {logStart:yyyy-MM-dd HH:mm:ss}")
             log.AppendLine()
-            AppendUnitTestPreview("Avvio test unita...")
-            AppendUnitTestPreview($"Seriale: {serial}")
+            AppendUnitTestPreview("Unit test started...")
+            AppendUnitTestPreview($"Serial: {serial}")
 
             Dim step1 = Await SendCommandAndCaptureAsync("2", "--- END OF READING ---", 8, ct)
-            log.AppendLine("## Step 1 - Lettura dati macchina (2)")
+            log.AppendLine("## Step 1 - Read unit data (2)")
             log.AppendLine("```")
             log.AppendLine(step1.Output.Trim())
             log.AppendLine("```")
-            AppendUnitTestPreview("Step 1 completato (2)")
+            AppendUnitTestPreview("Step 1 completed (2)")
 
             Dim step2 = Await SendCommandAndCaptureAsync("6", "--- END OF READING ---", 8, ct)
             If Me.InvokeRequired Then
@@ -2690,26 +2753,42 @@ Public Class Program_Form
             Else
                 ExtractConfigData()
             End If
-            log.AppendLine("## Step 2 - Lettura configurazione (6)")
+            log.AppendLine("## Step 2 - Read configuration (6)")
             log.AppendLine("```")
             log.AppendLine(step2.Output.Trim())
             log.AppendLine("```")
-            AppendUnitTestPreview("Step 2 completato (6)")
+            AppendUnitTestPreview("Step 2 completed (6)")
 
             Dim liveBaseline = Await ReadLiveDataOnceAsync(ct)
-            log.AppendLine("## Step 3 - Live data iniziali (b)")
+            log.AppendLine("## Step 3 - Initial live data (b)")
             log.AppendLine(FormatLiveDataMarkdown(liveBaseline))
+            AppendUnitTestPreview("Initial temperature check in progress...")
+            Dim tempBaselineReason As String = String.Empty
+            If Not ValidateTemperaturePairs(liveBaseline, tempBaselineReason) Then
+                log.AppendLine($"- {tempBaselineReason}")
+                AppendUnitTestPreview($"Initial temperature check failed: {tempBaselineReason}")
+                AppendFinalFooter(log, "FAILED", logStart)
+                File.WriteAllText(logPath, log.ToString())
+                Dim failPath = MoveLogToFailed(logPath)
+                UpdateUnitTestUi("Test fallito: live data mancanti", False, failPath)
+                Return
+            Else
+                log.AppendLine("- Temperature check: OK")
+                AppendUnitTestPreview("Initial temperature check: OK")
+            End If
             If liveBaseline Is Nothing Then
-                log.AppendLine("- Live data non ricevuti entro 60s: test fallito.")
-                AppendUnitTestPreview("Live data iniziali non ricevuti entro 60s. Test fallito.")
+                log.AppendLine("- Live data not received within 60s: test failed.")
+                AppendUnitTestPreview("Initial live data not received within 60s. Test failed.")
+                AppendFinalFooter(log, "FAILED", logStart)
                 File.WriteAllText(logPath, log.ToString())
                 Dim failPath = MoveLogToFailed(logPath)
                 UpdateUnitTestUi("Test fallito: live data mancanti", False, failPath)
                 Return
             End If
-            AppendUnitTestPreview("Live data iniziali ricevuti.")
+            AppendUnitTestPreview("Initial live data received.")
 
             If ct.IsCancellationRequested Then
+                AppendFinalFooter(log, "CANCELLED", logStart)
                 File.WriteAllText(logPath, log.ToString())
                 UpdateUnitTestUi("Test annullato dall'utente", False, logPath)
                 Return
@@ -2729,15 +2808,15 @@ Public Class Program_Form
                 End If
 
                 log.AppendLine()
-                log.AppendLine($"## Variazione {variationIndex}")
+                log.AppendLine($"## Variation {variationIndex}")
                 log.AppendLine($"- Target Speed1: {variationSpeed1}")
 
                 ApplyVariationToModel(variationSpeed1)
                 Dim saveOk = Await SaveConfigurationAsync(ct)
-                log.AppendLine($"- Salvataggio configurazione: {(If(saveOk, "OK", "FALLITO"))}")
+                log.AppendLine($"- Saving configuration: {(If(saveOk, "OK", "FAILED"))}")
                 If Not saveOk Then
                     allPassed = False
-                    log.AppendLine("- Motivo: timeout durante il salvataggio.")
+                    log.AppendLine("- Reason: timeout during save.")
                     Exit For
                 End If
 
@@ -2749,34 +2828,46 @@ Public Class Program_Form
                 End If
                 If Not verify.Success Then
                     allPassed = False
-                    log.AppendLine("- Lettura configurazione dopo la variazione non riuscita.")
+                    log.AppendLine("- Reading configuration after variation failed.")
                     Exit For
                 End If
                 log.AppendLine("```")
                 log.AppendLine(verify.Output.Trim())
                 log.AppendLine("```")
-                AppendUnitTestPreview($"Variazione {variationIndex}: configurazione riletta.")
+                AppendUnitTestPreview($"Variation {variationIndex}: configuration re-read.")
 
                 Dim parsedVerify As New CustomerData()
                 ParseCustomerData(verify.Output, parsedVerify, False)
 
                 If parsedVerify.FSC_CAF_Speed1 <> variationSpeed1 Then
                     allPassed = False
-                    log.AppendLine($"- Valore Speed1 letto ({parsedVerify.FSC_CAF_Speed1}) diverso dal target {variationSpeed1}.")
-                    AppendUnitTestPreview($"Variazione {variationIndex}: Speed1 letto {parsedVerify.FSC_CAF_Speed1} diverso dal target {variationSpeed1}.")
+                    log.AppendLine($"- Speed1 read ({parsedVerify.FSC_CAF_Speed1}) different from target {variationSpeed1}.")
+                    AppendUnitTestPreview($"Variation {variationIndex}: Speed1 read {parsedVerify.FSC_CAF_Speed1} differs from target {variationSpeed1}.")
                     Exit For
                 End If
-                AppendUnitTestPreview($"Variazione {variationIndex}: Speed1 confermato a {parsedVerify.FSC_CAF_Speed1}.")
+                AppendUnitTestPreview($"Variation {variationIndex}: Speed1 confirmed at {parsedVerify.FSC_CAF_Speed1}.")
 
-                AppendUnitTestPreview($"Variazione {variationIndex}: attivo live data, attesa 30s (timeout 60s).")
+                AppendUnitTestPreview($"Variation {variationIndex}: enabling live data, wait 30s (timeout 60s).")
                 Dim liveAfter = Await ReadLiveDataWithDelayAsync(30, 60, ct)
                 If liveAfter Is Nothing Then
                     allPassed = False
-                    log.AppendLine("- Live data non ricevuti entro 60s dopo la variazione.")
-                    AppendUnitTestPreview($"Variazione {variationIndex}: live data non ricevuti entro 60s.")
+                    log.AppendLine("- Live data not received within 60s after variation.")
+                    AppendUnitTestPreview($"Variation {variationIndex}: live data not received within 60s.")
                     Exit For
                 End If
                 log.AppendLine(FormatLiveDataMarkdown(liveAfter))
+
+                AppendUnitTestPreview($"Variation {variationIndex}: temperature check in progress...")
+                Dim tempReason As String = String.Empty
+                If Not ValidateTemperaturePairs(liveAfter, tempReason) Then
+                    allPassed = False
+                    log.AppendLine($"- {tempReason}")
+                    AppendUnitTestPreview($"Variation {variationIndex}: {tempReason}")
+                    Exit For
+                Else
+                    log.AppendLine("- Temperature check: OK")
+                    AppendUnitTestPreview($"Variation {variationIndex}: Temperature check OK")
+                End If
 
                 Dim rpmOk As Boolean = False
                 If liveAfter IsNot Nothing AndAlso previousLive IsNot Nothing Then
@@ -2791,14 +2882,14 @@ Public Class Program_Form
                     rpmOk = liveAfter.RPMMotorF > 0 AndAlso liveAfter.RPMMotorR > 0
                 End If
 
-                log.AppendLine($"- Verifica RPM: {(If(rpmOk, "OK", "KO"))} (F {If(liveAfter IsNot Nothing, liveAfter.RPMMotorF, 0)} / R {If(liveAfter IsNot Nothing, liveAfter.RPMMotorR, 0)}) rispetto al target precedente {previousTargetSpeed}")
-                AppendUnitTestPreview($"Variazione {variationIndex}: verifica RPM {(If(rpmOk, "OK", "KO"))}")
+                log.AppendLine($"- RPM check: {(If(rpmOk, "OK", "FAILED"))} (F {If(liveAfter IsNot Nothing, liveAfter.RPMMotorF, 0)} / R {If(liveAfter IsNot Nothing, liveAfter.RPMMotorR, 0)}) vs previous target {previousTargetSpeed}")
+                AppendUnitTestPreview($"Variation {variationIndex}: RPM check {(If(rpmOk, "OK", "FAILED"))}")
 
                 previousLive = liveAfter
                 previousTargetSpeed = variationSpeed1
                 If Not rpmOk Then
                     allPassed = False
-                    log.AppendLine("- Motivo: incremento giri non rilevato.")
+                    log.AppendLine("- Reason: expected RPM change not detected.")
                     Exit For
                 End If
 
@@ -2807,20 +2898,22 @@ Public Class Program_Form
 
             If wasCancelled Then
                 log.AppendLine()
-                log.AppendLine("## Ripristino configurazione originale")
-                log.AppendLine($"- Speed1 originale: {originalSpeed1F}")
+                log.AppendLine("## Restore original configuration")
+                log.AppendLine($"- Original Speed1: {originalSpeed1F}")
                 Await RestoreOriginalSpeedAsync(ct)
+                AppendFinalFooter(log, "CANCELLED", logStart)
                 File.WriteAllText(logPath, log.ToString())
                 UpdateUnitTestUi("Test annullato dall'utente", False, logPath)
                 Return
             End If
 
             log.AppendLine()
-            log.AppendLine("## Ripristino configurazione originale")
-            log.AppendLine($"- Speed1 originale: {originalSpeed1F}")
+            log.AppendLine("## Restore original configuration")
+            log.AppendLine($"- Original Speed1: {originalSpeed1F}")
             Await RestoreOriginalSpeedAsync(ct)
-            AppendUnitTestPreview("Ripristino Speed1 originale completato.")
+            AppendUnitTestPreview("Original Speed1 restored.")
 
+            AppendFinalFooter(log, If(allPassed, "PASSED", "FAILED"), logStart)
             File.WriteAllText(logPath, log.ToString())
             Dim finalLogPath = logPath
             If Not allPassed Then
@@ -2854,6 +2947,7 @@ Public Class Program_Form
             MessageBox.Show("Un test e' gia' in esecuzione.", "Test unita", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Return
         End If
+        ClearUnitTestPreview() ' pulizia immediata e reset timer mm:ss
         unitTestCts = New CancellationTokenSource()
         Await RunUnitTestAsync(unitTestCts.Token)
     End Sub
