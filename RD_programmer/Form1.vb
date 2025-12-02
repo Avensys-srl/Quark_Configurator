@@ -1,11 +1,13 @@
 ﻿Imports System.IO
 Imports System.IO.Ports
+Imports System.Diagnostics
 Imports System.Reflection
 Imports System.Text
 Imports System.Text.RegularExpressions
 Imports System.Threading.Tasks
 Imports System.Xml.Serialization
 Imports System.Globalization
+Imports System.Threading
 
 Public Class Program_Form
     Dim isConnected As Boolean = False
@@ -34,6 +36,16 @@ Public Class Program_Form
     Private readingLiveData As Boolean = False
     Private Const LiveStartMarker As String = "------ START READ LIVE DATA ------"
     Private Const LiveEndMarker As String = "------ END READ LIVE DATA ------"
+    Private lastLiveDataSnapshot As LiveData
+    Private lastLiveDataTimestamp As DateTime = DateTime.MinValue
+    Private unitTestCts As CancellationTokenSource
+    Private unitTestRunning As Boolean = False
+    Private unitTestLogPath As String
+    Private Const TestFolderName As String = "test"
+    Private Const TestFailedFolderName As String = "failed"
+    Private originalSpeed1F As Integer = 0
+    Private originalSpeed1R As Integer = 0
+    Private unitTestStartTime As DateTime = DateTime.MinValue
 
     ' === Palette (usa questi colori per coerenza) ===
     Private Shared ReadOnly ColBlue As Color = Color.FromArgb(37, 99, 235)     ' operativi
@@ -46,7 +58,7 @@ Public Class Program_Form
 
 
     ' === Timer opzionale per "pulsare" i badge dinamici (es. Bypass in movimento) ===
-    Private ReadOnly _pulseTimer As New Timer() With {.Interval = 350}
+    Private ReadOnly _pulseTimer As New System.Windows.Forms.Timer() With {.Interval = 350}
     Private _pulseToggle As Boolean = False
 
     ' Manteniamo un riferimento ai badge che vogliamo far lampeggiare
@@ -513,9 +525,9 @@ Public Class Program_Form
 
     Private Sub StartPortWatcher()
         Dim query As New WqlEventQuery("SELECT * FROM Win32_DeviceChangeEvent WHERE EventType = 1 OR EventType = 2") ' EventType = 1 Device Added, EventType = 2 Device Removed
-        portWatcher = New ManagementEventWatcher(query)
-        AddHandler portWatcher.EventArrived, AddressOf PortChanged
-        portWatcher.Start()
+        PortWatcher = New ManagementEventWatcher(query)
+        AddHandler PortWatcher.EventArrived, AddressOf PortChanged
+        PortWatcher.Start()
     End Sub
 
     Private Sub PortChanged(sender As Object, e As EventArrivedEventArgs)
@@ -617,6 +629,10 @@ Public Class Program_Form
         ToggleControls(isConnected)
         UpdateFormControls()
         PopulateSerialPorts()
+        If Tab_Main.TabPages.Contains(TP_TestUnit) Then
+            Tab_Main.TabPages.Remove(TP_TestUnit)
+            hiddenPages.Add(TP_TestUnit)
+        End If
     End Sub
 
     Private Sub Btn_RefreshLIST_Click(sender As Object, e As EventArgs) Handles Btn_RefreshLIST.Click
@@ -935,7 +951,9 @@ Public Class Program_Form
 
         Else
 
-            If Not character2Sent Then
+            If unitTestRunning Then
+                ' Skip automatic reads while the unit test drives the serial workflow.
+            ElseIf Not character2Sent Then
                 InviaStringa("2")
                 character2Sent = True
                 ResetInactivityTimer()
@@ -965,6 +983,9 @@ Public Class Program_Form
             ParseCustomerData(dataToParse, customerData)
         End If
         lb_status.Text = "Data loaded successfully."
+        If txtUnitTestSerial IsNot Nothing AndAlso String.IsNullOrWhiteSpace(txtUnitTestSerial.Text) Then
+            txtUnitTestSerial.Text = customerData.SerialNumber
+        End If
         num_F_Speed1.Enabled = True
         num_F_Speed2.Enabled = True
         num_F_Speed3.Enabled = True
@@ -1021,6 +1042,8 @@ Public Class Program_Form
 
                     ' 3) se live contiene dati validi, aggiorna la UI
                     If live IsNot Nothing AndAlso live.IsValid Then
+                        lastLiveDataSnapshot = CloneLiveData(live)
+                        lastLiveDataTimestamp = DateTime.Now
                         If Me.IsHandleCreated AndAlso Not Me.IsDisposed Then
                             Me.Invoke(Sub()
                                           ' Esempio: aggiorna due label
@@ -1042,6 +1065,7 @@ Public Class Program_Form
                                               lblRReturn.Text = $"{live.HumidityLeft:F0} %"
                                           End If
                                           UpdateStatusBar(live)
+                                          lb_status.Text = live.ToString()
                                       End Sub)
                         End If
                     End If
@@ -1057,12 +1081,12 @@ Public Class Program_Form
 
                 ' Se è la riga di data/ora, la parsifico qui
                 If completeLine.StartsWith("Data:") Then
-                               ' Esempio: "Data: 09/06/25  Ora: 14:23:45"
-                               Dim parts() As String = Regex.Split(completeLine, "Ora:")
-                               If parts.Length = 2 Then
-                                   Dim datePart As String = parts(0).Replace("Data:", "").Trim()
-                                   Dim timePart As String = parts(1).Trim()
-                                   Dim dt As DateTime
+                    ' Esempio: "Data: 09/06/25  Ora: 14:23:45"
+                    Dim parts() As String = Regex.Split(completeLine, "Ora:")
+                    If parts.Length = 2 Then
+                        Dim datePart As String = parts(0).Replace("Data:", "").Trim()
+                        Dim timePart As String = parts(1).Trim()
+                        Dim dt As DateTime
                         If DateTime.TryParseExact($"{datePart} {timePart}",
                                               "dd/MM/yy HH:mm:ss",
                                               CultureInfo.InvariantCulture,
@@ -1082,13 +1106,13 @@ Public Class Program_Form
                                    BtnUpdateDateTime.Enabled = True
                                End Sub)
                     End If
-                           Else
-                               ' Scrivi la linea nel log e aggiorna l'interfaccia grafica
-                               Invoke(Sub()
-                                          tb_COMStrem.AppendText(completeLine & Environment.NewLine)
-                                          AppendLogData(completeLine) ' Scrive solo righe complete nel log
-                                      End Sub)
-                           End If
+                Else
+                    ' Scrivi la linea nel log e aggiorna l'interfaccia grafica
+                    Invoke(Sub()
+                               tb_COMStrem.AppendText(completeLine & Environment.NewLine)
+                               AppendLogData(completeLine) ' Scrive solo righe complete nel log
+                           End Sub)
+                End If
 
             End While
 
@@ -1132,6 +1156,10 @@ Public Class Program_Form
                 InitializeLiveDataLabels()
                 ToggleControls(isConnected)
                 StartInactivityTimer()
+                If hiddenPages.Contains(TP_TestUnit) Then
+                    Tab_Main.TabPages.Add(TP_TestUnit)
+                    hiddenPages.Remove(TP_TestUnit)
+                End If
             End If
         Catch ex As Exception
             MsgBox("Error: " & ex.Message)
@@ -1150,6 +1178,10 @@ Public Class Program_Form
             StopInactivityTimer()
             VisibleGroups(False)
             InitializeLiveDataLabels()
+            If Tab_Main.TabPages.Contains(TP_TestUnit) Then
+                Tab_Main.TabPages.Remove(TP_TestUnit)
+                hiddenPages.Add(TP_TestUnit)
+            End If
         Catch ex As Exception
             MsgBox("Error: " & ex.Message)
         End Try
@@ -1168,7 +1200,7 @@ Public Class Program_Form
         End If
     End Sub
 
-    Private Sub ParseCustomerData(data As String, customerData As CustomerData)
+    Private Sub ParseCustomerData(data As String, customerData As CustomerData, Optional updateUI As Boolean = True)
 
         Dim lines() As String = data.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
 
@@ -1268,7 +1300,9 @@ Public Class Program_Form
             End If
         Next
 
-        UpdateFormControls()
+        If updateUI Then
+            UpdateFormControls()
+        End If
 
     End Sub
 
@@ -1706,48 +1740,48 @@ Public Class Program_Form
         End Try
 
         If loadedConfigData Is Nothing Then
-                MessageBox.Show($"Could not deserialize data from '{selectedFileName}'. The file might be corrupted or not a valid configuration file.", "Deserialization Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
-                Return
-            End If
+            MessageBox.Show($"Could not deserialize data from '{selectedFileName}'. The file might be corrupted or not a valid configuration file.", "Deserialization Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Return
+        End If
 
-            ' 5. Applica i valori dall'oggetto caricato (loadedConfigData) a Me.customerData
-            '    Questo è l'oggetto "vivo" del tuo form.
-            Try
-                ' --- Applica le impostazioni di configurazione generali ---
-                Me.customerData.FSC_CAF_Speed1 = loadedConfigData.FSC_CAF_Speed1
-                Me.customerData.FSC_CAF_Speed2 = loadedConfigData.FSC_CAF_Speed2
-                Me.customerData.FSC_CAF_Speed3 = loadedConfigData.FSC_CAF_Speed3
+        ' 5. Applica i valori dall'oggetto caricato (loadedConfigData) a Me.customerData
+        '    Questo è l'oggetto "vivo" del tuo form.
+        Try
+            ' --- Applica le impostazioni di configurazione generali ---
+            Me.customerData.FSC_CAF_Speed1 = loadedConfigData.FSC_CAF_Speed1
+            Me.customerData.FSC_CAF_Speed2 = loadedConfigData.FSC_CAF_Speed2
+            Me.customerData.FSC_CAF_Speed3 = loadedConfigData.FSC_CAF_Speed3
 
-                Me.customerData.CAP_Speed1 = loadedConfigData.CAP_Speed1
-                Me.customerData.CAP_Speed2 = loadedConfigData.CAP_Speed2
-                Me.customerData.CAP_Speed3 = loadedConfigData.CAP_Speed3
+            Me.customerData.CAP_Speed1 = loadedConfigData.CAP_Speed1
+            Me.customerData.CAP_Speed2 = loadedConfigData.CAP_Speed2
+            Me.customerData.CAP_Speed3 = loadedConfigData.CAP_Speed3
 
-                Me.customerData.BoostTimer = loadedConfigData.BoostTimer
-                Me.customerData.FilterTimer = loadedConfigData.FilterTimer
-                Me.customerData.FireKitTimer = loadedConfigData.FireKitTimer
+            Me.customerData.BoostTimer = loadedConfigData.BoostTimer
+            Me.customerData.FilterTimer = loadedConfigData.FilterTimer
+            Me.customerData.FireKitTimer = loadedConfigData.FireKitTimer
 
-                Me.customerData.CO2SetPoint = loadedConfigData.CO2SetPoint
-                Me.customerData.RHSetPoint = loadedConfigData.RHSetPoint
-                Me.customerData.VOCSetPoint = loadedConfigData.VOCSetPoint
-                Me.customerData.TempSetPoint = loadedConfigData.TempSetPoint
+            Me.customerData.CO2SetPoint = loadedConfigData.CO2SetPoint
+            Me.customerData.RHSetPoint = loadedConfigData.RHSetPoint
+            Me.customerData.VOCSetPoint = loadedConfigData.VOCSetPoint
+            Me.customerData.TempSetPoint = loadedConfigData.TempSetPoint
             Me.customerData.SUM_WINSetPoint = loadedConfigData.SUM_WINSetPoint
             Me.customerData.Belimo = loadedConfigData.Belimo
 
             Me.customerData.Configuration = loadedConfigData.Configuration ' Per LEFT/RIGHT
 
-                ' Impostazioni KHK
-                Me.customerData.KHK_ENABLE = loadedConfigData.KHK_ENABLE
-                Me.customerData.KHK_NC = loadedConfigData.KHK_NC
-                Me.customerData.KHK_NO = loadedConfigData.KHK_NO
-                Me.customerData.KHK_VALUE = loadedConfigData.KHK_VALUE
-                Me.customerData.KHK_SET_POINT = loadedConfigData.KHK_SET_POINT
+            ' Impostazioni KHK
+            Me.customerData.KHK_ENABLE = loadedConfigData.KHK_ENABLE
+            Me.customerData.KHK_NC = loadedConfigData.KHK_NC
+            Me.customerData.KHK_NO = loadedConfigData.KHK_NO
+            Me.customerData.KHK_VALUE = loadedConfigData.KHK_VALUE
+            Me.customerData.KHK_SET_POINT = loadedConfigData.KHK_SET_POINT
             Me.customerData.KHKIMBALANCESetPoint = loadedConfigData.KHKIMBALANCESetPoint
 
 
             ' Impostazioni Sbilanciamento
             Me.customerData.IMBALANCE_ENABLE = loadedConfigData.IMBALANCE_ENABLE
-                Me.customerData.IMBALANCESetPoint1 = loadedConfigData.IMBALANCESetPoint1
-                Me.customerData.IMBALANCESetPoint2 = loadedConfigData.IMBALANCESetPoint2
+            Me.customerData.IMBALANCESetPoint1 = loadedConfigData.IMBALANCESetPoint1
+            Me.customerData.IMBALANCESetPoint2 = loadedConfigData.IMBALANCESetPoint2
             Me.customerData.IMBALANCESetPoint3 = loadedConfigData.IMBALANCESetPoint3
 
             'Impostazioni IAQ
@@ -1762,23 +1796,23 @@ Public Class Program_Form
             ' Dato che abbiamo deciso di non salvarli, questa condizione solitamente
             ' non sovrascriverà i valori attuali della macchina con stringhe vuote.
             If Not String.IsNullOrEmpty(loadedConfigData.VersionHW) Then
-                    Me.customerData.VersionHW = loadedConfigData.VersionHW
-                End If
-                If Not String.IsNullOrEmpty(loadedConfigData.VersionSW) Then
-                    Me.customerData.VersionSW = loadedConfigData.VersionSW
-                End If
-                If Not String.IsNullOrEmpty(loadedConfigData.SerialNumber) Then
-                    Me.customerData.SerialNumber = loadedConfigData.SerialNumber
-                End If
+                Me.customerData.VersionHW = loadedConfigData.VersionHW
+            End If
+            If Not String.IsNullOrEmpty(loadedConfigData.VersionSW) Then
+                Me.customerData.VersionSW = loadedConfigData.VersionSW
+            End If
+            If Not String.IsNullOrEmpty(loadedConfigData.SerialNumber) Then
+                Me.customerData.SerialNumber = loadedConfigData.SerialNumber
+            End If
 
             ' 6. Aggiorna l'interfaccia utente per riflettere i nuovi dati in Me.customerData
             UpdateFormControls()
 
             MessageBox.Show($"Configuration '{selectedFileName}' applied successfully.", "Configuration Applied", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
-            Catch ex As Exception
-                MessageBox.Show($"An error occurred while applying the configuration: {ex.Message}", "Apply Configuration Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
-            End Try
+        Catch ex As Exception
+            MessageBox.Show($"An error occurred while applying the configuration: {ex.Message}", "Apply Configuration Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
     End Sub
 
     Private Sub Btn_Rem_Click(sender As Object, e As EventArgs) Handles Btn_Rem.Click
@@ -2251,6 +2285,585 @@ Public Class Program_Form
         End If
     End Sub
 
+    Private Function CloneLiveData(source As LiveData) As LiveData
+        If source Is Nothing Then Return Nothing
+        Dim copy As New LiveData() With {
+            .TemperatureFresh = source.TemperatureFresh,
+            .TemperatureReturn = source.TemperatureReturn,
+            .TemperatureSupply = source.TemperatureSupply,
+            .TemperatureExhaust = source.TemperatureExhaust,
+            .HumidityLeft = source.HumidityLeft,
+            .HumidityRight = source.HumidityRight,
+            .TemperatureHeater = source.TemperatureHeater,
+            .FeedbackVMotorR = source.FeedbackVMotorR,
+            .RPMMotorR = source.RPMMotorR,
+            .FeedbackVMotorF = source.FeedbackVMotorF,
+            .RPMMotorF = source.RPMMotorF,
+            .BelimoCurrent = source.BelimoCurrent,
+            .StatusUnit = source.StatusUnit
+        }
+        If source.Alarms IsNot Nothing Then
+            Array.Copy(source.Alarms, copy.Alarms, Math.Min(source.Alarms.Length, copy.Alarms.Length))
+        End If
+        If source.Belimo1_Inputs IsNot Nothing Then
+            Array.Copy(source.Belimo1_Inputs, copy.Belimo1_Inputs, Math.Min(source.Belimo1_Inputs.Length, copy.Belimo1_Inputs.Length))
+        End If
+        If source.Belimo2_Inputs IsNot Nothing Then
+            Array.Copy(source.Belimo2_Inputs, copy.Belimo2_Inputs, Math.Min(source.Belimo2_Inputs.Length, copy.Belimo2_Inputs.Length))
+        End If
+        Return copy
+    End Function
+
+    Private Function GetConsoleLength() As Integer
+        Dim length As Integer = 0
+        If Me.InvokeRequired Then
+            Me.Invoke(Sub() length = tb_COMStrem.TextLength)
+        Else
+            length = tb_COMStrem.TextLength
+        End If
+        Return length
+    End Function
+
+    Private Function GetConsoleSlice(startIndex As Integer) As String
+        Dim result As String = String.Empty
+        If Me.InvokeRequired Then
+            Me.Invoke(Sub()
+                          Dim txt = tb_COMStrem.Text
+                          If startIndex < 0 Then startIndex = 0
+                          If startIndex > txt.Length Then startIndex = txt.Length
+                          result = txt.Substring(startIndex)
+                      End Sub)
+        Else
+            Dim txt = tb_COMStrem.Text
+            If startIndex < 0 Then startIndex = 0
+            If startIndex > txt.Length Then startIndex = txt.Length
+            result = txt.Substring(startIndex)
+        End If
+        Return result
+    End Function
+
+    Private Function ContainsTokenAfter(startIndex As Integer, token As String) As Boolean
+        If String.IsNullOrWhiteSpace(token) Then Return False
+        Dim found As Boolean = False
+        If Me.InvokeRequired Then
+            Me.Invoke(Sub()
+                          Dim txt = tb_COMStrem.Text
+                          Dim idx = txt.IndexOf(token, Math.Max(0, startIndex), StringComparison.OrdinalIgnoreCase)
+                          found = idx >= 0
+                      End Sub)
+        Else
+            Dim txt = tb_COMStrem.Text
+            Dim idx = txt.IndexOf(token, Math.Max(0, startIndex), StringComparison.OrdinalIgnoreCase)
+            found = idx >= 0
+        End If
+        Return found
+    End Function
+
+    Private Async Function WaitForConditionAsync(predicate As Func(Of Boolean), timeout As TimeSpan, ct As CancellationToken) As Task(Of Boolean)
+        Dim sw = Stopwatch.StartNew()
+        While sw.Elapsed < timeout AndAlso Not ct.IsCancellationRequested
+            Dim conditionMet As Boolean = False
+            Try
+                If Me.InvokeRequired Then
+                    Me.Invoke(Sub() conditionMet = predicate())
+                Else
+                    conditionMet = predicate()
+                End If
+            Catch
+                conditionMet = False
+            End Try
+            If conditionMet Then Return True
+            Try
+                Await Task.Delay(150, ct)
+            Catch ex As TaskCanceledException
+                Exit While
+            End Try
+        End While
+        Return False
+    End Function
+
+    Private Async Function SendCommandAndCaptureAsync(command As String, expectedToken As String, timeoutSeconds As Integer, ct As CancellationToken) As Task(Of (Success As Boolean, Output As String))
+        Dim start = GetConsoleLength()
+        InviaStringa(command)
+        Dim ok As Boolean
+        If String.IsNullOrWhiteSpace(expectedToken) Then
+            ok = True
+            Try
+                Await Task.Delay(TimeSpan.FromSeconds(timeoutSeconds), ct)
+            Catch ex As TaskCanceledException
+                ok = False
+            End Try
+        Else
+            ok = Await WaitForConditionAsync(Function() ContainsTokenAfter(start, expectedToken), TimeSpan.FromSeconds(timeoutSeconds), ct)
+        End If
+        Dim output = GetConsoleSlice(start)
+        Return (ok, output)
+    End Function
+
+    Private Async Function ReadLiveDataOnceAsync(ct As CancellationToken) As Task(Of LiveData)
+        Return Await ReadLiveDataWithDelayAsync(0, 60, ct)
+    End Function
+
+    Private Async Function ReadLiveDataWithDelayAsync(minDelaySeconds As Integer, maxWaitSeconds As Integer, ct As CancellationToken) As Task(Of LiveData)
+        Dim startStamp = lastLiveDataTimestamp
+        InviaStringa("b") ' toggle on
+        Try
+            Dim waited As Integer = 0
+            While waited < minDelaySeconds AndAlso Not ct.IsCancellationRequested
+                Await Task.Delay(1000, ct)
+                waited += 1
+            End While
+
+            If ct.IsCancellationRequested Then Return Nothing
+
+            Dim remaining = Math.Max(0, maxWaitSeconds - minDelaySeconds)
+            Dim ok = Await WaitForConditionAsync(Function() lastLiveDataTimestamp > startStamp, TimeSpan.FromSeconds(remaining), ct)
+            If ok Then
+                Return CloneLiveData(lastLiveDataSnapshot)
+            End If
+            Return Nothing
+        Finally
+            InviaStringa("b") ' toggle off
+            readingLiveData = False
+        End Try
+    End Function
+
+    Private Function FormatLiveDataMarkdown(live As LiveData) As String
+        If live Is Nothing Then Return "- Live data non disponibili."
+        Dim sb As New StringBuilder()
+        sb.AppendLine($"- Temp Fresh/Return: {live.TemperatureFresh:F1} / {live.TemperatureReturn:F1} C")
+        sb.AppendLine($"- Temp Supply/Exhaust: {live.TemperatureSupply:F1} / {live.TemperatureExhaust:F1} C")
+        sb.AppendLine($"- Heater: {live.TemperatureHeater:F1} C")
+        sb.AppendLine($"- Humidity L/R: {live.HumidityLeft} / {live.HumidityRight} %")
+        sb.AppendLine($"- Feedback V F/R: {live.FeedbackVMotorF:F1} / {live.FeedbackVMotorR:F1} V")
+        sb.AppendLine($"- RPM F/R: {live.RPMMotorF} / {live.RPMMotorR}")
+        sb.AppendLine($"- StatusUnit: {live.StatusUnit} (0x{live.StatusUnit:X4})")
+        Dim alarms = live.GetAlarmCodes()
+        If Not String.IsNullOrWhiteSpace(alarms) Then
+            sb.AppendLine($"- Alarms: {alarms}")
+        End If
+        Return sb.ToString()
+    End Function
+
+    Private Function PrepareLogFile(serialNumber As String) As String
+        Try
+            Dim safeSerial = Regex.Replace(serialNumber.Trim(), "[^\da-zA-Z]+", "")
+            If safeSerial.Length = 0 Then
+                MessageBox.Show("Inserire un numero seriale valido (18 cifre).", "Serial mancante", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                Return String.Empty
+            End If
+
+            Dim testFolder = Path.Combine(Application.StartupPath, TestFolderName)
+            Dim failedFolder = Path.Combine(testFolder, TestFailedFolderName)
+            Directory.CreateDirectory(testFolder)
+            Directory.CreateDirectory(failedFolder)
+
+            Dim logPath = Path.Combine(testFolder, $"test_{safeSerial}.md")
+            If File.Exists(logPath) Then
+                Dim res = MessageBox.Show($"Il file {Path.GetFileName(logPath)} esiste gia'. Vuoi crearne uno nuovo con indice progressivo?", "File esistente", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+                If res = DialogResult.No Then Return String.Empty
+
+                Dim idx As Integer = 1
+                Do
+                    Dim candidate = Path.Combine(testFolder, $"test_{safeSerial}_{idx:000}.md")
+                    If Not File.Exists(candidate) Then
+                        logPath = candidate
+                        Exit Do
+                    End If
+                    idx += 1
+                Loop
+            End If
+
+            Return logPath
+        Catch ex As Exception
+            MessageBox.Show($"Impossibile preparare il file di log: {ex.Message}", "Errore", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Return String.Empty
+        End Try
+    End Function
+
+    Private Function MoveLogToFailed(logPath As String) As String
+        Try
+            Dim failedFolder = Path.Combine(Application.StartupPath, TestFolderName, TestFailedFolderName)
+            Directory.CreateDirectory(failedFolder)
+            Dim baseName = Path.GetFileNameWithoutExtension(logPath)
+            Dim ext = Path.GetExtension(logPath)
+            Dim dest = Path.Combine(failedFolder, $"{baseName}_failed{ext}")
+            Dim idx As Integer = 1
+            While File.Exists(dest)
+                dest = Path.Combine(failedFolder, $"{baseName}_failed_{idx:000}{ext}")
+                idx += 1
+            End While
+            File.Move(logPath, dest)
+            Return dest
+        Catch ex As Exception
+            MessageBox.Show($"Impossibile spostare il log fallito: {ex.Message}", "Errore spostamento log", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Return logPath
+        End Try
+    End Function
+
+    Private Function GetTestSerialNumber() As String
+        Dim serial As String = String.Empty
+        If Me.InvokeRequired Then
+            Me.Invoke(Sub()
+                          If txtUnitTestSerial IsNot Nothing Then
+                              serial = txtUnitTestSerial.Text
+                          End If
+                      End Sub)
+        Else
+            If txtUnitTestSerial IsNot Nothing Then
+                serial = txtUnitTestSerial.Text
+            End If
+        End If
+        If String.IsNullOrWhiteSpace(serial) AndAlso Not String.IsNullOrWhiteSpace(customerData.SerialNumber) Then
+            serial = customerData.SerialNumber
+        End If
+        Return serial
+    End Function
+
+    Private Function GetCurrentSpeed1() As Integer
+        Dim val As Integer = customerData.FSC_CAF_Speed1
+        If Me.InvokeRequired Then
+            Me.Invoke(Sub() val = CInt(num_F_Speed1.Value))
+        Else
+            val = CInt(num_F_Speed1.Value)
+        End If
+        Return val
+    End Function
+
+    Private Sub ClearUnitTestPreview()
+        If txtUnitTestLogPreview Is Nothing Then Return
+        If Me.InvokeRequired Then
+            Me.Invoke(Sub() ClearUnitTestPreview())
+            Return
+        End If
+        unitTestStartTime = DateTime.Now
+        txtUnitTestLogPreview.Clear()
+    End Sub
+
+    Private Sub AppendUnitTestPreview(line As String)
+        If txtUnitTestLogPreview Is Nothing Then Return
+        If Me.InvokeRequired Then
+            Me.Invoke(Sub() AppendUnitTestPreview(line))
+            Return
+        End If
+        Dim prefix As String = String.Empty
+        If unitTestStartTime <> DateTime.MinValue Then
+            Dim elapsed = DateTime.Now - unitTestStartTime
+            prefix = $"[{elapsed:mm\:ss}] "
+        End If
+        txtUnitTestLogPreview.AppendText(prefix & line & Environment.NewLine)
+    End Sub
+
+    Private Function ParseTestVariations() As List(Of Integer)
+        Dim variations As New List(Of Integer)()
+        Dim raw As String = String.Empty
+        If Me.InvokeRequired Then
+            Me.Invoke(Sub() raw = txtUnitTestVariations.Text)
+        Else
+            raw = txtUnitTestVariations.Text
+        End If
+
+        Dim lines = raw.Split(New String() {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries)
+        If lines.Length = 0 Then
+            variations.Add(Math.Max(25, Math.Min(100, customerData.FSC_CAF_Speed1)))
+            Return variations
+        End If
+
+        For Each line In lines
+            Dim parts = line.Split(New Char() {","c, ";"c, ":"c}, StringSplitOptions.RemoveEmptyEntries)
+            If parts.Length = 0 Then Continue For
+
+            Dim v1 As Integer = customerData.FSC_CAF_Speed1
+            Integer.TryParse(parts(0).Trim(), v1)
+            v1 = Math.Max(25, Math.Min(100, v1))
+            variations.Add(v1)
+        Next
+
+        Return variations
+    End Function
+
+    Private Sub ApplyVariationToModel(speed1 As Integer)
+        If Me.InvokeRequired Then
+            Me.Invoke(Sub() ApplyVariationToModel(speed1))
+            Return
+        End If
+
+        num_F_Speed1.Value = speed1
+        num_R_Speed1.Value = speed1
+        customerData.UpdateSpeedSettings(num_F_Speed1.Value, num_R_Speed1.Value, 1)
+    End Sub
+
+    Private Async Function SaveConfigurationAsync(ct As CancellationToken) As Task(Of Boolean)
+        If Me.InvokeRequired Then
+            Me.Invoke(Sub()
+                          writeStep = 1
+                          isWriting = True
+                          PB_SaveData.Visible = True
+                          lb_SaveProg.Visible = True
+                          lb_status.Text = "Saving data... (test unita)"
+                          ResetInactivityTimer()
+                      End Sub)
+        Else
+            writeStep = 1
+            isWriting = True
+            PB_SaveData.Visible = True
+            lb_SaveProg.Visible = True
+            lb_status.Text = "Saving data... (test unita)"
+            ResetInactivityTimer()
+        End If
+
+        Return Await WaitForConditionAsync(Function() Not isWriting, TimeSpan.FromSeconds(45), ct)
+    End Function
+
+    Private Sub UpdateUnitTestUi(statusText As String, running As Boolean, logPath As String)
+        If Me.InvokeRequired Then
+            Me.Invoke(Sub() UpdateUnitTestUi(statusText, running, logPath))
+            Return
+        End If
+
+        unitTestRunning = running
+        Btn_StartUnitTest.Enabled = Not running
+        Btn_StopUnitTest.Enabled = running
+        lblUnitTestStatus.Text = statusText
+        If Not String.IsNullOrWhiteSpace(logPath) Then
+            lblUnitTestLogPath.Text = $"Log: {logPath}"
+        Else
+            lblUnitTestLogPath.Text = "Log: n/d"
+        End If
+    End Sub
+
+    Private Async Function RestoreOriginalSpeedAsync(ct As CancellationToken) As Task
+        If originalSpeed1F <= 0 OrElse originalSpeed1R <= 0 Then Return
+        ApplyVariationToModel(originalSpeed1F)
+        Await SaveConfigurationAsync(ct)
+    End Function
+
+    Private Async Function RunUnitTestAsync(ct As CancellationToken) As Task
+        Dim caughtEx As Exception = Nothing
+        Try
+            UpdateUnitTestUi("Test unita in esecuzione...", True, Nothing)
+
+            If Not SerialPort1.IsOpen Then
+                UpdateUnitTestUi("Porta seriale non aperta.", False, Nothing)
+                Return
+            End If
+
+            If Me.InvokeRequired Then
+                Me.Invoke(Sub() CB_LiveData.Checked = False)
+            Else
+                CB_LiveData.Checked = False
+            End If
+
+            Dim serial = GetTestSerialNumber()
+            If String.IsNullOrWhiteSpace(serial) Then
+                UpdateUnitTestUi("Seriale mancante", False, Nothing)
+                Return
+            End If
+
+            originalSpeed1F = GetCurrentSpeed1()
+            originalSpeed1R = originalSpeed1F
+
+            Dim logPath = PrepareLogFile(serial)
+            If String.IsNullOrWhiteSpace(logPath) Then
+                UpdateUnitTestUi("Preparazione log annullata", False, Nothing)
+                Return
+            End If
+
+            unitTestLogPath = logPath
+            Dim log As New StringBuilder()
+            log.AppendLine($"# Test unita {serial}")
+            log.AppendLine($"Avvio: {DateTime.Now:yyyy-MM-dd HH:mm:ss}")
+            log.AppendLine()
+            AppendUnitTestPreview("Avvio test unita...")
+            AppendUnitTestPreview($"Seriale: {serial}")
+
+            Dim step1 = Await SendCommandAndCaptureAsync("2", "--- END OF READING ---", 8, ct)
+            log.AppendLine("## Step 1 - Lettura dati macchina (2)")
+            log.AppendLine("```")
+            log.AppendLine(step1.Output.Trim())
+            log.AppendLine("```")
+            AppendUnitTestPreview("Step 1 completato (2)")
+
+            Dim step2 = Await SendCommandAndCaptureAsync("6", "--- END OF READING ---", 8, ct)
+            If Me.InvokeRequired Then
+                Me.Invoke(Sub() ExtractConfigData())
+            Else
+                ExtractConfigData()
+            End If
+            log.AppendLine("## Step 2 - Lettura configurazione (6)")
+            log.AppendLine("```")
+            log.AppendLine(step2.Output.Trim())
+            log.AppendLine("```")
+            AppendUnitTestPreview("Step 2 completato (6)")
+
+            Dim liveBaseline = Await ReadLiveDataOnceAsync(ct)
+            log.AppendLine("## Step 3 - Live data iniziali (b)")
+            log.AppendLine(FormatLiveDataMarkdown(liveBaseline))
+            If liveBaseline Is Nothing Then
+                log.AppendLine("- Live data non ricevuti entro 60s: test fallito.")
+                AppendUnitTestPreview("Live data iniziali non ricevuti entro 60s. Test fallito.")
+                File.WriteAllText(logPath, log.ToString())
+                Dim failPath = MoveLogToFailed(logPath)
+                UpdateUnitTestUi("Test fallito: live data mancanti", False, failPath)
+                Return
+            End If
+            AppendUnitTestPreview("Live data iniziali ricevuti.")
+
+            If ct.IsCancellationRequested Then
+                File.WriteAllText(logPath, log.ToString())
+                UpdateUnitTestUi("Test annullato dall'utente", False, logPath)
+                Return
+            End If
+
+            Dim variations = ParseTestVariations()
+            Dim previousLive = liveBaseline
+            Dim allPassed As Boolean = True
+            Dim variationIndex As Integer = 1
+            Dim wasCancelled As Boolean = False
+            Dim previousTargetSpeed As Integer = originalSpeed1F
+
+            For Each variationSpeed1 In variations
+                If ct.IsCancellationRequested Then
+                    wasCancelled = True
+                    Exit For
+                End If
+
+                log.AppendLine()
+                log.AppendLine($"## Variazione {variationIndex}")
+                log.AppendLine($"- Target Speed1: {variationSpeed1}")
+
+                ApplyVariationToModel(variationSpeed1)
+                Dim saveOk = Await SaveConfigurationAsync(ct)
+                log.AppendLine($"- Salvataggio configurazione: {(If(saveOk, "OK", "FALLITO"))}")
+                If Not saveOk Then
+                    allPassed = False
+                    log.AppendLine("- Motivo: timeout durante il salvataggio.")
+                    Exit For
+                End If
+
+                Dim verify = Await SendCommandAndCaptureAsync("6", "--- END OF READING ---", 8, ct)
+                If Me.InvokeRequired Then
+                    Me.Invoke(Sub() ExtractConfigData())
+                Else
+                    ExtractConfigData()
+                End If
+                If Not verify.Success Then
+                    allPassed = False
+                    log.AppendLine("- Lettura configurazione dopo la variazione non riuscita.")
+                    Exit For
+                End If
+                log.AppendLine("```")
+                log.AppendLine(verify.Output.Trim())
+                log.AppendLine("```")
+                AppendUnitTestPreview($"Variazione {variationIndex}: configurazione riletta.")
+
+                Dim parsedVerify As New CustomerData()
+                ParseCustomerData(verify.Output, parsedVerify, False)
+
+                If parsedVerify.FSC_CAF_Speed1 <> variationSpeed1 Then
+                    allPassed = False
+                    log.AppendLine($"- Valore Speed1 letto ({parsedVerify.FSC_CAF_Speed1}) diverso dal target {variationSpeed1}.")
+                    AppendUnitTestPreview($"Variazione {variationIndex}: Speed1 letto {parsedVerify.FSC_CAF_Speed1} diverso dal target {variationSpeed1}.")
+                    Exit For
+                End If
+                AppendUnitTestPreview($"Variazione {variationIndex}: Speed1 confermato a {parsedVerify.FSC_CAF_Speed1}.")
+
+                AppendUnitTestPreview($"Variazione {variationIndex}: attivo live data, attesa 30s (timeout 60s).")
+                Dim liveAfter = Await ReadLiveDataWithDelayAsync(30, 60, ct)
+                If liveAfter Is Nothing Then
+                    allPassed = False
+                    log.AppendLine("- Live data non ricevuti entro 60s dopo la variazione.")
+                    AppendUnitTestPreview($"Variazione {variationIndex}: live data non ricevuti entro 60s.")
+                    Exit For
+                End If
+                log.AppendLine(FormatLiveDataMarkdown(liveAfter))
+
+                Dim rpmOk As Boolean = False
+                If liveAfter IsNot Nothing AndAlso previousLive IsNot Nothing Then
+                    If variationSpeed1 > previousTargetSpeed Then
+                        rpmOk = (liveAfter.RPMMotorF > previousLive.RPMMotorF) AndAlso (liveAfter.RPMMotorR > previousLive.RPMMotorR)
+                    ElseIf variationSpeed1 < previousTargetSpeed Then
+                        rpmOk = (liveAfter.RPMMotorF < previousLive.RPMMotorF) AndAlso (liveAfter.RPMMotorR < previousLive.RPMMotorR)
+                    Else
+                        rpmOk = True ' nessun cambio richiesto se target identico
+                    End If
+                ElseIf liveAfter IsNot Nothing Then
+                    rpmOk = liveAfter.RPMMotorF > 0 AndAlso liveAfter.RPMMotorR > 0
+                End If
+
+                log.AppendLine($"- Verifica RPM: {(If(rpmOk, "OK", "KO"))} (F {If(liveAfter IsNot Nothing, liveAfter.RPMMotorF, 0)} / R {If(liveAfter IsNot Nothing, liveAfter.RPMMotorR, 0)}) rispetto al target precedente {previousTargetSpeed}")
+                AppendUnitTestPreview($"Variazione {variationIndex}: verifica RPM {(If(rpmOk, "OK", "KO"))}")
+
+                previousLive = liveAfter
+                previousTargetSpeed = variationSpeed1
+                If Not rpmOk Then
+                    allPassed = False
+                    log.AppendLine("- Motivo: incremento giri non rilevato.")
+                    Exit For
+                End If
+
+                variationIndex += 1
+            Next
+
+            If wasCancelled Then
+                log.AppendLine()
+                log.AppendLine("## Ripristino configurazione originale")
+                log.AppendLine($"- Speed1 originale: {originalSpeed1F}")
+                Await RestoreOriginalSpeedAsync(ct)
+                File.WriteAllText(logPath, log.ToString())
+                UpdateUnitTestUi("Test annullato dall'utente", False, logPath)
+                Return
+            End If
+
+            log.AppendLine()
+            log.AppendLine("## Ripristino configurazione originale")
+            log.AppendLine($"- Speed1 originale: {originalSpeed1F}")
+            Await RestoreOriginalSpeedAsync(ct)
+            AppendUnitTestPreview("Ripristino Speed1 originale completato.")
+
+            File.WriteAllText(logPath, log.ToString())
+            Dim finalLogPath = logPath
+            If Not allPassed Then
+                finalLogPath = MoveLogToFailed(logPath)
+                UpdateUnitTestUi("Test fallito: log spostato in failed", False, finalLogPath)
+            Else
+                UpdateUnitTestUi("Test concluso con successo", False, finalLogPath)
+            End If
+        Catch ex As Exception
+            caughtEx = ex
+        End Try
+
+        If caughtEx IsNot Nothing Then
+            Await HandleUnitTestExceptionAsync(caughtEx, ct)
+        End If
+    End Function
+
+    Private Async Function HandleUnitTestExceptionAsync(ex As Exception, ct As CancellationToken) As Task
+        Dim failPath = unitTestLogPath
+        If Not String.IsNullOrWhiteSpace(failPath) AndAlso File.Exists(failPath) Then
+            failPath = MoveLogToFailed(failPath)
+        End If
+        If unitTestRunning Then
+            Await RestoreOriginalSpeedAsync(ct)
+        End If
+        UpdateUnitTestUi($"Errore test: {ex.Message}", False, failPath)
+    End Function
+
+    Private Async Sub Btn_StartUnitTest_Click(sender As Object, e As EventArgs) Handles Btn_StartUnitTest.Click
+        If unitTestRunning Then
+            MessageBox.Show("Un test e' gia' in esecuzione.", "Test unita", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Return
+        End If
+        unitTestCts = New CancellationTokenSource()
+        Await RunUnitTestAsync(unitTestCts.Token)
+    End Sub
+
+    Private Sub Btn_StopUnitTest_Click(sender As Object, e As EventArgs) Handles Btn_StopUnitTest.Click
+        If unitTestRunning Then
+            unitTestCts?.Cancel()
+            UpdateUnitTestUi("Test annullato dall'utente", False, unitTestLogPath)
+        End If
+    End Sub
 
 End Class
 

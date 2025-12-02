@@ -26,6 +26,7 @@ Partial Class Program_Form
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Program_Form))
         Me.SerialPort1 = New System.IO.Ports.SerialPort(Me.components)
         Me.TP_Configurator = New System.Windows.Forms.TabPage()
+        Me.flpStatus = New System.Windows.Forms.FlowLayoutPanel()
         Me.Grp_Acc = New System.Windows.Forms.GroupBox()
         Me.Btn_ResAcc = New System.Windows.Forms.Button()
         Me.TB_acc = New System.Windows.Forms.TextBox()
@@ -174,6 +175,19 @@ Partial Class Program_Form
         Me.Btn_Disconnect = New System.Windows.Forms.Button()
         Me.PcBx_Logo = New System.Windows.Forms.PictureBox()
         Me.Tab_Main = New System.Windows.Forms.TabControl()
+        Me.TP_TestUnit = New System.Windows.Forms.TabPage()
+        Me.Grp_UnitTest = New System.Windows.Forms.GroupBox()
+        Me.lblUnitTestLogPreviewLabel = New System.Windows.Forms.Label()
+        Me.txtUnitTestLogPreview = New System.Windows.Forms.TextBox()
+        Me.lblUnitTestLogPath = New System.Windows.Forms.Label()
+        Me.lblUnitTestStatus = New System.Windows.Forms.Label()
+        Me.lblUnitTestNote = New System.Windows.Forms.Label()
+        Me.lblUnitTestVariationsLabel = New System.Windows.Forms.Label()
+        Me.lblUnitTestSerialLabel = New System.Windows.Forms.Label()
+        Me.txtUnitTestVariations = New System.Windows.Forms.TextBox()
+        Me.txtUnitTestSerial = New System.Windows.Forms.TextBox()
+        Me.Btn_StopUnitTest = New System.Windows.Forms.Button()
+        Me.Btn_StartUnitTest = New System.Windows.Forms.Button()
         Me.TP_Shell = New System.Windows.Forms.TabPage()
         Me.CB_Timestamp = New System.Windows.Forms.CheckBox()
         Me.CB_SaveLog = New System.Windows.Forms.CheckBox()
@@ -183,7 +197,6 @@ Partial Class Program_Form
         Me.SerialDataTimer = New System.Windows.Forms.Timer(Me.components)
         Me.lb_QKvers = New System.Windows.Forms.Label()
         Me.TimerDateTime = New System.Windows.Forms.Timer(Me.components)
-        Me.flpStatus = New System.Windows.Forms.FlowLayoutPanel()
         Me.TP_Configurator.SuspendLayout()
         Me.Grp_Acc.SuspendLayout()
         Me.Grp_Live.SuspendLayout()
@@ -223,6 +236,8 @@ Partial Class Program_Form
         CType(Me.num_F_Speed1, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.PcBx_Logo, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Tab_Main.SuspendLayout()
+        Me.TP_TestUnit.SuspendLayout()
+        Me.Grp_UnitTest.SuspendLayout()
         Me.TP_Shell.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -261,6 +276,19 @@ Partial Class Program_Form
         Me.TP_Configurator.TabIndex = 0
         Me.TP_Configurator.Text = "Configurator"
         Me.TP_Configurator.UseVisualStyleBackColor = True
+        '
+        'flpStatus
+        '
+        Me.flpStatus.AutoSize = True
+        Me.flpStatus.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
+        Me.flpStatus.BackColor = System.Drawing.Color.LightGray
+        Me.flpStatus.Dock = System.Windows.Forms.DockStyle.Bottom
+        Me.flpStatus.Location = New System.Drawing.Point(3, 503)
+        Me.flpStatus.Name = "flpStatus"
+        Me.flpStatus.Padding = New System.Windows.Forms.Padding(6)
+        Me.flpStatus.Size = New System.Drawing.Size(1067, 12)
+        Me.flpStatus.TabIndex = 22
+        Me.flpStatus.WrapContents = False
         '
         'Grp_Acc
         '
@@ -1845,12 +1873,146 @@ Partial Class Program_Form
         'Tab_Main
         '
         Me.Tab_Main.Controls.Add(Me.TP_Configurator)
+        Me.Tab_Main.Controls.Add(Me.TP_TestUnit)
         Me.Tab_Main.Controls.Add(Me.TP_Shell)
         Me.Tab_Main.Location = New System.Drawing.Point(12, 12)
         Me.Tab_Main.Name = "Tab_Main"
         Me.Tab_Main.SelectedIndex = 0
         Me.Tab_Main.Size = New System.Drawing.Size(1081, 544)
         Me.Tab_Main.TabIndex = 7
+        '
+        'TP_TestUnit
+        '
+        Me.TP_TestUnit.Controls.Add(Me.Grp_UnitTest)
+        Me.TP_TestUnit.Location = New System.Drawing.Point(4, 22)
+        Me.TP_TestUnit.Name = "TP_TestUnit"
+        Me.TP_TestUnit.Padding = New System.Windows.Forms.Padding(3)
+        Me.TP_TestUnit.Size = New System.Drawing.Size(1073, 518)
+        Me.TP_TestUnit.TabIndex = 1
+        Me.TP_TestUnit.Text = "Unit Test"
+        Me.TP_TestUnit.UseVisualStyleBackColor = True
+        '
+        'Grp_UnitTest
+        '
+        Me.Grp_UnitTest.Controls.Add(Me.lblUnitTestLogPreviewLabel)
+        Me.Grp_UnitTest.Controls.Add(Me.txtUnitTestLogPreview)
+        Me.Grp_UnitTest.Controls.Add(Me.lblUnitTestLogPath)
+        Me.Grp_UnitTest.Controls.Add(Me.lblUnitTestStatus)
+        Me.Grp_UnitTest.Controls.Add(Me.lblUnitTestNote)
+        Me.Grp_UnitTest.Controls.Add(Me.lblUnitTestVariationsLabel)
+        Me.Grp_UnitTest.Controls.Add(Me.lblUnitTestSerialLabel)
+        Me.Grp_UnitTest.Controls.Add(Me.txtUnitTestVariations)
+        Me.Grp_UnitTest.Controls.Add(Me.txtUnitTestSerial)
+        Me.Grp_UnitTest.Controls.Add(Me.Btn_StopUnitTest)
+        Me.Grp_UnitTest.Controls.Add(Me.Btn_StartUnitTest)
+        Me.Grp_UnitTest.Location = New System.Drawing.Point(18, 15)
+        Me.Grp_UnitTest.Name = "Grp_UnitTest"
+        Me.Grp_UnitTest.Size = New System.Drawing.Size(1037, 487)
+        Me.Grp_UnitTest.TabIndex = 0
+        Me.Grp_UnitTest.TabStop = False
+        Me.Grp_UnitTest.Text = "Test automatico unita"
+        '
+        'lblUnitTestLogPreviewLabel
+        '
+        Me.lblUnitTestLogPreviewLabel.AutoSize = True
+        Me.lblUnitTestLogPreviewLabel.Location = New System.Drawing.Point(880, 74)
+        Me.lblUnitTestLogPreviewLabel.Name = "lblUnitTestLogPreviewLabel"
+        Me.lblUnitTestLogPreviewLabel.Size = New System.Drawing.Size(120, 13)
+        Me.lblUnitTestLogPreviewLabel.TabIndex = 9
+        Me.lblUnitTestLogPreviewLabel.Text = "Anteprima log (readonly)"
+        '
+        'txtUnitTestLogPreview
+        '
+        Me.txtUnitTestLogPreview.Location = New System.Drawing.Point(498, 90)
+        Me.txtUnitTestLogPreview.Multiline = True
+        Me.txtUnitTestLogPreview.Name = "txtUnitTestLogPreview"
+        Me.txtUnitTestLogPreview.ReadOnly = True
+        Me.txtUnitTestLogPreview.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
+        Me.txtUnitTestLogPreview.Size = New System.Drawing.Size(502, 225)
+        Me.txtUnitTestLogPreview.TabIndex = 10
+        '
+        'lblUnitTestLogPath
+        '
+        Me.lblUnitTestLogPath.AutoSize = True
+        Me.lblUnitTestLogPath.Location = New System.Drawing.Point(20, 199)
+        Me.lblUnitTestLogPath.Name = "lblUnitTestLogPath"
+        Me.lblUnitTestLogPath.MaximumSize = New System.Drawing.Size(480, 0)
+        Me.lblUnitTestLogPath.Size = New System.Drawing.Size(48, 13)
+        Me.lblUnitTestLogPath.TabIndex = 8
+        Me.lblUnitTestLogPath.Text = "Log: n/d"
+        '
+        'lblUnitTestStatus
+        '
+        Me.lblUnitTestStatus.AutoSize = True
+        Me.lblUnitTestStatus.Location = New System.Drawing.Point(20, 173)
+        Me.lblUnitTestStatus.Name = "lblUnitTestStatus"
+        Me.lblUnitTestStatus.Size = New System.Drawing.Size(87, 13)
+        Me.lblUnitTestStatus.TabIndex = 7
+        Me.lblUnitTestStatus.Text = "Stato: in attesa..."
+        '
+        'lblUnitTestNote
+        '
+        Me.lblUnitTestNote.Location = New System.Drawing.Point(543, 90)
+        Me.lblUnitTestNote.MaximumSize = New System.Drawing.Size(457, 0)
+        Me.lblUnitTestNote.Name = "lblUnitTestNote"
+        Me.lblUnitTestNote.Size = New System.Drawing.Size(457, 0)
+        Me.lblUnitTestNote.TabIndex = 6
+        Me.lblUnitTestNote.Text = resources.GetString("lblUnitTestNote.Text")
+        '
+        'lblUnitTestVariationsLabel
+        '
+        Me.lblUnitTestVariationsLabel.AutoSize = True
+        Me.lblUnitTestVariationsLabel.Location = New System.Drawing.Point(20, 74)
+        Me.lblUnitTestVariationsLabel.Name = "lblUnitTestVariationsLabel"
+        Me.lblUnitTestVariationsLabel.Size = New System.Drawing.Size(181, 13)
+        Me.lblUnitTestVariationsLabel.TabIndex = 5
+        Me.lblUnitTestVariationsLabel.Text = "Variazioni (Speed1,Speed2,Speed3):"
+        '
+        'lblUnitTestSerialLabel
+        '
+        Me.lblUnitTestSerialLabel.AutoSize = True
+        Me.lblUnitTestSerialLabel.Location = New System.Drawing.Point(20, 33)
+        Me.lblUnitTestSerialLabel.Name = "lblUnitTestSerialLabel"
+        Me.lblUnitTestSerialLabel.Size = New System.Drawing.Size(141, 13)
+        Me.lblUnitTestSerialLabel.TabIndex = 4
+        Me.lblUnitTestSerialLabel.Text = "Numero seriale (18 cifre) test"
+        '
+        'txtUnitTestVariations
+        '
+        Me.txtUnitTestVariations.Location = New System.Drawing.Point(23, 90)
+        Me.txtUnitTestVariations.Multiline = True
+        Me.txtUnitTestVariations.Name = "txtUnitTestVariations"
+        Me.txtUnitTestVariations.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
+        Me.txtUnitTestVariations.Size = New System.Drawing.Size(431, 80)
+        Me.txtUnitTestVariations.TabIndex = 3
+        Me.txtUnitTestVariations.Text = "100" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "60" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "30"
+        '
+        'txtUnitTestSerial
+        '
+        Me.txtUnitTestSerial.Location = New System.Drawing.Point(192, 30)
+        Me.txtUnitTestSerial.MaxLength = 32
+        Me.txtUnitTestSerial.Name = "txtUnitTestSerial"
+        Me.txtUnitTestSerial.Size = New System.Drawing.Size(262, 20)
+        Me.txtUnitTestSerial.TabIndex = 2
+        '
+        'Btn_StopUnitTest
+        '
+        Me.Btn_StopUnitTest.Enabled = False
+        Me.Btn_StopUnitTest.Location = New System.Drawing.Point(652, 24)
+        Me.Btn_StopUnitTest.Name = "Btn_StopUnitTest"
+        Me.Btn_StopUnitTest.Size = New System.Drawing.Size(129, 32)
+        Me.Btn_StopUnitTest.TabIndex = 1
+        Me.Btn_StopUnitTest.Text = "Stop test"
+        Me.Btn_StopUnitTest.UseVisualStyleBackColor = True
+        '
+        'Btn_StartUnitTest
+        '
+        Me.Btn_StartUnitTest.Location = New System.Drawing.Point(498, 24)
+        Me.Btn_StartUnitTest.Name = "Btn_StartUnitTest"
+        Me.Btn_StartUnitTest.Size = New System.Drawing.Size(129, 32)
+        Me.Btn_StartUnitTest.TabIndex = 0
+        Me.Btn_StartUnitTest.Text = "Avvia test"
+        Me.Btn_StartUnitTest.UseVisualStyleBackColor = True
         '
         'TP_Shell
         '
@@ -1861,8 +2023,8 @@ Partial Class Program_Form
         Me.TP_Shell.Controls.Add(Me.Btn_SendData)
         Me.TP_Shell.Location = New System.Drawing.Point(4, 22)
         Me.TP_Shell.Name = "TP_Shell"
-        Me.TP_Shell.Size = New System.Drawing.Size(1073, 481)
-        Me.TP_Shell.TabIndex = 1
+        Me.TP_Shell.Size = New System.Drawing.Size(1073, 518)
+        Me.TP_Shell.TabIndex = 2
         Me.TP_Shell.Text = "Service Data"
         Me.TP_Shell.UseVisualStyleBackColor = True
         '
@@ -1928,19 +2090,6 @@ Partial Class Program_Form
         '
         Me.TimerDateTime.Interval = 1000
         '
-        'flpStatus
-        '
-        Me.flpStatus.AutoSize = True
-        Me.flpStatus.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
-        Me.flpStatus.BackColor = System.Drawing.Color.LightGray
-        Me.flpStatus.Dock = System.Windows.Forms.DockStyle.Bottom
-        Me.flpStatus.Location = New System.Drawing.Point(3, 503)
-        Me.flpStatus.Name = "flpStatus"
-        Me.flpStatus.Padding = New System.Windows.Forms.Padding(6)
-        Me.flpStatus.Size = New System.Drawing.Size(1067, 12)
-        Me.flpStatus.TabIndex = 22
-        Me.flpStatus.WrapContents = False
-        '
         'Program_Form
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -2003,6 +2152,9 @@ Partial Class Program_Form
         CType(Me.num_F_Speed1, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.PcBx_Logo, System.ComponentModel.ISupportInitialize).EndInit()
         Me.Tab_Main.ResumeLayout(False)
+        Me.TP_TestUnit.ResumeLayout(False)
+        Me.Grp_UnitTest.ResumeLayout(False)
+        Me.Grp_UnitTest.PerformLayout()
         Me.TP_Shell.ResumeLayout(False)
         Me.TP_Shell.PerformLayout()
         Me.ResumeLayout(False)
@@ -2169,4 +2321,17 @@ Partial Class Program_Form
     Friend WithEvents lbl_DisRH As Label
     Friend WithEvents CB_RHDisable As CheckBox
     Friend WithEvents flpStatus As FlowLayoutPanel
+    Friend WithEvents TP_TestUnit As TabPage
+    Friend WithEvents Grp_UnitTest As GroupBox
+    Friend WithEvents Btn_StartUnitTest As Button
+    Friend WithEvents Btn_StopUnitTest As Button
+    Friend WithEvents txtUnitTestSerial As TextBox
+    Friend WithEvents txtUnitTestVariations As TextBox
+    Friend WithEvents lblUnitTestLogPath As Label
+    Friend WithEvents lblUnitTestStatus As Label
+    Friend WithEvents lblUnitTestNote As Label
+    Friend WithEvents lblUnitTestVariationsLabel As Label
+    Friend WithEvents lblUnitTestSerialLabel As Label
+    Friend WithEvents lblUnitTestLogPreviewLabel As Label
+    Friend WithEvents txtUnitTestLogPreview As TextBox
 End Class

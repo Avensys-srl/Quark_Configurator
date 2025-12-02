@@ -73,10 +73,10 @@
     <ApplicationManifest>My Project\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>03E445F76DCBFA284F7E618E22E3B0694F043D1B</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>0AABFACFFAD82A243B9D5281D3C066AFA476CBFA</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>avensys.pfx</ManifestKeyFile>
+    <ManifestKeyFile>RD_programmer_4_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -226,6 +226,7 @@
     <Content Include="Resources\412_DRAW_QUARK_FL_D.png" />
     <Content Include="Resources\AV_icon.ico" />
     <None Include="RD_programmer_3_TemporaryKey.pfx" />
+    <None Include="RD_programmer_4_TemporaryKey.pfx" />
     <None Include="Resources\Firmware_Update.exe" />
     <Content Include="Resources\SMART_ICON.png" />
     <None Include="packages.config" />

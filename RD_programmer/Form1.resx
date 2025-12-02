@@ -120,6 +120,9 @@
   <metadata name="SerialPort1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
+  <data name="lblUnitTestNote.Text" xml:space="preserve">
+    <value>Inserire una variazione per riga nel formato Speed1,Speed2,Speed3. Se lasciato vuoto verra' utilizzato un default (Speed1 a 100%). I log verranno salvati in ./test con suffisso progressivo se il file esiste.</value>
+  </data>
   <metadata name="SerialDataTimer.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>127, 17</value>
   </metadata>
