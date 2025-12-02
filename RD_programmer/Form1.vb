@@ -3,6 +3,7 @@ Imports System.IO.Ports
 Imports System.Diagnostics
 Imports System.Reflection
 Imports System.Text
+Imports System.Linq
 Imports System.Text.RegularExpressions
 Imports System.Threading.Tasks
 Imports System.Xml.Serialization
@@ -46,6 +47,14 @@ Public Class Program_Form
     Private originalSpeed1F As Integer = 0
     Private originalSpeed1R As Integer = 0
     Private unitTestStartTime As DateTime = DateTime.MinValue
+    Private Class TestLogListItem
+        Public Property Display As String
+        Public Property FullPath As String
+        Public Overrides Function ToString() As String
+            Return Display
+        End Function
+    End Class
+    Private liveDataHistory As New Queue(Of LiveData)()
 
     ' === Palette (usa questi colori per coerenza) ===
     Private Shared ReadOnly ColBlue As Color = Color.FromArgb(37, 99, 235)     ' operativi
@@ -633,6 +642,7 @@ Public Class Program_Form
             Tab_Main.TabPages.Remove(TP_TestUnit)
             hiddenPages.Add(TP_TestUnit)
         End If
+        LoadTestLogs()
     End Sub
 
     Private Sub Btn_RefreshLIST_Click(sender As Object, e As EventArgs) Handles Btn_RefreshLIST.Click
@@ -1044,6 +1054,7 @@ Public Class Program_Form
                     If live IsNot Nothing AndAlso live.IsValid Then
                         lastLiveDataSnapshot = CloneLiveData(live)
                         lastLiveDataTimestamp = DateTime.Now
+                        AddLiveDataHistory(lastLiveDataSnapshot)
                         If Me.IsHandleCreated AndAlso Not Me.IsDisposed Then
                             Me.Invoke(Sub()
                                           ' Esempio: aggiorna due label
@@ -1065,7 +1076,6 @@ Public Class Program_Form
                                               lblRReturn.Text = $"{live.HumidityLeft:F0} %"
                                           End If
                                           UpdateStatusBar(live)
-                                          lb_status.Text = live.ToString()
                                       End Sub)
                         End If
                     End If
@@ -2433,17 +2443,22 @@ Public Class Program_Form
         Dim sb As New StringBuilder()
         sb.AppendLine($"- Temp Fresh/Return: {live.TemperatureFresh:F1} / {live.TemperatureReturn:F1} C")
         sb.AppendLine($"- Temp Supply/Exhaust: {live.TemperatureSupply:F1} / {live.TemperatureExhaust:F1} C")
-        sb.AppendLine($"- Heater: {live.TemperatureHeater:F1} C")
+        Dim heaterText As String = $"{live.TemperatureHeater:F1} C"
+        If Not HasEhdAccessory() AndAlso Math.Abs(live.TemperatureHeater) < 0.0001 Then
+            heaterText = "N/A"
+        End If
+        sb.AppendLine($"- Heater: {heaterText}")
         sb.AppendLine($"- Humidity L/R: {live.HumidityLeft} / {live.HumidityRight} %")
         sb.AppendLine($"- Feedback V F/R: {live.FeedbackVMotorF:F1} / {live.FeedbackVMotorR:F1} V")
         sb.AppendLine($"- RPM F/R: {live.RPMMotorF} / {live.RPMMotorR}")
-        sb.AppendLine($"- StatusUnit: {live.StatusUnit} (0x{live.StatusUnit:X4})")
-        sb.AppendLine($"  Flags: {FormatStatusUnitFlags(live)}")
+        sb.AppendLine($"- StatusUnit: {live.StatusUnit} (0x{live.StatusUnit:X4}): {FormatStatusUnitFlags(live)}")
         sb.AppendLine($"- Belimo current: {live.BelimoCurrent:F1} mA")
-        sb.AppendLine($"- Belimo1 inputs: {FormatBelimoInputs(live.Belimo1_Inputs)}")
-        sb.AppendLine($"- Belimo2 inputs: {FormatBelimoInputs(live.Belimo2_Inputs)}")
+        sb.AppendLine($"- Belimo1: {FormatBelimoState(live.Belimo1_Inputs)} (inputs: {FormatBelimoInputs(live.Belimo1_Inputs)})")
+        sb.AppendLine($"- Belimo2: {FormatBelimoState(live.Belimo2_Inputs)} (inputs: {FormatBelimoInputs(live.Belimo2_Inputs)})")
         Dim alarms = live.GetAlarmCodes()
-        If Not String.IsNullOrWhiteSpace(alarms) Then
+        If String.IsNullOrWhiteSpace(alarms) Then
+            sb.AppendLine("- Alarms: NONE")
+        Else
             sb.AppendLine($"- Alarms: {alarms}")
         End If
         Return sb.ToString()
@@ -2454,10 +2469,21 @@ Public Class Program_Form
             reason = "Temperature validation failed: live data missing."
             Return False
         End If
-        Dim diffFR = Math.Abs(live.TemperatureFresh - live.TemperatureReturn)
-        Dim diffSE = Math.Abs(live.TemperatureSupply - live.TemperatureExhaust)
-        Dim avgFR = (live.TemperatureFresh + live.TemperatureReturn) / 2.0
-        Dim avgSE = (live.TemperatureSupply + live.TemperatureExhaust) / 2.0
+        Dim samples As New List(Of LiveData)()
+        samples.Add(live)
+        If liveDataHistory.Count > 0 Then
+            samples.AddRange(liveDataHistory)
+        End If
+        Dim takeN = Math.Min(5, samples.Count)
+        Dim lastSamples = samples.Skip(Math.Max(0, samples.Count - takeN)).ToList()
+        Dim avgFresh = lastSamples.Average(Function(x) x.TemperatureFresh)
+        Dim avgReturn = lastSamples.Average(Function(x) x.TemperatureReturn)
+        Dim avgSupply = lastSamples.Average(Function(x) x.TemperatureSupply)
+        Dim avgExhaust = lastSamples.Average(Function(x) x.TemperatureExhaust)
+        Dim diffFR = Math.Abs(avgFresh - avgReturn)
+        Dim diffSE = Math.Abs(avgSupply - avgExhaust)
+        Dim avgFR = (avgFresh + avgReturn) / 2.0
+        Dim avgSE = (avgSupply + avgExhaust) / 2.0
         Dim diffAvg = Math.Abs(avgFR - avgSE)
 
         Dim okPairs = diffFR <= 1.5 AndAlso diffSE <= 1.5 AndAlso diffAvg <= 3.5
@@ -2496,6 +2522,40 @@ Public Class Program_Form
         Next
         Return String.Join(",", bits)
     End Function
+
+    Private Function HasEhdAccessory() As Boolean
+        If customerData Is Nothing OrElse String.IsNullOrWhiteSpace(customerData.Accessories) Then Return False
+        Return customerData.Accessories.IndexOf("EHD", StringComparison.OrdinalIgnoreCase) >= 0
+    End Function
+
+    Private Function FormatBelimoState(inputs As Boolean()) As String
+        If inputs Is Nothing OrElse inputs.Length < 4 Then Return "unknown"
+
+        Dim i0 = inputs(0)
+        Dim i1 = inputs(1)
+        Dim i2 = inputs(2)
+        Dim i3 = inputs(3)
+
+        If (i0 AndAlso i1 AndAlso i2 AndAlso i3) Then
+            Return "Disconnect"
+        ElseIf (Not i0 AndAlso Not i1 AndAlso i2 AndAlso i3) Then
+            Return "Close"
+        ElseIf (Not i0 AndAlso i1 AndAlso i2 AndAlso Not i3) Then
+            Return "Moving"
+        ElseIf (i0 AndAlso i1 AndAlso Not i2 AndAlso Not i3) Then
+            Return "Open"
+        Else
+            Return "No_FKI"
+        End If
+    End Function
+
+    Private Sub AddLiveDataHistory(live As LiveData)
+        If live Is Nothing Then Return
+        liveDataHistory.Enqueue(CloneLiveData(live))
+        While liveDataHistory.Count > 5
+            liveDataHistory.Dequeue()
+        End While
+    End Sub
 
     Private Function PrepareLogFile(serialNumber As String) As String
         Try
@@ -2604,6 +2664,36 @@ Public Class Program_Form
             prefix = $"[{elapsed:mm\:ss}] "
         End If
         txtUnitTestLogPreview.AppendText(prefix & line & Environment.NewLine)
+    End Sub
+
+    Private Sub LoadTestLogs()
+        If lstTestLogs Is Nothing Then Return
+        If Me.InvokeRequired Then
+            Me.Invoke(Sub() LoadTestLogs())
+            Return
+        End If
+        lstTestLogs.Items.Clear()
+        Try
+            Dim testDir = Path.Combine(Application.StartupPath, TestFolderName)
+            If Not Directory.Exists(testDir) Then Return
+
+            Dim files As New List(Of String)()
+            files.AddRange(Directory.GetFiles(testDir, "*.md"))
+            Dim failedDir = Path.Combine(testDir, TestFailedFolderName)
+            If Directory.Exists(failedDir) Then
+                files.AddRange(Directory.GetFiles(failedDir, "*.md"))
+            End If
+
+            For Each f In files.OrderByDescending(Function(x) File.GetCreationTime(x))
+                Dim display = Path.GetFileName(f)
+                If f.StartsWith(Path.Combine(testDir, TestFailedFolderName), StringComparison.OrdinalIgnoreCase) Then
+                    display = Path.Combine(TestFailedFolderName, Path.GetFileName(f))
+                End If
+                lstTestLogs.Items.Add(New TestLogListItem With {.Display = display, .FullPath = f})
+            Next
+        Catch
+            ' ignore errors on listing
+        End Try
     End Sub
 
     Private Function ParseTestVariations() As List(Of Integer)
@@ -2765,13 +2855,33 @@ Public Class Program_Form
             AppendUnitTestPreview("Initial temperature check in progress...")
             Dim tempBaselineReason As String = String.Empty
             If Not ValidateTemperaturePairs(liveBaseline, tempBaselineReason) Then
-                log.AppendLine($"- {tempBaselineReason}")
-                AppendUnitTestPreview($"Initial temperature check failed: {tempBaselineReason}")
-                AppendFinalFooter(log, "FAILED", logStart)
-                File.WriteAllText(logPath, log.ToString())
-                Dim failPath = MoveLogToFailed(logPath)
-                UpdateUnitTestUi("Test fallito: live data mancanti", False, failPath)
-                Return
+                AppendUnitTestPreview($"Initial temperature check failed, retrying in 15s: {tempBaselineReason}")
+                Dim retryLive = Await ReadLiveDataWithDelayAsync(15, 15, ct)
+                If retryLive IsNot Nothing Then
+                    log.AppendLine("## Temperature retry (initial, +15s)")
+                    log.AppendLine(FormatLiveDataMarkdown(retryLive))
+                    liveBaseline = retryLive
+                    tempBaselineReason = String.Empty
+                    If Not ValidateTemperaturePairs(liveBaseline, tempBaselineReason) Then
+                        log.AppendLine($"- {tempBaselineReason}")
+                        AppendUnitTestPreview($"Initial temperature check failed after retry: {tempBaselineReason}")
+                        AppendFinalFooter(log, "FAILED", logStart)
+                        File.WriteAllText(logPath, log.ToString())
+                        Dim failPath = MoveLogToFailed(logPath)
+                        LoadTestLogs()
+                        UpdateUnitTestUi("Test fallito: live data mancanti", False, failPath)
+                        Return
+                    End If
+                Else
+                    log.AppendLine($"- {tempBaselineReason}")
+                    AppendUnitTestPreview($"Initial temperature check failed (no retry data): {tempBaselineReason}")
+                    AppendFinalFooter(log, "FAILED", logStart)
+                    File.WriteAllText(logPath, log.ToString())
+                    Dim failPath = MoveLogToFailed(logPath)
+                    LoadTestLogs()
+                    UpdateUnitTestUi("Test fallito: live data mancanti", False, failPath)
+                    Return
+                End If
             Else
                 log.AppendLine("- Temperature check: OK")
                 AppendUnitTestPreview("Initial temperature check: OK")
@@ -2782,6 +2892,7 @@ Public Class Program_Form
                 AppendFinalFooter(log, "FAILED", logStart)
                 File.WriteAllText(logPath, log.ToString())
                 Dim failPath = MoveLogToFailed(logPath)
+                LoadTestLogs()
                 UpdateUnitTestUi("Test fallito: live data mancanti", False, failPath)
                 Return
             End If
@@ -2860,10 +2971,25 @@ Public Class Program_Form
                 AppendUnitTestPreview($"Variation {variationIndex}: temperature check in progress...")
                 Dim tempReason As String = String.Empty
                 If Not ValidateTemperaturePairs(liveAfter, tempReason) Then
-                    allPassed = False
-                    log.AppendLine($"- {tempReason}")
-                    AppendUnitTestPreview($"Variation {variationIndex}: {tempReason}")
-                    Exit For
+                    AppendUnitTestPreview($"Variation {variationIndex}: temp check failed, retrying in 15s: {tempReason}")
+                    Dim retryLive = Await ReadLiveDataWithDelayAsync(15, 15, ct)
+                    If retryLive IsNot Nothing Then
+                        log.AppendLine($"## Temperature retry (variation {variationIndex}, +15s)")
+                        log.AppendLine(FormatLiveDataMarkdown(retryLive))
+                        liveAfter = retryLive
+                        tempReason = String.Empty
+                        If Not ValidateTemperaturePairs(liveAfter, tempReason) Then
+                            allPassed = False
+                            log.AppendLine($"- {tempReason}")
+                            AppendUnitTestPreview($"Variation {variationIndex}: {tempReason}")
+                            Exit For
+                        End If
+                    Else
+                        allPassed = False
+                        log.AppendLine($"- {tempReason}")
+                        AppendUnitTestPreview($"Variation {variationIndex}: {tempReason}")
+                        Exit For
+                    End If
                 Else
                     log.AppendLine("- Temperature check: OK")
                     AppendUnitTestPreview($"Variation {variationIndex}: Temperature check OK")
@@ -2882,7 +3008,7 @@ Public Class Program_Form
                     rpmOk = liveAfter.RPMMotorF > 0 AndAlso liveAfter.RPMMotorR > 0
                 End If
 
-                log.AppendLine($"- RPM check: {(If(rpmOk, "OK", "FAILED"))} (F {If(liveAfter IsNot Nothing, liveAfter.RPMMotorF, 0)} / R {If(liveAfter IsNot Nothing, liveAfter.RPMMotorR, 0)}) vs previous target {previousTargetSpeed}")
+                log.AppendLine($"- RPM check: {(If(rpmOk, "OK", "FAILED"))} (F {If(liveAfter IsNot Nothing, liveAfter.RPMMotorF, 0)} / R {If(liveAfter IsNot Nothing, liveAfter.RPMMotorR, 0)}) vs previous target (F {previousLive?.RPMMotorF}, R {previousLive?.RPMMotorR})")
                 AppendUnitTestPreview($"Variation {variationIndex}: RPM check {(If(rpmOk, "OK", "FAILED"))}")
 
                 previousLive = liveAfter
@@ -2915,6 +3041,7 @@ Public Class Program_Form
 
             AppendFinalFooter(log, If(allPassed, "PASSED", "FAILED"), logStart)
             File.WriteAllText(logPath, log.ToString())
+            LoadTestLogs()
             Dim finalLogPath = logPath
             If Not allPassed Then
                 finalLogPath = MoveLogToFailed(logPath)
@@ -2957,6 +3084,26 @@ Public Class Program_Form
             unitTestCts?.Cancel()
             UpdateUnitTestUi("Test annullato dall'utente", False, unitTestLogPath)
         End If
+    End Sub
+
+    Private Sub Btn_RefreshTestLogs_Click(sender As Object, e As EventArgs) Handles Btn_RefreshTestLogs.Click
+        LoadTestLogs()
+    End Sub
+
+    Private Sub lstTestLogs_DoubleClick(sender As Object, e As EventArgs) Handles lstTestLogs.DoubleClick
+        Dim item = TryCast(lstTestLogs.SelectedItem, TestLogListItem)
+        If item Is Nothing Then Return
+        Try
+            If File.Exists(item.FullPath) Then
+                Dim psi As New ProcessStartInfo With {
+                    .FileName = item.FullPath,
+                    .UseShellExecute = True
+                }
+                Process.Start(psi)
+            End If
+        Catch ex As Exception
+            MessageBox.Show($"Cannot open file: {ex.Message}", "Open file error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
     End Sub
 
 End Class

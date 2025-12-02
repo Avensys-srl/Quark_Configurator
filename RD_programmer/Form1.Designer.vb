@@ -177,6 +177,9 @@ Partial Class Program_Form
         Me.Tab_Main = New System.Windows.Forms.TabControl()
         Me.TP_TestUnit = New System.Windows.Forms.TabPage()
         Me.Grp_UnitTest = New System.Windows.Forms.GroupBox()
+        Me.Btn_RefreshTestLogs = New System.Windows.Forms.Button()
+        Me.lstTestLogs = New System.Windows.Forms.ListBox()
+        Me.lblTestLogs = New System.Windows.Forms.Label()
         Me.lblUnitTestLogPreviewLabel = New System.Windows.Forms.Label()
         Me.txtUnitTestLogPreview = New System.Windows.Forms.TextBox()
         Me.lblUnitTestLogPath = New System.Windows.Forms.Label()
@@ -1894,6 +1897,9 @@ Partial Class Program_Form
         '
         'Grp_UnitTest
         '
+        Me.Grp_UnitTest.Controls.Add(Me.Btn_RefreshTestLogs)
+        Me.Grp_UnitTest.Controls.Add(Me.lstTestLogs)
+        Me.Grp_UnitTest.Controls.Add(Me.lblTestLogs)
         Me.Grp_UnitTest.Controls.Add(Me.lblUnitTestLogPreviewLabel)
         Me.Grp_UnitTest.Controls.Add(Me.txtUnitTestLogPreview)
         Me.Grp_UnitTest.Controls.Add(Me.lblUnitTestLogPath)
@@ -1911,6 +1917,33 @@ Partial Class Program_Form
         Me.Grp_UnitTest.TabIndex = 0
         Me.Grp_UnitTest.TabStop = False
         Me.Grp_UnitTest.Text = "Test automatico unita"
+        '
+        'Btn_RefreshTestLogs
+        '
+        Me.Btn_RefreshTestLogs.Location = New System.Drawing.Point(905, 344)
+        Me.Btn_RefreshTestLogs.Name = "Btn_RefreshTestLogs"
+        Me.Btn_RefreshTestLogs.Size = New System.Drawing.Size(95, 23)
+        Me.Btn_RefreshTestLogs.TabIndex = 13
+        Me.Btn_RefreshTestLogs.Text = "Refresh list"
+        Me.Btn_RefreshTestLogs.UseVisualStyleBackColor = True
+        '
+        'lstTestLogs
+        '
+        Me.lstTestLogs.FormattingEnabled = True
+        Me.lstTestLogs.HorizontalScrollbar = True
+        Me.lstTestLogs.Location = New System.Drawing.Point(498, 373)
+        Me.lstTestLogs.Name = "lstTestLogs"
+        Me.lstTestLogs.Size = New System.Drawing.Size(502, 108)
+        Me.lstTestLogs.TabIndex = 12
+        '
+        'lblTestLogs
+        '
+        Me.lblTestLogs.AutoSize = True
+        Me.lblTestLogs.Location = New System.Drawing.Point(495, 349)
+        Me.lblTestLogs.Name = "lblTestLogs"
+        Me.lblTestLogs.Size = New System.Drawing.Size(154, 13)
+        Me.lblTestLogs.TabIndex = 11
+        Me.lblTestLogs.Text = "Test files (double-click to open)"
         '
         'lblUnitTestLogPreviewLabel
         '
@@ -1935,8 +1968,8 @@ Partial Class Program_Form
         '
         Me.lblUnitTestLogPath.AutoSize = True
         Me.lblUnitTestLogPath.Location = New System.Drawing.Point(20, 199)
-        Me.lblUnitTestLogPath.Name = "lblUnitTestLogPath"
         Me.lblUnitTestLogPath.MaximumSize = New System.Drawing.Size(480, 0)
+        Me.lblUnitTestLogPath.Name = "lblUnitTestLogPath"
         Me.lblUnitTestLogPath.Size = New System.Drawing.Size(48, 13)
         Me.lblUnitTestLogPath.TabIndex = 8
         Me.lblUnitTestLogPath.Text = "Log: n/d"
@@ -1964,9 +1997,9 @@ Partial Class Program_Form
         Me.lblUnitTestVariationsLabel.AutoSize = True
         Me.lblUnitTestVariationsLabel.Location = New System.Drawing.Point(20, 74)
         Me.lblUnitTestVariationsLabel.Name = "lblUnitTestVariationsLabel"
-        Me.lblUnitTestVariationsLabel.Size = New System.Drawing.Size(181, 13)
+        Me.lblUnitTestVariationsLabel.Size = New System.Drawing.Size(106, 13)
         Me.lblUnitTestVariationsLabel.TabIndex = 5
-        Me.lblUnitTestVariationsLabel.Text = "Variazioni (Speed1,Speed2,Speed3):"
+        Me.lblUnitTestVariationsLabel.Text = "Variazioni di Speed1:"
         '
         'lblUnitTestSerialLabel
         '
@@ -2334,4 +2367,7 @@ Partial Class Program_Form
     Friend WithEvents lblUnitTestSerialLabel As Label
     Friend WithEvents lblUnitTestLogPreviewLabel As Label
     Friend WithEvents txtUnitTestLogPreview As TextBox
+    Friend WithEvents lblTestLogs As Label
+    Friend WithEvents lstTestLogs As ListBox
+    Friend WithEvents Btn_RefreshTestLogs As Button
 End Class
