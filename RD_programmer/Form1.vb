@@ -2747,6 +2747,132 @@ Public Class Program_Form
         End Try
     End Sub
 
+    Private Sub ExportSelectedLogToPdf()
+        Dim item = TryCast(lstTestLogs.SelectedItem, TestLogListItem)
+        If item Is Nothing Then
+            MessageBox.Show("Select a log file first.", "Export to PDF", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Return
+        End If
+        Dim mdPath = item.FullPath
+        If Not File.Exists(mdPath) Then
+            MessageBox.Show("File not found.", "Export to PDF", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            Return
+        End If
+        Dim pdfPath = Path.ChangeExtension(mdPath, ".pdf")
+        If File.Exists(pdfPath) Then
+            Dim overwrite = MessageBox.Show($"PDF already exists:{Environment.NewLine}{pdfPath}{Environment.NewLine}Overwrite?", "Export to PDF", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+            If overwrite <> DialogResult.Yes Then Return
+        End If
+
+        Dim serialLabel As String = "Serial: n/a"
+        Try
+            Dim nameNoExt = Path.GetFileNameWithoutExtension(mdPath)
+            If nameNoExt.StartsWith("test_", StringComparison.OrdinalIgnoreCase) Then
+                serialLabel = "Serial: " & nameNoExt.Substring(5)
+            Else
+                serialLabel = "Serial: " & nameNoExt
+            End If
+        Catch
+        End Try
+
+        Dim tempHtml As String = ConvertMarkdownToHtml(mdPath)
+        If String.IsNullOrWhiteSpace(tempHtml) OrElse Not File.Exists(tempHtml) Then
+            MessageBox.Show("Failed to generate HTML for PDF export.", "Export to PDF", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Return
+        End If
+
+        Try
+            Dim wkArgs = $"--dpi 300 --image-dpi 300 --image-quality 90 --print-media-type --disable-smart-shrinking --enable-local-file-access --footer-left ""{serialLabel}"" --footer-right ""[page]/[topage]"" ""{tempHtml}"" ""{pdfPath}"""
+            Dim psi As New ProcessStartInfo With {
+                .FileName = "wkhtmltopdf",
+                .Arguments = wkArgs,
+                .UseShellExecute = False,
+                .RedirectStandardOutput = True,
+                .RedirectStandardError = True,
+                .CreateNoWindow = True
+            }
+            Using proc = Process.Start(psi)
+                proc.WaitForExit(30000)
+                If proc.ExitCode <> 0 Then
+                    Dim err = proc.StandardError.ReadToEnd()
+                    MessageBox.Show($"PDF export failed (wkhtmltopdf, code {proc.ExitCode}).{Environment.NewLine}{err}", "Export to PDF", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                    Return
+                End If
+            End Using
+            MessageBox.Show($"PDF created:{Environment.NewLine}{pdfPath}", "Export to PDF", MessageBoxButtons.OK, MessageBoxIcon.Information)
+        Catch ex As Exception
+            MessageBox.Show($"PDF export failed: {ex.Message}", "Export to PDF", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        Finally
+            Try
+                If File.Exists(tempHtml) Then File.Delete(tempHtml)
+            Catch
+            End Try
+        End Try
+    End Sub
+
+    Private Function ConvertMarkdownToHtml(mdPath As String) As String
+        Dim tempHtml = Path.Combine(Path.GetTempPath(), $"testlog_{Guid.NewGuid():N}.html")
+        Dim bodyHtml As String = Nothing
+
+        ' Primo tentativo: pandoc -> HTML (senza CSS) e poi wrappo con il mio template
+        Try
+            Dim psi As New ProcessStartInfo With {
+                .FileName = "pandoc",
+                .Arguments = $" ""{mdPath}"" -t html",
+                .UseShellExecute = False,
+                .RedirectStandardOutput = True,
+                .RedirectStandardError = True,
+                .CreateNoWindow = True
+            }
+            Using proc = Process.Start(psi)
+                bodyHtml = proc.StandardOutput.ReadToEnd()
+                proc.WaitForExit(15000)
+                If proc.ExitCode <> 0 Then
+                    Dim err = proc.StandardError.ReadToEnd()
+                    Console.WriteLine($"pandoc to html failed: {err}")
+                    bodyHtml = Nothing
+                End If
+            End Using
+        Catch ex As Exception
+            Console.WriteLine($"ConvertMarkdownToHtml pandoc error: {ex.Message}")
+        End Try
+
+        ' Fallback: HTML minimale
+        If String.IsNullOrWhiteSpace(bodyHtml) Then
+            Try
+                Dim md = File.ReadAllText(mdPath)
+                Dim escaped = System.Net.WebUtility.HtmlEncode(md).Replace(Environment.NewLine, "<br/>")
+                bodyHtml = $"<pre>{escaped}</pre>"
+            Catch ex As Exception
+                Console.WriteLine($"ConvertMarkdownToHtml fallback error: {ex.Message}")
+                Return String.Empty
+            End Try
+        End If
+
+        Try
+            Dim css = "
+                body { font-family: 'Segoe UI', Arial, sans-serif; margin: 32px; color: #111827; background: #ffffff; font-size: 13px; }
+                h1, h2, h3 { color: #111827; margin-top: 22px; margin-bottom: 10px; }
+                h1 { font-size: 22px; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; }
+                h2 { font-size: 18px; }
+                h3 { font-size: 16px; }
+                p { line-height: 1.5; margin: 6px 0; }
+                pre, code { font-family: 'Cascadia Mono', 'Fira Code', Consolas, monospace; font-size: 12px; }
+                pre { background: #f3f4f6; padding: 12px; border-radius: 10px; border: 1px solid #e5e7eb; overflow-x: auto; }
+                blockquote { border-left: 4px solid #3b82f6; padding-left: 12px; color: #374151; background: #f8fafc; }
+                ul, ol { margin-left: 18px; }
+                .container { max-width: 900px; margin: 0 auto; }
+                .card { background: #fff; padding: 14px; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-bottom: 12px; }
+            "
+            Dim template = $"<html><head><meta charset='utf-8'><style>{css}</style></head><body><div class='container'><div class='card'>{bodyHtml}</div></div></body></html>"
+            File.WriteAllText(tempHtml, template, Encoding.UTF8)
+            Return tempHtml
+        Catch ex As Exception
+            Console.WriteLine($"ConvertMarkdownToHtml write error: {ex.Message}")
+            Return String.Empty
+        End Try
+    End Function
+
     Private Function ParseTestVariations() As List(Of Integer)
         Dim variations As New List(Of Integer)()
         Dim raw As String = String.Empty
@@ -3244,6 +3370,10 @@ Public Class Program_Form
 
     Private Sub Btn_RefreshTestLogs_Click(sender As Object, e As EventArgs) Handles Btn_RefreshTestLogs.Click
         LoadTestLogs()
+    End Sub
+
+    Private Sub Btn_ExportPdf_Click(sender As Object, e As EventArgs) Handles Btn_ExportPdf.Click
+        ExportSelectedLogToPdf()
     End Sub
 
     Private Sub lstTestLogs_DoubleClick(sender As Object, e As EventArgs) Handles lstTestLogs.DoubleClick

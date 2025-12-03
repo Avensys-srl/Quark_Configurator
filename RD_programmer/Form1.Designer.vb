@@ -178,6 +178,7 @@ Partial Class Program_Form
         Me.TP_TestUnit = New System.Windows.Forms.TabPage()
         Me.Grp_UnitTest = New System.Windows.Forms.GroupBox()
         Me.Btn_RefreshTestLogs = New System.Windows.Forms.Button()
+        Me.Btn_ExportPdf = New System.Windows.Forms.Button()
         Me.lstTestLogs = New System.Windows.Forms.ListBox()
         Me.lblTestLogs = New System.Windows.Forms.Label()
         Me.lblUnitTestLogPreviewLabel = New System.Windows.Forms.Label()
@@ -1897,6 +1898,7 @@ Partial Class Program_Form
         '
         'Grp_UnitTest
         '
+        Me.Grp_UnitTest.Controls.Add(Me.Btn_ExportPdf)
         Me.Grp_UnitTest.Controls.Add(Me.Btn_RefreshTestLogs)
         Me.Grp_UnitTest.Controls.Add(Me.lstTestLogs)
         Me.Grp_UnitTest.Controls.Add(Me.lblTestLogs)
@@ -1926,6 +1928,15 @@ Partial Class Program_Form
         Me.Btn_RefreshTestLogs.TabIndex = 13
         Me.Btn_RefreshTestLogs.Text = "Refresh list"
         Me.Btn_RefreshTestLogs.UseVisualStyleBackColor = True
+        '
+        'Btn_ExportPdf
+        '
+        Me.Btn_ExportPdf.Location = New System.Drawing.Point(804, 344)
+        Me.Btn_ExportPdf.Name = "Btn_ExportPdf"
+        Me.Btn_ExportPdf.Size = New System.Drawing.Size(95, 23)
+        Me.Btn_ExportPdf.TabIndex = 14
+        Me.Btn_ExportPdf.Text = "Export to PDF"
+        Me.Btn_ExportPdf.UseVisualStyleBackColor = True
         '
         'lstTestLogs
         '
@@ -2370,4 +2381,5 @@ Partial Class Program_Form
     Friend WithEvents lblTestLogs As Label
     Friend WithEvents lstTestLogs As ListBox
     Friend WithEvents Btn_RefreshTestLogs As Button
+    Friend WithEvents Btn_ExportPdf As Button
 End Class
