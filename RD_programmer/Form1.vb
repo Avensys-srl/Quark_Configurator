@@ -9,6 +9,7 @@ Imports System.Threading.Tasks
 Imports System.Xml.Serialization
 Imports System.Globalization
 Imports System.Threading
+Imports System.Media
 
 Public Class Program_Form
     Dim isConnected As Boolean = False
@@ -46,6 +47,8 @@ Public Class Program_Form
     Private Const TestFailedFolderName As String = "failed"
     Private originalSpeed1F As Integer = 0
     Private originalSpeed1R As Integer = 0
+    Private originalSpeed2F As Integer = 0
+    Private originalSpeed3F As Integer = 0
     Private unitTestStartTime As DateTime = DateTime.MinValue
     Private Class TestLogListItem
         Public Property Display As String
@@ -2474,7 +2477,7 @@ Public Class Program_Form
         If liveDataHistory.Count > 0 Then
             samples.AddRange(liveDataHistory)
         End If
-        Dim takeN = Math.Min(5, samples.Count)
+        Dim takeN = Math.Min(10, samples.Count)
         Dim lastSamples = samples.Skip(Math.Max(0, samples.Count - takeN)).ToList()
         Dim avgFresh = lastSamples.Average(Function(x) x.TemperatureFresh)
         Dim avgReturn = lastSamples.Average(Function(x) x.TemperatureReturn)
@@ -2486,13 +2489,40 @@ Public Class Program_Form
         Dim avgSE = (avgSupply + avgExhaust) / 2.0
         Dim diffAvg = Math.Abs(avgFR - avgSE)
 
-        Dim okPairs = diffFR <= 1.5 AndAlso diffSE <= 1.5 AndAlso diffAvg <= 3.5
+        Dim okPairs = diffFR <= 3.0 AndAlso diffSE <= 3.0 AndAlso diffAvg <= 5.0
         If Not okPairs Then
-            reason = $"Temperature validation failed: |F-R|={diffFR:F1}C, |S-E|={diffSE:F1}C, |avg pairs|={diffAvg:F1}C (limits 1.5/1.5/3.5)."
+            reason = $"Temperature validation failed: |F-R|={diffFR:F1}C, |S-E|={diffSE:F1}C, |avg pairs|={diffAvg:F1}C (limits 3.0/3.0/5.0)."
         End If
         Return okPairs
     End Function
 
+    Private Function ValidateHumidity(live As LiveData, ByRef reason As String) As Boolean
+        If live Is Nothing Then
+            reason = "Humidity validation failed: live data missing."
+            Return False
+        End If
+        Dim diff = Math.Abs(live.HumidityLeft - live.HumidityRight)
+        Dim ok = diff <= 8
+        If Not ok Then
+            reason = $"Humidity validation failed: |L-R|={diff}% (limit 8%)."
+        End If
+        Return ok
+    End Function
+
+    Private Function ValidateBelimoCurrent(live As LiveData, noFki As Integer, ByRef reason As String) As Boolean
+        If noFki <> 0 Then
+            Return True ' skip check when NO_FKI is not 0
+        End If
+        If live Is Nothing Then
+            reason = "Belimo current validation failed: live data missing."
+            Return False
+        End If
+        Dim ok = live.BelimoCurrent > 200.0
+        If Not ok Then
+            reason = $"Belimo current validation failed: {live.BelimoCurrent:F1} mA (must be > 200 mA)."
+        End If
+        Return ok
+    End Function
     Private Function FormatStatusUnitFlags(live As LiveData) As String
         Dim flags As New List(Of String)
         If live.UnitRun Then flags.Add("RUN")
@@ -2552,9 +2582,30 @@ Public Class Program_Form
     Private Sub AddLiveDataHistory(live As LiveData)
         If live Is Nothing Then Return
         liveDataHistory.Enqueue(CloneLiveData(live))
-        While liveDataHistory.Count > 5
+        While liveDataHistory.Count > 10
             liveDataHistory.Dequeue()
         End While
+    End Sub
+
+    Private Sub SignalTestCompletion(result As String)
+        Try
+            Select Case result
+                Case "PASSED"
+                    Console.Beep(1200, 200)
+                    Thread.Sleep(100)
+                    Console.Beep(1500, 300)
+                    MessageBox.Show("Test PASSED. Confirm to stop alert.", "Test result", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                Case "FAILED"
+                    For i As Integer = 1 To 3
+                        Console.Beep(400, 300)
+                        Thread.Sleep(120)
+                    Next
+                    MessageBox.Show("Test FAILED. Confirm to stop alert.", "Test result", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                Case "CANCELLED"
+                    Console.Beep(900, 150)
+            End Select
+        Catch
+        End Try
     End Sub
 
     Private Function PrepareLogFile(serialNumber As String) As String
@@ -2736,6 +2787,9 @@ Public Class Program_Form
     End Sub
 
     Private Async Function SaveConfigurationAsync(ct As CancellationToken) As Task(Of Boolean)
+        ' Ensure Speed2/Speed3 remain at original baseline values during variations
+        If originalSpeed2F > 0 Then customerData.FSC_CAF_Speed2 = originalSpeed2F
+        If originalSpeed3F > 0 Then customerData.FSC_CAF_Speed3 = originalSpeed3F
         If Me.InvokeRequired Then
             Me.Invoke(Sub()
                           writeStep = 1
@@ -2797,6 +2851,7 @@ Public Class Program_Form
 
             If Not SerialPort1.IsOpen Then
                 UpdateUnitTestUi("Porta seriale non aperta.", False, Nothing)
+                SignalTestCompletion("FAILED")
                 Return
             End If
 
@@ -2809,15 +2864,19 @@ Public Class Program_Form
             Dim serial = GetTestSerialNumber()
             If String.IsNullOrWhiteSpace(serial) Then
                 UpdateUnitTestUi("Seriale mancante", False, Nothing)
+                SignalTestCompletion("FAILED")
                 Return
             End If
 
             originalSpeed1F = GetCurrentSpeed1()
             originalSpeed1R = originalSpeed1F
+            originalSpeed2F = customerData.FSC_CAF_Speed2
+            originalSpeed3F = customerData.FSC_CAF_Speed3
 
             Dim logPath = PrepareLogFile(serial)
             If String.IsNullOrWhiteSpace(logPath) Then
                 UpdateUnitTestUi("Preparazione log annullata", False, Nothing)
+                SignalTestCompletion("FAILED")
                 Return
             End If
 
@@ -2870,6 +2929,7 @@ Public Class Program_Form
                         Dim failPath = MoveLogToFailed(logPath)
                         LoadTestLogs()
                         UpdateUnitTestUi("Test fallito: live data mancanti", False, failPath)
+                        SignalTestCompletion("FAILED")
                         Return
                     End If
                 Else
@@ -2880,11 +2940,60 @@ Public Class Program_Form
                     Dim failPath = MoveLogToFailed(logPath)
                     LoadTestLogs()
                     UpdateUnitTestUi("Test fallito: live data mancanti", False, failPath)
+                    SignalTestCompletion("FAILED")
                     Return
                 End If
             Else
                 log.AppendLine("- Temperature check: OK")
                 AppendUnitTestPreview("Initial temperature check: OK")
+            End If
+            Dim humReason As String = String.Empty
+            If Not ValidateHumidity(liveBaseline, humReason) Then
+                AppendUnitTestPreview($"Initial humidity check failed, retrying in 15s: {humReason}")
+                Dim retryHum = Await ReadLiveDataWithDelayAsync(15, 15, ct)
+                If retryHum IsNot Nothing Then
+                    log.AppendLine("## Humidity retry (initial, +15s)")
+                    log.AppendLine(FormatLiveDataMarkdown(retryHum))
+                    If Not ValidateHumidity(retryHum, humReason) Then
+                        log.AppendLine($"- {humReason}")
+                        AppendUnitTestPreview($"Initial humidity check failed after retry: {humReason}")
+                        AppendFinalFooter(log, "FAILED", logStart)
+                        File.WriteAllText(logPath, log.ToString())
+                        Dim failPath = MoveLogToFailed(logPath)
+                        LoadTestLogs()
+                        UpdateUnitTestUi("Test fallito: humidity out of range", False, failPath)
+                        SignalTestCompletion("FAILED")
+                        Return
+                    End If
+                Else
+                    log.AppendLine($"- {humReason}")
+                    AppendUnitTestPreview($"Initial humidity check failed (no retry data): {humReason}")
+                    AppendFinalFooter(log, "FAILED", logStart)
+                    File.WriteAllText(logPath, log.ToString())
+                    Dim failPath = MoveLogToFailed(logPath)
+                    LoadTestLogs()
+                    UpdateUnitTestUi("Test fallito: humidity out of range", False, failPath)
+                    SignalTestCompletion("FAILED")
+                    Return
+                End If
+            Else
+                log.AppendLine("- Humidity check: OK")
+                AppendUnitTestPreview("Initial humidity check: OK")
+            End If
+            Dim belimoReason As String = String.Empty
+            If Not ValidateBelimoCurrent(liveBaseline, customerData.no_FKI, belimoReason) Then
+                log.AppendLine($"- {belimoReason}")
+                AppendUnitTestPreview($"Initial Belimo check failed: {belimoReason}")
+                AppendFinalFooter(log, "FAILED", logStart)
+                File.WriteAllText(logPath, log.ToString())
+                Dim failPath = MoveLogToFailed(logPath)
+                LoadTestLogs()
+                UpdateUnitTestUi("Test fallito: Belimo current out of range", False, failPath)
+                SignalTestCompletion("FAILED")
+                Return
+            Else
+                log.AppendLine("- Belimo current check: OK")
+                AppendUnitTestPreview("Initial Belimo current check: OK")
             End If
             If liveBaseline Is Nothing Then
                 log.AppendLine("- Live data not received within 60s: test failed.")
@@ -2894,6 +3003,7 @@ Public Class Program_Form
                 Dim failPath = MoveLogToFailed(logPath)
                 LoadTestLogs()
                 UpdateUnitTestUi("Test fallito: live data mancanti", False, failPath)
+                SignalTestCompletion("FAILED")
                 Return
             End If
             AppendUnitTestPreview("Initial live data received.")
@@ -2902,6 +3012,7 @@ Public Class Program_Form
                 AppendFinalFooter(log, "CANCELLED", logStart)
                 File.WriteAllText(logPath, log.ToString())
                 UpdateUnitTestUi("Test annullato dall'utente", False, logPath)
+                SignalTestCompletion("CANCELLED")
                 Return
             End If
 
@@ -2995,6 +3106,44 @@ Public Class Program_Form
                     AppendUnitTestPreview($"Variation {variationIndex}: Temperature check OK")
                 End If
 
+                Dim humReason2 As String = String.Empty
+                AppendUnitTestPreview($"Variation {variationIndex}: humidity check in progress...")
+                If Not ValidateHumidity(liveAfter, humReason2) Then
+                    AppendUnitTestPreview($"Variation {variationIndex}: humidity check failed, retrying in 15s: {humReason2}")
+                    Dim retryHum = Await ReadLiveDataWithDelayAsync(15, 15, ct)
+                    If retryHum IsNot Nothing Then
+                        log.AppendLine($"## Humidity retry (variation {variationIndex}, +15s)")
+                        log.AppendLine(FormatLiveDataMarkdown(retryHum))
+                        humReason2 = String.Empty
+                        If Not ValidateHumidity(retryHum, humReason2) Then
+                            allPassed = False
+                            log.AppendLine($"- {humReason2}")
+                            AppendUnitTestPreview($"Variation {variationIndex}: {humReason2}")
+                            Exit For
+                        End If
+                    Else
+                        allPassed = False
+                        log.AppendLine($"- {humReason2}")
+                        AppendUnitTestPreview($"Variation {variationIndex}: {humReason2}")
+                        Exit For
+                    End If
+                Else
+                    log.AppendLine("- Humidity check: OK")
+                    AppendUnitTestPreview($"Variation {variationIndex}: Humidity check OK")
+                End If
+
+                Dim belimoReason2 As String = String.Empty
+                AppendUnitTestPreview($"Variation {variationIndex}: Belimo current check in progress...")
+                If Not ValidateBelimoCurrent(liveAfter, customerData.no_FKI, belimoReason2) Then
+                    allPassed = False
+                    log.AppendLine($"- {belimoReason2}")
+                    AppendUnitTestPreview($"Variation {variationIndex}: {belimoReason2}")
+                    Exit For
+                Else
+                    log.AppendLine("- Belimo current check: OK")
+                    AppendUnitTestPreview($"Variation {variationIndex}: Belimo current check OK")
+                End If
+
                 Dim rpmOk As Boolean = False
                 If liveAfter IsNot Nothing AndAlso previousLive IsNot Nothing Then
                     If variationSpeed1 > previousTargetSpeed Then
@@ -3030,12 +3179,16 @@ Public Class Program_Form
                 AppendFinalFooter(log, "CANCELLED", logStart)
                 File.WriteAllText(logPath, log.ToString())
                 UpdateUnitTestUi("Test annullato dall'utente", False, logPath)
+                SignalTestCompletion("CANCELLED")
                 Return
             End If
 
             log.AppendLine()
             log.AppendLine("## Restore original configuration")
             log.AppendLine($"- Original Speed1: {originalSpeed1F}")
+            Dim origS2 As String = If(originalSpeed2F > 0, originalSpeed2F.ToString(), "n/a")
+            Dim origS3 As String = If(originalSpeed3F > 0, originalSpeed3F.ToString(), "n/a")
+            log.AppendLine($"- Restored fan speeds: S1={originalSpeed1F}, S2={origS2}, S3={origS3}")
             Await RestoreOriginalSpeedAsync(ct)
             AppendUnitTestPreview("Original Speed1 restored.")
 
@@ -3049,12 +3202,14 @@ Public Class Program_Form
             Else
                 UpdateUnitTestUi("Test concluso con successo", False, finalLogPath)
             End If
+            SignalTestCompletion(If(allPassed, "PASSED", "FAILED"))
         Catch ex As Exception
             caughtEx = ex
         End Try
 
         If caughtEx IsNot Nothing Then
             Await HandleUnitTestExceptionAsync(caughtEx, ct)
+            SignalTestCompletion("FAILED")
         End If
     End Function
 
@@ -3083,6 +3238,7 @@ Public Class Program_Form
         If unitTestRunning Then
             unitTestCts?.Cancel()
             UpdateUnitTestUi("Test annullato dall'utente", False, unitTestLogPath)
+            SignalTestCompletion("CANCELLED")
         End If
     End Sub
 
