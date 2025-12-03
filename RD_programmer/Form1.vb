@@ -649,6 +649,10 @@ Public Class Program_Form
     End Sub
 
     Private Sub Btn_RefreshLIST_Click(sender As Object, e As EventArgs) Handles Btn_RefreshLIST.Click
+        If SerialPort1 IsNot Nothing AndAlso SerialPort1.IsOpen Then
+            MessageBox.Show("Please disconnect before refreshing COM list to avoid serial conflicts.", "Refresh COM list", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Return
+        End If
         PopulateSerialPorts()
     End Sub
 
@@ -2099,6 +2103,7 @@ Public Class Program_Form
     Private Sub Btn_ResAcc_Click(sender As Object, e As EventArgs) Handles Btn_ResAcc.Click
         If SerialPort1.IsOpen Then
             InviaStringa("c")
+            StartMenuRecoveryAfterAccessories()
         End If
     End Sub
 
@@ -3375,6 +3380,43 @@ Public Class Program_Form
     Private Sub Btn_ExportPdf_Click(sender As Object, e As EventArgs) Handles Btn_ExportPdf.Click
         ExportSelectedLogToPdf()
     End Sub
+
+    Private Async Sub StartMenuRecoveryAfterAccessories()
+        Dim startLen = GetConsoleLength()
+        Try
+            Await Task.Delay(4000)
+            If Not SerialPort1.IsOpen Then Return
+            Dim newText = GetConsoleSlice(startLen)
+            If newText.Contains("Select the number") Then Return
+            If tb_COMStrem.Text.Contains("Writing standard HW accessories to EEPROM") Then
+                Await ReconnectCurrentPortAsync()
+            End If
+        Catch
+            ' ignore recovery errors
+        End Try
+    End Sub
+
+    Private Async Function ReconnectCurrentPortAsync() As Task
+        If Me.InvokeRequired Then
+            Dim tcs As New TaskCompletionSource(Of Boolean)()
+            Me.Invoke(Async Sub()
+                          Await ReconnectCurrentPortAsync()
+                          tcs.SetResult(True)
+                      End Sub)
+            Await tcs.Task
+            Return
+        End If
+
+        Try
+            If SerialPort1 IsNot Nothing AndAlso SerialPort1.IsOpen Then
+                Btn_Disconnect_Click(Btn_Disconnect, EventArgs.Empty)
+            End If
+            Await Task.Delay(400)
+            Btn_Connect_Click(Btn_Connect, EventArgs.Empty)
+        Catch ex As Exception
+            lb_status.Text = $"Reconnect failed: {ex.Message}"
+        End Try
+    End Function
 
     Private Sub lstTestLogs_DoubleClick(sender As Object, e As EventArgs) Handles lstTestLogs.DoubleClick
         Dim item = TryCast(lstTestLogs.SelectedItem, TestLogListItem)
