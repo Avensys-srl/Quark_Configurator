@@ -3277,10 +3277,12 @@ Public Class Program_Form
 
                 Dim rpmOk As Boolean = False
                 If liveAfter IsNot Nothing AndAlso previousLive IsNot Nothing Then
+                    Dim deltaF As Integer = liveAfter.RPMMotorF - previousLive.RPMMotorF
+                    Dim deltaR As Integer = liveAfter.RPMMotorR - previousLive.RPMMotorR
                     If variationSpeed1 > previousTargetSpeed Then
-                        rpmOk = (liveAfter.RPMMotorF > previousLive.RPMMotorF) AndAlso (liveAfter.RPMMotorR > previousLive.RPMMotorR)
+                        rpmOk = (deltaF >= 300) AndAlso (deltaR >= 300)
                     ElseIf variationSpeed1 < previousTargetSpeed Then
-                        rpmOk = (liveAfter.RPMMotorF < previousLive.RPMMotorF) AndAlso (liveAfter.RPMMotorR < previousLive.RPMMotorR)
+                        rpmOk = (deltaF <= -300) AndAlso (deltaR <= -300)
                     Else
                         rpmOk = True ' nessun cambio richiesto se target identico
                     End If
