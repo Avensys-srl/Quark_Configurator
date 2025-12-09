@@ -44,6 +44,7 @@ Public Class Program_Form
     Private Const LiveEndMarker As String = "------ END READ LIVE DATA ------"
     Private lastLiveDataSnapshot As LiveData
     Private lastLiveDataTimestamp As DateTime = DateTime.MinValue
+    Private liveStreamDetected As Boolean = False
     Private unitTestCts As CancellationTokenSource
     Private unitTestRunning As Boolean = False
     Private unitTestLogPath As String
@@ -202,6 +203,31 @@ Public Class Program_Form
         currentLogFilePath = GenerateLogFileName()
         File.Create(currentLogFilePath).Dispose()
     End Sub
+
+    Private Async Function MonitorAndToggleLiveDataAsync(durationSeconds As Integer, ct As CancellationToken) As Task
+        If SerialPort1 Is Nothing OrElse Not SerialPort1.IsOpen Then Return
+        liveStreamDetected = False
+        Dim detected As Boolean = False
+        Dim sw = Stopwatch.StartNew()
+        Try
+            While sw.Elapsed < TimeSpan.FromSeconds(durationSeconds)
+                If ct.IsCancellationRequested Then Exit While
+                Await Task.Delay(200, ct)
+                If liveStreamDetected Then
+                    detected = True
+                    Exit While
+                End If
+            End While
+
+            If detected Then
+                InviaStringa("b") ' toggle off live data
+                Await Task.Delay(400, ct)
+                SerialPort1.ReadExisting() ' flush buffer
+            End If
+        Catch
+            ' ignora eventuali errori in questa fase
+        End Try
+    End Function
 
     Private Sub AppendLogData(data As String)
         If isLoggingEnabled Then
@@ -1169,6 +1195,7 @@ Public Class Program_Form
 
                 ' Start/End LIVE DATA
                 If completeLine = LiveStartMarker Then
+                    liveStreamDetected = True
                     readingLiveData = True
                     liveDataBuffer.Clear()
                     Continue While
@@ -1210,6 +1237,7 @@ Public Class Program_Form
                     liveDataBuffer.Clear()
                     Continue While
                 ElseIf readingLiveData Then
+                    liveStreamDetected = True
                     liveDataBuffer.Add(completeLine)
                     Continue While
                 End If
@@ -1293,6 +1321,10 @@ Public Class Program_Form
                 InitializeLiveDataLabels()
                 ToggleControls(isConnected)
                 StartInactivityTimer()
+                ' Se arrivano live data pendenti, invia "b" per spegnerli prima di procedere
+                Task.Run(Async Function()
+                             Await MonitorAndToggleLiveDataAsync(10, CancellationToken.None)
+                         End Function)
                 If hiddenPages.Contains(TP_TestUnit) Then
                     Tab_Main.TabPages.Add(TP_TestUnit)
                     hiddenPages.Remove(TP_TestUnit)
@@ -3200,6 +3232,7 @@ Public Class Program_Form
             log.AppendLine(step1.Output.Trim())
             log.AppendLine("```")
             AppendUnitTestPreview("Step 1 completed (2)")
+            Await MonitorAndToggleLiveDataAsync(10, ct)
 
             Dim step2 = Await SendCommandAndCaptureAsync("6", "--- END OF READING ---", 8, ct)
             If Me.InvokeRequired Then
@@ -3217,6 +3250,7 @@ Public Class Program_Form
             log.AppendLine(step2.Output.Trim())
             log.AppendLine("```")
             AppendUnitTestPreview("Step 2 completed (6)")
+            Await MonitorAndToggleLiveDataAsync(10, ct)
 
             Dim liveBaseline = Await ReadLiveDataOnceAsync(ct)
             log.AppendLine("## Step 3 - Initial live data (b)")
