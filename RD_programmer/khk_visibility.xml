@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<KhkVisibilityConfig>
+  <!-- Optional: remote API endpoint returning allowed serial patterns as JSON (future use) -->
+  <ApiEndpoint>https://mybestdocument.altervista.org/KHK_Serial/get_serial_patterns.php</ApiEndpoint>
+
+  <SerialPatterns>
+    <!-- prefix: serial starts with value; optional maxLast3 limits the last 3 digits (exclusive) -->
+    <Pattern prefix="9999" />
+    <Pattern prefix="7603" maxLast3="110" />
+    <Pattern prefix="8705" />
+    <Pattern prefix="8910" />
+  </SerialPatterns>
+</KhkVisibilityConfig>

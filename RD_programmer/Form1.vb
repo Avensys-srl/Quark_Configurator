@@ -10,6 +10,10 @@ Imports System.Xml.Serialization
 Imports System.Globalization
 Imports System.Threading
 Imports System.Media
+Imports System.Xml.Linq
+Imports System.Net
+Imports System.Net.Http
+Imports System.Web.Script.Serialization
 
 Public Class Program_Form
     Dim isConnected As Boolean = False
@@ -49,13 +53,30 @@ Public Class Program_Form
     Private originalSpeed1R As Integer = 0
     Private originalSpeed2F As Integer = 0
     Private originalSpeed3F As Integer = 0
+    Private originalRhSetPoint As Integer = 0
+    Private originalImbalanceEnable As Integer = 0
+    Private originalKhkConfig As Integer = 0
+    Private originalSmokeValue As Byte = 0
     Private unitTestStartTime As DateTime = DateTime.MinValue
+    Private khkVisibilityEntries As New List(Of KhkVisibilityEntry)()
+    Private khkApiEndpoint As String = String.Empty
     Private Class TestLogListItem
         Public Property Display As String
         Public Property FullPath As String
         Public Overrides Function ToString() As String
             Return Display
         End Function
+    End Class
+    Private Class KhkVisibilityEntry
+        Public Property Prefix As String
+        Public Property MaxLast3 As Integer?
+    End Class
+    Private Class KhkApiPattern
+        Public Property prefix As String
+        Public Property maxLast3 As Integer?
+    End Class
+    Private Class KhkApiResponse
+        Public Property serialPatterns As List(Of KhkApiPattern)
     End Class
     Private liveDataHistory As New Queue(Of LiveData)()
 
@@ -470,19 +491,8 @@ Public Class Program_Form
 
         If customerData.SerialNumber IsNot Nothing AndAlso customerData.SerialNumber.Length <> 0 Then
             Invoke(Sub() lb_SerialNumber.Text = "Serial Number: " + customerData.SerialNumber)
-            If customerData.SerialNumber.StartsWith("9999") Then
-                Invoke(Sub() Grp_KHK.Visible = True)
-            ElseIf customerData.SerialNumber.StartsWith("7603") AndAlso
-                    Integer.Parse(customerData.SerialNumber.Substring(customerData.SerialNumber.Length - 3)) < 110 Then
-                Invoke(Sub() Grp_KHK.Visible = True)
-            ElseIf customerData.SerialNumber.StartsWith("8705") Then
-                Invoke(Sub() Grp_KHK.Visible = True)
-            ElseIf customerData.SerialNumber.StartsWith("8910") Then
-                Invoke(Sub() Grp_KHK.Visible = True)
-            Else
-                Invoke(Sub() Grp_KHK.Visible = False)
-            End If
-
+            Dim showKhk = ShouldShowKhkForSerial(customerData.SerialNumber)
+            Invoke(Sub() Grp_KHK.Visible = showKhk)
         Else
             Invoke(Sub() lb_SerialNumber.Text = "Serial Number:")
         End If
@@ -631,12 +641,122 @@ Public Class Program_Form
         End If
     End Sub
 
+    Private Sub LoadKhkVisibilityConfig()
+        khkVisibilityEntries.Clear()
+        khkApiEndpoint = String.Empty
+        Dim xmlPatterns As New List(Of KhkVisibilityEntry)
+        Dim configPath As String = Nothing
+        Dim primary = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "khk_visibility.xml")
+        Dim fallback = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "khk_visibility.xml"))
+        If File.Exists(primary) Then
+            configPath = primary
+        ElseIf File.Exists(fallback) Then
+            configPath = fallback
+        End If
+
+        Try
+            If Not String.IsNullOrWhiteSpace(configPath) AndAlso File.Exists(configPath) Then
+                Dim doc As System.Xml.Linq.XDocument = System.Xml.Linq.XDocument.Load(configPath)
+                Dim api As String = doc.Root?.Element("ApiEndpoint")?.Value
+                If Not String.IsNullOrWhiteSpace(api) Then khkApiEndpoint = api.Trim()
+
+                Dim patterns As IEnumerable(Of System.Xml.Linq.XElement) = doc.Root?.Element("SerialPatterns")?.Elements("Pattern")
+                If patterns IsNot Nothing Then
+                    For Each p As System.Xml.Linq.XElement In patterns
+                        Dim prefAttr = p.Attribute("prefix")
+                        Dim pref = If(prefAttr IsNot Nothing, prefAttr.Value, String.Empty).Trim()
+                        If String.IsNullOrWhiteSpace(pref) Then Continue For
+                        Dim entry As New KhkVisibilityEntry With {.Prefix = pref}
+                        Dim maxLast3Attr = p.Attribute("maxLast3")
+                        If maxLast3Attr IsNot Nothing Then
+                            Dim n As Integer
+                            If Integer.TryParse(maxLast3Attr.Value, n) Then entry.MaxLast3 = n
+                        End If
+                        xmlPatterns.Add(entry)
+                    Next
+                End If
+            End If
+        Catch
+            ' fallback gestito sotto
+        End Try
+
+        ' 1) Se esiste endpoint API e riusciamo a leggere, VINCE l'API (nessuna unione con XML)
+        Dim apiApplied As Boolean = False
+        If Not String.IsNullOrWhiteSpace(khkApiEndpoint) Then
+            Dim apiList = LoadKhkVisibilityFromApi(khkApiEndpoint)
+            If apiList IsNot Nothing AndAlso apiList.Count > 0 Then
+                khkVisibilityEntries = apiList
+                apiApplied = True
+            End If
+        End If
+
+        ' 2) Se l'API non ha fornito dati validi, usa solo l'XML (se presente)
+        If Not apiApplied AndAlso xmlPatterns.Count > 0 Then
+            khkVisibilityEntries = xmlPatterns
+        End If
+
+        ' 3) Se non abbiamo né API né XML validi, usa i default
+        If khkVisibilityEntries.Count = 0 Then
+            ' Defaults (come logica precedente): 9999, 7603(last3<110), 8705, 8910
+            khkVisibilityEntries.Add(New KhkVisibilityEntry With {.Prefix = "9999"})
+            khkVisibilityEntries.Add(New KhkVisibilityEntry With {.Prefix = "7603", .MaxLast3 = 110})
+            khkVisibilityEntries.Add(New KhkVisibilityEntry With {.Prefix = "8705"})
+            khkVisibilityEntries.Add(New KhkVisibilityEntry With {.Prefix = "8910"})
+        End If
+    End Sub
+
+    Private Function LoadKhkVisibilityFromApi(url As String) As List(Of KhkVisibilityEntry)
+        Try
+            Dim handler As New HttpClientHandler()
+            handler.AutomaticDecompression = DecompressionMethods.GZip Or DecompressionMethods.Deflate
+            Using client As New HttpClient(handler)
+                client.Timeout = TimeSpan.FromSeconds(8)
+                Dim resp = client.GetAsync(url).Result
+                If Not resp.IsSuccessStatusCode Then Return Nothing
+                Dim json = resp.Content.ReadAsStringAsync().Result
+                If String.IsNullOrWhiteSpace(json) Then Return Nothing
+                Dim js As New JavaScriptSerializer()
+                Dim payload = js.Deserialize(Of KhkApiResponse)(json)
+                If payload Is Nothing OrElse payload.serialPatterns Is Nothing Then Return Nothing
+                Dim list As New List(Of KhkVisibilityEntry)
+                For Each p In payload.serialPatterns
+                    If p Is Nothing OrElse String.IsNullOrWhiteSpace(p.prefix) Then Continue For
+                    Dim entry As New KhkVisibilityEntry With {.Prefix = p.prefix.Trim()}
+                    If p.maxLast3.HasValue Then entry.MaxLast3 = p.maxLast3.Value
+                    list.Add(entry)
+                Next
+                Return list
+            End Using
+        Catch
+            Return Nothing
+        End Try
+    End Function
+
+    Private Function ShouldShowKhkForSerial(serial As String) As Boolean
+        If String.IsNullOrWhiteSpace(serial) Then Return False
+        For Each entry In khkVisibilityEntries
+            If serial.StartsWith(entry.Prefix) Then
+                If entry.MaxLast3.HasValue AndAlso serial.Length >= 3 Then
+                    Dim last3Str = serial.Substring(Math.Max(0, serial.Length - 3))
+                    Dim n As Integer
+                    If Integer.TryParse(last3Str, n) Then
+                        If n < entry.MaxLast3.Value Then Return True Else Continue For
+                    End If
+                Else
+                    Return True
+                End If
+            End If
+        Next
+        Return False
+    End Function
+
     Private Sub Program_Form_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         VisibleGroups(False)
         ToggleService(isService)
         PB_SaveData.Visible = False
         lb_SaveProg.Visible = False
         lb_QKvers.Text &= Assembly.GetExecutingAssembly().GetName().Version.ToString()
+        LoadKhkVisibilityConfig()
         StartPortWatcher()
         ToggleControls(isConnected)
         UpdateFormControls()
@@ -2961,6 +3081,60 @@ Public Class Program_Form
 
     Private Async Function RestoreOriginalSpeedAsync(ct As CancellationToken) As Task
         If originalSpeed1F <= 0 OrElse originalSpeed1R <= 0 Then Return
+        ' Ripristina anche i setpoint/flag modificati durante il test
+        customerData.RHSetPoint = originalRhSetPoint
+        customerData.IMBALANCE_ENABLE = originalImbalanceEnable
+        customerData.KHK_VALUE = originalKhkConfig
+        customerData.SMOKE_VALUE = originalSmokeValue
+        If Me.InvokeRequired Then
+            Me.Invoke(Sub()
+                          num_RHSetpoint.Value = originalRhSetPoint
+                          CB_ImbEnable.Checked = (originalImbalanceEnable = 1)
+                          ' Ripristino KHK
+                          CB_KHKenable.Checked = (originalKhkConfig And &H1) = &H1
+                          If (originalKhkConfig And &H2) = &H2 Then
+                              RB_NC.Checked = True
+                              RB_NO.Checked = False
+                          Else
+                              RB_NO.Checked = True
+                              RB_NC.Checked = False
+                          End If
+                          ' Ripristino Smoke
+                          CB_SmokeEnable.Checked = (originalSmokeValue <> 0)
+                          If originalSmokeValue = 1 Then
+                              RB_SmokeNC.Checked = True
+                              RB_SmokeNO.Checked = False
+                          ElseIf originalSmokeValue = 2 Then
+                              RB_SmokeNC.Checked = False
+                              RB_SmokeNO.Checked = True
+                          Else
+                              RB_SmokeNC.Checked = True
+                              RB_SmokeNO.Checked = False
+                          End If
+                      End Sub)
+        Else
+            num_RHSetpoint.Value = originalRhSetPoint
+            CB_ImbEnable.Checked = (originalImbalanceEnable = 1)
+            CB_KHKenable.Checked = (originalKhkConfig And &H1) = &H1
+            If (originalKhkConfig And &H2) = &H2 Then
+                RB_NC.Checked = True
+                RB_NO.Checked = False
+            Else
+                RB_NO.Checked = True
+                RB_NC.Checked = False
+            End If
+            CB_SmokeEnable.Checked = (originalSmokeValue <> 0)
+            If originalSmokeValue = 1 Then
+                RB_SmokeNC.Checked = True
+                RB_SmokeNO.Checked = False
+            ElseIf originalSmokeValue = 2 Then
+                RB_SmokeNC.Checked = False
+                RB_SmokeNO.Checked = True
+            Else
+                RB_SmokeNC.Checked = True
+                RB_SmokeNO.Checked = False
+            End If
+        End If
         ApplyVariationToModel(originalSpeed1F)
         Await SaveConfigurationAsync(ct)
     End Function
@@ -3033,6 +3207,11 @@ Public Class Program_Form
             Else
                 ExtractConfigData()
             End If
+            ' Memorizza i valori originali che forzeremo durante il test
+            originalRhSetPoint = customerData.RHSetPoint
+            originalImbalanceEnable = customerData.IMBALANCE_ENABLE
+            originalKhkConfig = customerData.KHK_VALUE
+            originalSmokeValue = CByte(customerData.SMOKE_VALUE)
             log.AppendLine("## Step 2 - Read configuration (6)")
             log.AppendLine("```")
             log.AppendLine(step2.Output.Trim())
@@ -3153,6 +3332,7 @@ Public Class Program_Form
             Dim variationIndex As Integer = 1
             Dim wasCancelled As Boolean = False
             Dim previousTargetSpeed As Integer = originalSpeed1F
+            Dim forcedParamsApplied As Boolean = False
 
             For Each variationSpeed1 In variations
                 If ct.IsCancellationRequested Then
@@ -3163,6 +3343,36 @@ Public Class Program_Form
                 log.AppendLine()
                 log.AppendLine($"## Variation {variationIndex}")
                 log.AppendLine($"- Target Speed1: {variationSpeed1}")
+
+                If Not forcedParamsApplied Then
+                    ' Forza i parametri richiesti solo all'inizio del test (anche sui controlli UI)
+                    customerData.RHSetPoint = 99
+                    customerData.IMBALANCE_ENABLE = 0
+                    customerData.KHK_VALUE = 0 ' coerente con KHK disabilitato
+                    customerData.SMOKE_VALUE = 0
+                    If Me.InvokeRequired Then
+                        Me.Invoke(Sub()
+                                      num_RHSetpoint.Value = 99
+                                      CB_ImbEnable.Checked = False
+                                      CB_KHKenable.Checked = False ' durante il test deve restare disabilitato
+                                      RB_NC.Checked = True ' selezione neutra
+                                      RB_NO.Checked = False
+                                      CB_SmokeEnable.Checked = False
+                                      RB_SmokeNC.Checked = True
+                                      RB_SmokeNO.Checked = False
+                                  End Sub)
+                    Else
+                        num_RHSetpoint.Value = 99
+                        CB_ImbEnable.Checked = False
+                        CB_KHKenable.Checked = False
+                        RB_NC.Checked = True
+                        RB_NO.Checked = False
+                        CB_SmokeEnable.Checked = False
+                        RB_SmokeNC.Checked = True
+                        RB_SmokeNO.Checked = False
+                    End If
+                    forcedParamsApplied = True
+                End If
 
                 ApplyVariationToModel(variationSpeed1)
                 Dim saveOk = Await SaveConfigurationAsync(ct)
@@ -3308,6 +3518,10 @@ Public Class Program_Form
                 log.AppendLine()
                 log.AppendLine("## Restore original configuration")
                 log.AppendLine($"- Original Speed1: {originalSpeed1F}")
+                log.AppendLine($"- Original RH setpoint: {originalRhSetPoint}")
+                log.AppendLine($"- Original IMBALANCE Enable: {originalImbalanceEnable}")
+                log.AppendLine($"- Original KHK Config: {originalKhkConfig}")
+                log.AppendLine($"- Original Smoke contact: {originalSmokeValue}")
                 Await RestoreOriginalSpeedAsync(ct)
                 AppendFinalFooter(log, "CANCELLED", logStart)
                 File.WriteAllText(logPath, log.ToString())
@@ -3322,6 +3536,10 @@ Public Class Program_Form
             Dim origS2 As String = If(originalSpeed2F > 0, originalSpeed2F.ToString(), "n/a")
             Dim origS3 As String = If(originalSpeed3F > 0, originalSpeed3F.ToString(), "n/a")
             log.AppendLine($"- Restored fan speeds: S1={originalSpeed1F}, S2={origS2}, S3={origS3}")
+            log.AppendLine($"- Restored RH setpoint: {originalRhSetPoint}")
+            log.AppendLine($"- Restored IMBALANCE Enable: {originalImbalanceEnable}")
+            log.AppendLine($"- Restored KHK Config: {originalKhkConfig}")
+            log.AppendLine($"- Restored Smoke contact: {originalSmokeValue}")
             Await RestoreOriginalSpeedAsync(ct)
             AppendUnitTestPreview("Original Speed1 restored.")
 
