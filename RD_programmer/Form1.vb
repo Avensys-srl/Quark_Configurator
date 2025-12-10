@@ -664,6 +664,14 @@ Public Class Program_Form
         If e.Control AndAlso e.Alt AndAlso e.KeyCode = Keys.S Then
             isService = Not isService
             ToggleService(isService)
+        ElseIf e.Control AndAlso e.Alt AndAlso e.KeyCode = Keys.T Then
+            If Tab_Main.TabPages.Contains(TP_TestUnit) Then
+                hiddenPages.Add(TP_TestUnit)
+                Tab_Main.TabPages.Remove(TP_TestUnit)
+            ElseIf hiddenPages.Contains(TP_TestUnit) Then
+                Tab_Main.TabPages.Add(TP_TestUnit)
+                hiddenPages.Remove(TP_TestUnit)
+            End If
         End If
     End Sub
 
@@ -3557,6 +3565,11 @@ Public Class Program_Form
                 log.AppendLine($"- Original KHK Config: {originalKhkConfig}")
                 log.AppendLine($"- Original Smoke contact: {originalSmokeValue}")
                 Await RestoreOriginalSpeedAsync(ct)
+                Try
+                    Refresh_Data()
+                Catch
+                    ' ignore refresh errors
+                End Try
                 AppendFinalFooter(log, "CANCELLED", logStart)
                 File.WriteAllText(logPath, log.ToString())
                 UpdateUnitTestUi("Test annullato dall'utente", False, logPath)
@@ -3575,6 +3588,11 @@ Public Class Program_Form
             log.AppendLine($"- Restored KHK Config: {originalKhkConfig}")
             log.AppendLine($"- Restored Smoke contact: {originalSmokeValue}")
             Await RestoreOriginalSpeedAsync(ct)
+            Try
+                Refresh_Data()
+            Catch
+                ' ignore refresh errors
+            End Try
             AppendUnitTestPreview("Original Speed1 restored.")
 
             AppendFinalFooter(log, If(allPassed, "PASSED", "FAILED"), logStart)
@@ -3605,6 +3623,11 @@ Public Class Program_Form
         End If
         If unitTestRunning Then
             Await RestoreOriginalSpeedAsync(ct)
+            Try
+                Refresh_Data()
+            Catch
+                ' ignore
+            End Try
         End If
         UpdateUnitTestUi($"Errore test: {ex.Message}", False, failPath)
     End Function
