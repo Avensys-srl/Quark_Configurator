@@ -177,8 +177,8 @@ Partial Class Program_Form
         Me.Tab_Main = New System.Windows.Forms.TabControl()
         Me.TP_TestUnit = New System.Windows.Forms.TabPage()
         Me.Grp_UnitTest = New System.Windows.Forms.GroupBox()
-        Me.Btn_RefreshTestLogs = New System.Windows.Forms.Button()
         Me.Btn_ExportPdf = New System.Windows.Forms.Button()
+        Me.Btn_RefreshTestLogs = New System.Windows.Forms.Button()
         Me.lstTestLogs = New System.Windows.Forms.ListBox()
         Me.lblTestLogs = New System.Windows.Forms.Label()
         Me.lblUnitTestLogPreviewLabel = New System.Windows.Forms.Label()
@@ -298,9 +298,9 @@ Partial Class Program_Form
         '
         Me.Grp_Acc.Controls.Add(Me.Btn_ResAcc)
         Me.Grp_Acc.Controls.Add(Me.TB_acc)
-        Me.Grp_Acc.Location = New System.Drawing.Point(655, 391)
+        Me.Grp_Acc.Location = New System.Drawing.Point(655, 401)
         Me.Grp_Acc.Name = "Grp_Acc"
-        Me.Grp_Acc.Size = New System.Drawing.Size(210, 84)
+        Me.Grp_Acc.Size = New System.Drawing.Size(210, 74)
         Me.Grp_Acc.TabIndex = 21
         Me.Grp_Acc.TabStop = False
         Me.Grp_Acc.Text = "Accessories List"
@@ -309,7 +309,7 @@ Partial Class Program_Form
         '
         Me.Btn_ResAcc.Location = New System.Drawing.Point(159, 19)
         Me.Btn_ResAcc.Name = "Btn_ResAcc"
-        Me.Btn_ResAcc.Size = New System.Drawing.Size(45, 59)
+        Me.Btn_ResAcc.Size = New System.Drawing.Size(45, 49)
         Me.Btn_ResAcc.TabIndex = 1
         Me.Btn_ResAcc.Text = "Reset List"
         Me.Btn_ResAcc.UseVisualStyleBackColor = True
@@ -320,7 +320,7 @@ Partial Class Program_Form
         Me.TB_acc.Multiline = True
         Me.TB_acc.Name = "TB_acc"
         Me.TB_acc.ReadOnly = True
-        Me.TB_acc.Size = New System.Drawing.Size(146, 59)
+        Me.TB_acc.Size = New System.Drawing.Size(146, 49)
         Me.TB_acc.TabIndex = 0
         '
         'Grp_Live
@@ -930,9 +930,9 @@ Partial Class Program_Form
         Me.Grp_UnitConfig.Controls.Add(Me.RB_right)
         Me.Grp_UnitConfig.Controls.Add(Me.lb_Configuration)
         Me.Grp_UnitConfig.Controls.Add(Me.RB_left)
-        Me.Grp_UnitConfig.Location = New System.Drawing.Point(592, 7)
+        Me.Grp_UnitConfig.Location = New System.Drawing.Point(628, 7)
         Me.Grp_UnitConfig.Name = "Grp_UnitConfig"
-        Me.Grp_UnitConfig.Size = New System.Drawing.Size(272, 378)
+        Me.Grp_UnitConfig.Size = New System.Drawing.Size(237, 338)
         Me.Grp_UnitConfig.TabIndex = 12
         Me.Grp_UnitConfig.TabStop = False
         Me.Grp_UnitConfig.Text = "Configuration"
@@ -940,9 +940,9 @@ Partial Class Program_Form
         'PcBx_Quark
         '
         Me.PcBx_Quark.Image = Global.Quark_Configurator.My.Resources.Resources.DRAW_QUARK
-        Me.PcBx_Quark.Location = New System.Drawing.Point(6, 15)
+        Me.PcBx_Quark.Location = New System.Drawing.Point(8, 14)
         Me.PcBx_Quark.Name = "PcBx_Quark"
-        Me.PcBx_Quark.Size = New System.Drawing.Size(260, 320)
+        Me.PcBx_Quark.Size = New System.Drawing.Size(223, 273)
         Me.PcBx_Quark.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom
         Me.PcBx_Quark.TabIndex = 10
         Me.PcBx_Quark.TabStop = False
@@ -950,7 +950,7 @@ Partial Class Program_Form
         'RB_right
         '
         Me.RB_right.AutoSize = True
-        Me.RB_right.Location = New System.Drawing.Point(187, 354)
+        Me.RB_right.Location = New System.Drawing.Point(172, 310)
         Me.RB_right.Name = "RB_right"
         Me.RB_right.Size = New System.Drawing.Size(59, 17)
         Me.RB_right.TabIndex = 11
@@ -961,7 +961,7 @@ Partial Class Program_Form
         'lb_Configuration
         '
         Me.lb_Configuration.AutoSize = True
-        Me.lb_Configuration.Location = New System.Drawing.Point(85, 338)
+        Me.lb_Configuration.Location = New System.Drawing.Point(78, 290)
         Me.lb_Configuration.Name = "lb_Configuration"
         Me.lb_Configuration.Size = New System.Drawing.Size(87, 13)
         Me.lb_Configuration.TabIndex = 3
@@ -970,7 +970,7 @@ Partial Class Program_Form
         'RB_left
         '
         Me.RB_left.AutoSize = True
-        Me.RB_left.Location = New System.Drawing.Point(20, 354)
+        Me.RB_left.Location = New System.Drawing.Point(8, 310)
         Me.RB_left.Name = "RB_left"
         Me.RB_left.Size = New System.Drawing.Size(51, 17)
         Me.RB_left.TabIndex = 11
@@ -1920,15 +1920,6 @@ Partial Class Program_Form
         Me.Grp_UnitTest.TabStop = False
         Me.Grp_UnitTest.Text = "Test automatico unita"
         '
-        'Btn_RefreshTestLogs
-        '
-        Me.Btn_RefreshTestLogs.Location = New System.Drawing.Point(905, 344)
-        Me.Btn_RefreshTestLogs.Name = "Btn_RefreshTestLogs"
-        Me.Btn_RefreshTestLogs.Size = New System.Drawing.Size(95, 23)
-        Me.Btn_RefreshTestLogs.TabIndex = 13
-        Me.Btn_RefreshTestLogs.Text = "Refresh list"
-        Me.Btn_RefreshTestLogs.UseVisualStyleBackColor = True
-        '
         'Btn_ExportPdf
         '
         Me.Btn_ExportPdf.Location = New System.Drawing.Point(804, 344)
@@ -1937,6 +1928,15 @@ Partial Class Program_Form
         Me.Btn_ExportPdf.TabIndex = 14
         Me.Btn_ExportPdf.Text = "Export to PDF"
         Me.Btn_ExportPdf.UseVisualStyleBackColor = True
+        '
+        'Btn_RefreshTestLogs
+        '
+        Me.Btn_RefreshTestLogs.Location = New System.Drawing.Point(905, 344)
+        Me.Btn_RefreshTestLogs.Name = "Btn_RefreshTestLogs"
+        Me.Btn_RefreshTestLogs.Size = New System.Drawing.Size(95, 23)
+        Me.Btn_RefreshTestLogs.TabIndex = 13
+        Me.Btn_RefreshTestLogs.Text = "Refresh list"
+        Me.Btn_RefreshTestLogs.UseVisualStyleBackColor = True
         '
         'lstTestLogs
         '

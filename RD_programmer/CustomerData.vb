@@ -48,6 +48,10 @@
     Public Property IAQ_R_Speed As Integer
     Public Property Belimo As Integer
     Public Property no_FKI As Integer
+    Public Property Input1Value As Integer
+    Public Property Input2Value As Integer
+    Public Property Output1Value As Integer
+    Public Property Output2Value As Integer
 
     ' --- Costanti per identificare i set di velocità ---
     Public Const SpeedSetting1 As Integer = 1
@@ -225,6 +229,10 @@
         SUM_WINSetPoint = 12
         Belimo = 0
         no_FKI = 0
+        Input1Value = 0
+        Input2Value = 0
+        Output1Value = 0
+        Output2Value = 0
         Configuration = String.Empty
         VersionHW = String.Empty
         VersionSW = String.Empty

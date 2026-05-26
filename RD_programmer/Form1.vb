@@ -61,11 +61,28 @@ Public Class Program_Form
     Private unitTestStartTime As DateTime = DateTime.MinValue
     Private khkVisibilityEntries As New List(Of KhkVisibilityEntry)()
     Private khkApiEndpoint As String = String.Empty
+    Private Grp_InputOutput As GroupBox
+    Private cmbInput1 As ComboBox
+    Private cmbInput2 As ComboBox
+    Private cmbOutput1 As ComboBox
+    Private cmbOutput2 As ComboBox
+    Private suppressInputOutputEvents As Boolean = False
+    Private suppressKhkInputOutputRules As Boolean = False
+    Private inputOutputControlsBaseEnabled As Boolean = False
+    Private eepromWriteCommandStartIndex As Integer = 0
+    Private Const SaveStepCount As Integer = 35
     Private Class TestLogListItem
         Public Property Display As String
         Public Property FullPath As String
         Public Overrides Function ToString() As String
             Return Display
+        End Function
+    End Class
+    Private Class ComboValueItem
+        Public Property Value As Integer
+        Public Property Text As String
+        Public Overrides Function ToString() As String
+            Return Text
         End Function
     End Class
     Private Class KhkVisibilityEntry
@@ -97,6 +114,224 @@ Public Class Program_Form
 
     ' Manteniamo un riferimento ai badge che vogliamo far lampeggiare
     Private _lblBypMov As Label = Nothing
+
+    Private Sub InitializeInputOutputControls()
+        If Grp_InputOutput IsNot Nothing Then Return
+
+        Grp_InputOutput = New GroupBox() With {
+            .Name = "Grp_InputOutput",
+            .Text = "Input / Output",
+            .Location = New Point(361, 351),
+            .Size = New Size(504, 44),
+            .Visible = False
+        }
+
+        Dim lblInput1 As New Label() With {.Text = "Input 1", .Location = New Point(8, 19), .AutoSize = True}
+        Dim lblInput2 As New Label() With {.Text = "Input 2", .Location = New Point(112, 19), .AutoSize = True}
+        Dim lblOutput1 As New Label() With {.Text = "Output 1", .Location = New Point(216, 19), .AutoSize = True}
+        Dim lblOutput2 As New Label() With {.Text = "Output 2", .Location = New Point(344, 19), .AutoSize = True}
+
+        cmbInput1 = CreateIoCombo("cmbInput1", 55, 15)
+        cmbInput2 = CreateIoCombo("cmbInput2", 159, 15)
+        cmbOutput1 = CreateIoCombo("cmbOutput1", 269, 15)
+        cmbOutput2 = CreateIoCombo("cmbOutput2", 397, 15)
+
+        FillComboOptions(cmbInput1, GetInputOptions())
+        FillComboOptions(cmbInput2, GetInputOptions())
+        FillComboOptions(cmbOutput1, GetOutputOptions())
+        FillComboOptions(cmbOutput2, GetOutputOptions())
+
+        AddHandler cmbInput1.SelectedIndexChanged, AddressOf InputOutputCombo_SelectedIndexChanged
+        AddHandler cmbInput2.SelectedIndexChanged, AddressOf InputOutputCombo_SelectedIndexChanged
+        AddHandler cmbOutput1.SelectedIndexChanged, AddressOf InputOutputCombo_SelectedIndexChanged
+        AddHandler cmbOutput2.SelectedIndexChanged, AddressOf InputOutputCombo_SelectedIndexChanged
+
+        Grp_InputOutput.Controls.AddRange(New Control() {lblInput1, cmbInput1, lblInput2, cmbInput2, lblOutput1, cmbOutput1, lblOutput2, cmbOutput2})
+        Grp_InputOutput.Parent = TP_Configurator
+        TP_Configurator.Controls.Add(Grp_InputOutput)
+        Grp_InputOutput.BringToFront()
+    End Sub
+
+    Private Function CreateIoCombo(name As String, x As Integer, y As Integer) As ComboBox
+        Return New ComboBox() With {
+            .Name = name,
+            .Location = New Point(x, y),
+            .Size = New Size(50, 21),
+            .DropDownWidth = 230,
+            .DropDownStyle = ComboBoxStyle.DropDownList,
+            .Enabled = False
+        }
+    End Function
+
+    Private Function GetInputOptions() As List(Of ComboValueItem)
+        Return New List(Of ComboValueItem) From {
+            New ComboValueItem With {.Value = 0, .Text = "0 - Disable"},
+            New ComboValueItem With {.Value = 1, .Text = "1 - 12V RUN / 0V STOP"},
+            New ComboValueItem With {.Value = 2, .Text = "2 - 0V RUN / 12V STOP"},
+            New ComboValueItem With {.Value = 3, .Text = "3 - 0-10V Air flow regulation"},
+            New ComboValueItem With {.Value = 4, .Text = "4 - 12V Bypass Open"},
+            New ComboValueItem With {.Value = 5, .Text = "5 - 0V Bypass Open"},
+            New ComboValueItem With {.Value = 6, .Text = "6 - 12V Boost ON"},
+            New ComboValueItem With {.Value = 7, .Text = "7 - 12V Climate OFF"},
+            New ComboValueItem With {.Value = 11, .Text = "11 - Fire alarm unit stop"},
+            New ComboValueItem With {.Value = 12, .Text = "12 - Fire alarm ventilation max"},
+            New ComboValueItem With {.Value = 13, .Text = "13 - Fire alarm only extract"},
+            New ComboValueItem With {.Value = 14, .Text = "14 - Fire alarm only supply"}
+        }
+    End Function
+
+    Private Function GetOutputOptions() As List(Of ComboValueItem)
+        Return New List(Of ComboValueItem) From {
+            New ComboValueItem With {.Value = 0, .Text = "0 - Disable"},
+            New ComboValueItem With {.Value = 1, .Text = "1 - Bypass status open"},
+            New ComboValueItem With {.Value = 2, .Text = "2 - Common fault status"},
+            New ComboValueItem With {.Value = 3, .Text = "3 - Unit is run"},
+            New ComboValueItem With {.Value = 4, .Text = "4 - Valve control"},
+            New ComboValueItem With {.Value = 5, .Text = "5 - Summer/Winter"},
+            New ComboValueItem With {.Value = 6, .Text = "6 - Max speed"},
+            New ComboValueItem With {.Value = 128, .Text = "128 - Disable inverted"},
+            New ComboValueItem With {.Value = 129, .Text = "129 - Bypass status open inverted"},
+            New ComboValueItem With {.Value = 130, .Text = "130 - Common fault status inverted"},
+            New ComboValueItem With {.Value = 131, .Text = "131 - Unit is run inverted"},
+            New ComboValueItem With {.Value = 132, .Text = "132 - Valve control inverted"},
+            New ComboValueItem With {.Value = 133, .Text = "133 - Summer/Winter inverted"},
+            New ComboValueItem With {.Value = 134, .Text = "134 - Max speed inverted"}
+        }
+    End Function
+
+    Private Sub FillComboOptions(combo As ComboBox, options As List(Of ComboValueItem))
+        combo.Items.Clear()
+        For Each item In options
+            combo.Items.Add(item)
+        Next
+        If combo.Items.Count > 0 Then combo.SelectedIndex = 0
+    End Sub
+
+    Private Function GetComboValue(combo As ComboBox) As Integer
+        If combo Is Nothing OrElse combo.SelectedItem Is Nothing Then Return 0
+        Return DirectCast(combo.SelectedItem, ComboValueItem).Value
+    End Function
+
+    Private Sub SetComboValue(combo As ComboBox, value As Integer)
+        If combo Is Nothing Then Return
+        For Each item As ComboValueItem In combo.Items
+            If item.Value = value Then
+                combo.SelectedItem = item
+                Return
+            End If
+        Next
+        If combo.Items.Count > 0 Then combo.SelectedIndex = 0
+    End Sub
+
+    Private Function GetLegacySmokeValue() As Integer
+        Dim input2 = customerData.Input2Value
+        If input2 >= 0 AndAlso input2 <= 2 Then Return input2
+        Return 0
+    End Function
+
+    Private Sub SyncSmokeControlsFromInput2()
+        Dim input2 = customerData.Input2Value
+        If input2 = 0 Then
+            CB_SmokeEnable.Checked = False
+            RB_SmokeNC.Checked = True
+            RB_SmokeNO.Checked = False
+            customerData.SMOKE_VALUE = 0
+        ElseIf input2 = 1 Then
+            CB_SmokeEnable.Checked = True
+            RB_SmokeNC.Checked = True
+            RB_SmokeNO.Checked = False
+            customerData.SMOKE_VALUE = 1
+        ElseIf input2 = 2 Then
+            CB_SmokeEnable.Checked = True
+            RB_SmokeNC.Checked = False
+            RB_SmokeNO.Checked = True
+            customerData.SMOKE_VALUE = 2
+        Else
+            CB_SmokeEnable.Checked = False
+            RB_SmokeNC.Checked = True
+            RB_SmokeNO.Checked = False
+        End If
+        UpdateSmokeControls()
+    End Sub
+
+    Private Sub InputOutputCombo_SelectedIndexChanged(sender As Object, e As EventArgs)
+        If suppressInputOutputEvents Then Return
+
+        customerData.Input1Value = GetComboValue(cmbInput1)
+        customerData.Input2Value = GetComboValue(cmbInput2)
+        customerData.Output1Value = GetComboValue(cmbOutput1)
+        customerData.Output2Value = GetComboValue(cmbOutput2)
+
+        If sender Is cmbInput1 AndAlso GetComboValue(cmbInput1) <> 0 AndAlso CB_KHKenable.Checked Then
+            CB_KHKenable.Checked = False
+        End If
+
+        If sender Is cmbInput2 Then
+            suppressInputOutputEvents = True
+            SyncSmokeControlsFromInput2()
+            suppressInputOutputEvents = False
+        End If
+
+        ApplyKhkInputOutputRules()
+    End Sub
+
+    Private Sub SetInputOutputControlsEnabled(enabled As Boolean)
+        inputOutputControlsBaseEnabled = enabled
+        ApplyKhkInputOutputRules()
+    End Sub
+
+    Private Sub ApplyKhkInputOutputRules()
+        If suppressKhkInputOutputRules Then Return
+        If cmbInput1 Is Nothing OrElse cmbInput2 Is Nothing OrElse cmbOutput1 Is Nothing OrElse cmbOutput2 Is Nothing Then Return
+
+        Dim khkEnabled = CB_KHKenable.Checked
+        Dim khkUsesOutput1 = khkEnabled AndAlso Not CB_DisableTemperatureControl.Checked
+
+        If khkEnabled Then
+            suppressInputOutputEvents = True
+            SetComboValue(cmbInput1, 0)
+            If khkUsesOutput1 Then
+                SetComboValue(cmbOutput1, 0)
+            End If
+            suppressInputOutputEvents = False
+        End If
+
+        cmbInput1.Enabled = inputOutputControlsBaseEnabled AndAlso Not khkEnabled
+        cmbInput2.Enabled = inputOutputControlsBaseEnabled
+        cmbOutput1.Enabled = inputOutputControlsBaseEnabled AndAlso Not khkUsesOutput1
+        cmbOutput2.Enabled = inputOutputControlsBaseEnabled
+
+        customerData.Input1Value = GetComboValue(cmbInput1)
+        customerData.Input2Value = GetComboValue(cmbInput2)
+        customerData.Output1Value = GetComboValue(cmbOutput1)
+        customerData.Output2Value = GetComboValue(cmbOutput2)
+    End Sub
+
+    Private Sub SendEepromWriteCommand(name As String, value As Integer)
+        eepromWriteCommandStartIndex = tb_COMStrem.TextLength
+        InviaStringa($"EEPWR {name} {value}")
+        writeStep += 1
+        ResetInactivityTimer()
+    End Sub
+
+    Private Function CheckEepromWriteResponse(name As String) As Boolean
+        Dim response = tb_COMStrem.Text.Substring(Math.Min(eepromWriteCommandStartIndex, tb_COMStrem.TextLength))
+        If response.Contains("ERR") Then
+            isWriting = False
+            PB_SaveData.Visible = False
+            PB_SaveData.Value = 0
+            lb_SaveProg.Visible = False
+            writeStep = 1
+            lb_status.Text = $"Save failed while writing {name}"
+            Return True
+        End If
+        If response.Contains($"OK {name}") Then
+            writeStep += 1
+            ResetInactivityTimer()
+            Return True
+        End If
+        Return False
+    End Function
 
 
     Private Function GetCurrentApplicationData() As CustomerData
@@ -154,6 +389,10 @@ Public Class Program_Form
         End If
 
         dataToReturn.SMOKE_VALUE = Me.customerData.SMOKE_VALUE
+        dataToReturn.Input1Value = GetComboValue(cmbInput1)
+        dataToReturn.Input2Value = GetComboValue(cmbInput2)
+        dataToReturn.Output1Value = GetComboValue(cmbOutput1)
+        dataToReturn.Output2Value = GetComboValue(cmbOutput2)
 
         ' --- Popolamento della proprietà 'Configuration' (LEFT/RIGHT) ---
         If RB_left.Checked Then
@@ -347,6 +586,13 @@ Public Class Program_Form
             Invoke(Sub() customerData.Belimo = 1)
         End If
 
+        suppressInputOutputEvents = True
+        SetComboValue(cmbInput1, customerData.Input1Value)
+        SetComboValue(cmbInput2, customerData.Input2Value)
+        SetComboValue(cmbOutput1, customerData.Output1Value)
+        SetComboValue(cmbOutput2, customerData.Output2Value)
+        suppressInputOutputEvents = False
+
         If customerData.Configuration IsNot Nothing AndAlso customerData.Configuration.Length <> 0 Then
             If customerData.Configuration.Contains("LEFT") Then
                 RB_left.Checked = True
@@ -361,6 +607,8 @@ Public Class Program_Form
             RB_left.Checked = False
         End If
 
+
+        suppressKhkInputOutputRules = True
 
         ' Estrai lo stato di KHK Enable (Bit 0)
         If (customerData.KHK_VALUE And &H1) = &H1 Then
@@ -388,6 +636,8 @@ Public Class Program_Form
             CB_DisableTemperatureControl.Checked = False ' Il bit 2 è 0 -> Disabilita controllo/timer è NON SPUNTATO (quindi controllo/timer è abilitato)
         End If
 
+        suppressKhkInputOutputRules = False
+
         ' Abilita/Disabilita i controlli dipendenti in base allo stato di CB_KHKenable
         num_FK_Speed.Enabled = CB_KHKenable.Checked
         num_RK_Speed.Enabled = CB_KHKenable.Checked
@@ -395,20 +645,10 @@ Public Class Program_Form
         RB_NO.Enabled = CB_KHKenable.Checked
         CB_DisableTemperatureControl.Enabled = CB_KHKenable.Checked
 
-        If (customerData.SMOKE_VALUE = 0) Then
-            Invoke(Sub() CB_SmokeEnable.Checked = False)
-        ElseIf (customerData.SMOKE_VALUE = 1) Then
-            Invoke(Sub() CB_SmokeEnable.Checked = True)
-            Invoke(Sub() RB_SmokeNC.Checked = True)
-            Invoke(Sub() RB_SmokeNO.Checked = False)
-        Else
-            customerData.SMOKE_VALUE = 2
-            Invoke(Sub() CB_SmokeEnable.Checked = True)
-            Invoke(Sub() RB_SmokeNC.Checked = False)
-            Invoke(Sub() RB_SmokeNO.Checked = True)
-        End If
-
-        UpdateSmokeControls()
+        suppressInputOutputEvents = True
+        SyncSmokeControlsFromInput2()
+        suppressInputOutputEvents = False
+        ApplyKhkInputOutputRules()
 
         If (customerData.IMBALANCESetPoint1 < -70 OrElse customerData.IMBALANCESetPoint1 > 70) Then
             Invoke(Sub() customerData.IMBALANCESetPoint1 = 0)
@@ -636,6 +876,7 @@ Public Class Program_Form
         Grp_Preset.Visible = isVisible
         Grp_DateTime.Visible = False
         Grp_Smoke.Visible = isVisible
+        If Grp_InputOutput IsNot Nothing Then Grp_InputOutput.Visible = isVisible
         Grp_Live.Visible = isVisible
         Grp_Acc.Visible = isVisible
         flpStatus.Visible = isVisible
@@ -785,6 +1026,7 @@ Public Class Program_Form
     End Function
 
     Private Sub Program_Form_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        InitializeInputOutputControls()
         VisibleGroups(False)
         ToggleService(isService)
         PB_SaveData.Visible = False
@@ -858,6 +1100,7 @@ Public Class Program_Form
         num_TempSetpoint.Enabled = False
         num_SWSetpoint.Enabled = False
         num_Belimo.Enabled = False
+        SetInputOutputControlsEnabled(False)
         num_SWSetpoint.Maximum = 99
         updatingDateTime = False
         CB_SmokeEnable.Checked = False
@@ -1093,7 +1336,7 @@ Public Class Program_Form
                     End If
                 Case 26
                     If tb_COMStrem.Text.Contains("Please set Smoke conf. (1=En NC, 2=En NO, 0=Dis) :") Then
-                        InviaStringa(customerData.SMOKE_VALUE.ToString())
+                        InviaStringa(GetLegacySmokeValue().ToString())
                         writeStep += 1
                         ResetInactivityTimer()
                     End If
@@ -1103,6 +1346,22 @@ Public Class Program_Form
                         writeStep += 1
                         ResetInactivityTimer()
                     End If
+                Case 28
+                    SendEepromWriteCommand("Set_Input[0]", GetComboValue(cmbInput1))
+                Case 29
+                    CheckEepromWriteResponse("Set_Input[0]")
+                Case 30
+                    SendEepromWriteCommand("Set_Input[1]", GetComboValue(cmbInput2))
+                Case 31
+                    CheckEepromWriteResponse("Set_Input[1]")
+                Case 32
+                    SendEepromWriteCommand("Set_Output[0]", GetComboValue(cmbOutput1))
+                Case 33
+                    CheckEepromWriteResponse("Set_Output[0]")
+                Case 34
+                    SendEepromWriteCommand("Set_Output[1]", GetComboValue(cmbOutput2))
+                Case 35
+                    CheckEepromWriteResponse("Set_Output[1]")
                 Case Else
                     Await Task.Delay(6000)
                     isWriting = False
@@ -1115,7 +1374,7 @@ Public Class Program_Form
             End Select
 
             If (isWriting) Then
-                savestep = (writeStep - 1) / 27 * 100
+                savestep = (writeStep - 1) / SaveStepCount * 100
                 PB_SaveData.Value = savestep
                 lb_SaveProg.Text = savestep.ToString() + " %"
             End If
@@ -1169,6 +1428,7 @@ Public Class Program_Form
         num_FilterTimer.Enabled = True
         num_RHSetpoint.Enabled = True
         num_TempSetpoint.Enabled = True
+        SetInputOutputControlsEnabled(True)
         CB_LiveData.Enabled = True
         If (customerData.SUM_WINSetPoint = 99) Then
             CB_BPDisable.Checked = True
@@ -1394,7 +1654,7 @@ Public Class Program_Form
                 'Dim numericValue As String = Regex.Replace(value, "[^\d]", "")
                 Dim numericValue As String = Regex.Replace(value, "[^-?\d+]", "")
                 'Dim numericValue As String = Regex.Replace(value, "^-?\d+", "")
-                Dim numero As Int16
+                Dim numero As Integer
 
 
                 Select Case name
@@ -1437,7 +1697,7 @@ Public Class Program_Form
                     Case "IMBALANCE Set Point"
                         SByte.TryParse(numericValue, customerData.IMBALANCESetPoint1)
                     Case "KHK Set Point"
-                        SByte.TryParse(numericValue, numero)
+                        Integer.TryParse(numericValue, numero)
                         If (numero < customerData.FSC_CAF_Speed3) Then
                             customerData.KHK_SET_POINT = customerData.FSC_CAF_Speed3
                         Else
@@ -1446,7 +1706,7 @@ Public Class Program_Form
                     Case "Configuration"
                         customerData.Configuration = value
                     Case "KHK Config"
-                        SByte.TryParse(value, numero)
+                        Integer.TryParse(value, numero)
                         If numero < 2 AndAlso numero > 5 Then
                             numero = 2
                         End If
@@ -1465,12 +1725,21 @@ Public Class Program_Form
                         SByte.TryParse(numericValue, customerData.IAQ_Imbalance)
                     Case "BELIMO"
                         SByte.TryParse(numericValue, customerData.Belimo)
+                    Case "INPUT 1"
+                        Integer.TryParse(value, numero)
+                        customerData.Input1Value = Math.Max(0, Math.Min(255, numero))
                     Case "INPUT 2"
-                        SByte.TryParse(value, numero)
-                        If numero < 0 AndAlso numero > 2 Then
-                            numero = 0
+                        Integer.TryParse(value, numero)
+                        customerData.Input2Value = Math.Max(0, Math.Min(255, numero))
+                        If customerData.Input2Value >= 0 AndAlso customerData.Input2Value <= 2 Then
+                            customerData.SMOKE_VALUE = CByte(customerData.Input2Value)
                         End If
-                        customerData.SMOKE_VALUE = numero
+                    Case "OUTPUT 1"
+                        Integer.TryParse(value, numero)
+                        customerData.Output1Value = Math.Max(0, Math.Min(255, numero))
+                    Case "OUTPUT 2"
+                        Integer.TryParse(value, numero)
+                        customerData.Output2Value = Math.Max(0, Math.Min(255, numero))
                     Case "NO_FKI"
                         SByte.TryParse(numericValue, customerData.no_FKI)
                 End Select
@@ -1658,6 +1927,8 @@ Public Class Program_Form
     End Sub
 
     Private Sub UpdateSmokeValue()
+        If suppressInputOutputEvents Then Return
+
         Dim SmokeValueTemp As Byte = 0
 
         If Not CB_SmokeEnable.Checked Then
@@ -1671,6 +1942,13 @@ Public Class Program_Form
         End If
 
         customerData.SMOKE_VALUE = SmokeValueTemp
+        customerData.Input2Value = SmokeValueTemp
+
+        If Not suppressInputOutputEvents Then
+            suppressInputOutputEvents = True
+            SetComboValue(cmbInput2, SmokeValueTemp)
+            suppressInputOutputEvents = False
+        End If
     End Sub
 
     Private Sub KHK_ENABLE_CheckedChanged(sender As Object, e As EventArgs) Handles CB_KHKenable.CheckedChanged
@@ -1680,6 +1958,7 @@ Public Class Program_Form
         RB_NO.Enabled = CB_KHKenable.Checked
         CB_DisableTemperatureControl.Enabled = CB_KHKenable.Checked
         UpdateKHKValue()
+        ApplyKhkInputOutputRules()
     End Sub
 
     Private Sub NC_Button_CheckedChanged(sender As Object, e As EventArgs) Handles RB_NC.CheckedChanged
@@ -1692,6 +1971,7 @@ Public Class Program_Form
 
     Private Sub CB_DisableTemperatureControl_CheckedChanged(sender As Object, e As EventArgs) Handles CB_DisableTemperatureControl.CheckedChanged
         UpdateKHKValue()
+        ApplyKhkInputOutputRules()
 
         ' Mostra il messaggio di avviso SOLO quando la checkbox viene SPUNTATA
         If CB_DisableTemperatureControl.Checked Then
@@ -1966,6 +2246,10 @@ Public Class Program_Form
             Me.customerData.IAQ_Reference = loadedConfigData.IAQ_Reference
 
             Me.customerData.SMOKE_VALUE = loadedConfigData.SMOKE_VALUE
+            Me.customerData.Input1Value = loadedConfigData.Input1Value
+            Me.customerData.Input2Value = loadedConfigData.Input2Value
+            Me.customerData.Output1Value = loadedConfigData.Output1Value
+            Me.customerData.Output2Value = loadedConfigData.Output2Value
 
             ' --- Applica condizionatamente i dati specifici della macchina ---
             ' Questi verranno aggiornati solo se il file di configurazione caricato
