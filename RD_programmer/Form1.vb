@@ -61,16 +61,11 @@ Public Class Program_Form
     Private unitTestStartTime As DateTime = DateTime.MinValue
     Private khkVisibilityEntries As New List(Of KhkVisibilityEntry)()
     Private khkApiEndpoint As String = String.Empty
-    Private Grp_InputOutput As GroupBox
-    Private cmbInput1 As ComboBox
-    Private cmbInput2 As ComboBox
-    Private cmbOutput1 As ComboBox
-    Private cmbOutput2 As ComboBox
     Private suppressInputOutputEvents As Boolean = False
     Private suppressKhkInputOutputRules As Boolean = False
     Private inputOutputControlsBaseEnabled As Boolean = False
     Private eepromWriteCommandStartIndex As Integer = 0
-    Private Const SaveStepCount As Integer = 35
+    Private eepromWriteDefinitions As List(Of EepromWriteDefinition)
     Private Class TestLogListItem
         Public Property Display As String
         Public Property FullPath As String
@@ -84,6 +79,10 @@ Public Class Program_Form
         Public Overrides Function ToString() As String
             Return Text
         End Function
+    End Class
+    Private Class EepromWriteDefinition
+        Public Property Name As String
+        Public Property ValueProvider As Func(Of Integer)
     End Class
     Private Class KhkVisibilityEntry
         Public Property Prefix As String
@@ -116,86 +115,48 @@ Public Class Program_Form
     Private _lblBypMov As Label = Nothing
 
     Private Sub InitializeInputOutputControls()
-        If Grp_InputOutput IsNot Nothing Then Return
-
-        Grp_InputOutput = New GroupBox() With {
-            .Name = "Grp_InputOutput",
-            .Text = "Input / Output",
-            .Location = New Point(361, 351),
-            .Size = New Size(504, 44),
-            .Visible = False
-        }
-
-        Dim lblInput1 As New Label() With {.Text = "Input 1", .Location = New Point(8, 19), .AutoSize = True}
-        Dim lblInput2 As New Label() With {.Text = "Input 2", .Location = New Point(112, 19), .AutoSize = True}
-        Dim lblOutput1 As New Label() With {.Text = "Output 1", .Location = New Point(216, 19), .AutoSize = True}
-        Dim lblOutput2 As New Label() With {.Text = "Output 2", .Location = New Point(344, 19), .AutoSize = True}
-
-        cmbInput1 = CreateIoCombo("cmbInput1", 55, 15)
-        cmbInput2 = CreateIoCombo("cmbInput2", 159, 15)
-        cmbOutput1 = CreateIoCombo("cmbOutput1", 269, 15)
-        cmbOutput2 = CreateIoCombo("cmbOutput2", 397, 15)
+        If Grp_InputOutput Is Nothing Then Return
 
         FillComboOptions(cmbInput1, GetInputOptions())
         FillComboOptions(cmbInput2, GetInputOptions())
         FillComboOptions(cmbOutput1, GetOutputOptions())
         FillComboOptions(cmbOutput2, GetOutputOptions())
 
+        RemoveHandler cmbInput1.SelectedIndexChanged, AddressOf InputOutputCombo_SelectedIndexChanged
+        RemoveHandler cmbInput2.SelectedIndexChanged, AddressOf InputOutputCombo_SelectedIndexChanged
+        RemoveHandler cmbOutput1.SelectedIndexChanged, AddressOf InputOutputCombo_SelectedIndexChanged
+        RemoveHandler cmbOutput2.SelectedIndexChanged, AddressOf InputOutputCombo_SelectedIndexChanged
         AddHandler cmbInput1.SelectedIndexChanged, AddressOf InputOutputCombo_SelectedIndexChanged
         AddHandler cmbInput2.SelectedIndexChanged, AddressOf InputOutputCombo_SelectedIndexChanged
         AddHandler cmbOutput1.SelectedIndexChanged, AddressOf InputOutputCombo_SelectedIndexChanged
         AddHandler cmbOutput2.SelectedIndexChanged, AddressOf InputOutputCombo_SelectedIndexChanged
-
-        Grp_InputOutput.Controls.AddRange(New Control() {lblInput1, cmbInput1, lblInput2, cmbInput2, lblOutput1, cmbOutput1, lblOutput2, cmbOutput2})
-        Grp_InputOutput.Parent = TP_Configurator
-        TP_Configurator.Controls.Add(Grp_InputOutput)
-        Grp_InputOutput.BringToFront()
     End Sub
-
-    Private Function CreateIoCombo(name As String, x As Integer, y As Integer) As ComboBox
-        Return New ComboBox() With {
-            .Name = name,
-            .Location = New Point(x, y),
-            .Size = New Size(50, 21),
-            .DropDownWidth = 230,
-            .DropDownStyle = ComboBoxStyle.DropDownList,
-            .Enabled = False
-        }
-    End Function
 
     Private Function GetInputOptions() As List(Of ComboValueItem)
         Return New List(Of ComboValueItem) From {
             New ComboValueItem With {.Value = 0, .Text = "0 - Disable"},
-            New ComboValueItem With {.Value = 1, .Text = "1 - 12V RUN / 0V STOP"},
-            New ComboValueItem With {.Value = 2, .Text = "2 - 0V RUN / 12V STOP"},
+            New ComboValueItem With {.Value = 1, .Text = "1 - 12V RUN / 0V STANDBY"},
+            New ComboValueItem With {.Value = 2, .Text = "2 - 0V RUN / 12V STANDBY"},
             New ComboValueItem With {.Value = 3, .Text = "3 - 0-10V Air flow regulation"},
             New ComboValueItem With {.Value = 4, .Text = "4 - 12V Bypass Open"},
             New ComboValueItem With {.Value = 5, .Text = "5 - 0V Bypass Open"},
-            New ComboValueItem With {.Value = 6, .Text = "6 - 12V Boost ON"},
-            New ComboValueItem With {.Value = 7, .Text = "7 - 12V Climate OFF"},
-            New ComboValueItem With {.Value = 11, .Text = "11 - Fire alarm unit stop"},
-            New ComboValueItem With {.Value = 12, .Text = "12 - Fire alarm ventilation max"},
-            New ComboValueItem With {.Value = 13, .Text = "13 - Fire alarm only extract"},
-            New ComboValueItem With {.Value = 14, .Text = "14 - Fire alarm only supply"}
+            New ComboValueItem With {.Value = 6, .Text = "6 - 12V Boost ON"}
         }
     End Function
 
     Private Function GetOutputOptions() As List(Of ComboValueItem)
         Return New List(Of ComboValueItem) From {
             New ComboValueItem With {.Value = 0, .Text = "0 - Disable"},
-            New ComboValueItem With {.Value = 1, .Text = "1 - Bypass status open"},
-            New ComboValueItem With {.Value = 2, .Text = "2 - Common fault status"},
-            New ComboValueItem With {.Value = 3, .Text = "3 - Unit is run"},
-            New ComboValueItem With {.Value = 4, .Text = "4 - Valve control"},
-            New ComboValueItem With {.Value = 5, .Text = "5 - Summer/Winter"},
-            New ComboValueItem With {.Value = 6, .Text = "6 - Max speed"},
-            New ComboValueItem With {.Value = 128, .Text = "128 - Disable inverted"},
-            New ComboValueItem With {.Value = 129, .Text = "129 - Bypass status open inverted"},
-            New ComboValueItem With {.Value = 130, .Text = "130 - Common fault status inverted"},
-            New ComboValueItem With {.Value = 131, .Text = "131 - Unit is run inverted"},
-            New ComboValueItem With {.Value = 132, .Text = "132 - Valve control inverted"},
-            New ComboValueItem With {.Value = 133, .Text = "133 - Summer/Winter inverted"},
-            New ComboValueItem With {.Value = 134, .Text = "134 - Max speed inverted"}
+            New ComboValueItem With {.Value = 1, .Text = "1 - Bypass status open NC"},
+            New ComboValueItem With {.Value = 2, .Text = "2 - Common fault status NC"},
+            New ComboValueItem With {.Value = 3, .Text = "3 - Unit is run NC"},
+            New ComboValueItem With {.Value = 5, .Text = "5 - Summer/Winter NC"},
+            New ComboValueItem With {.Value = 6, .Text = "6 - Max speed NC"},
+            New ComboValueItem With {.Value = 129, .Text = "129 - Bypass status open NO"},
+            New ComboValueItem With {.Value = 130, .Text = "130 - Common fault status NO"},
+            New ComboValueItem With {.Value = 131, .Text = "131 - Unit is run NO"},
+            New ComboValueItem With {.Value = 133, .Text = "133 - Summer/Winter NO"},
+            New ComboValueItem With {.Value = 134, .Text = "134 - Max speed NO"}
         }
     End Function
 
@@ -322,6 +283,7 @@ Public Class Program_Form
             PB_SaveData.Value = 0
             lb_SaveProg.Visible = False
             writeStep = 1
+            eepromWriteDefinitions = Nothing
             lb_status.Text = $"Save failed while writing {name}"
             Return True
         End If
@@ -332,6 +294,81 @@ Public Class Program_Form
         End If
         Return False
     End Function
+
+    Private Function BuildEepromWriteDefinitions() As List(Of EepromWriteDefinition)
+        Return New List(Of EepromWriteDefinition) From {
+            New EepromWriteDefinition With {.Name = "Set_StepMotorsCFS_CAF[0]", .ValueProvider = Function() customerData.FSC_CAF_Speed1 * 10},
+            New EepromWriteDefinition With {.Name = "Set_StepMotorsCFS_CAF[1]", .ValueProvider = Function() customerData.FSC_CAF_Speed2 * 10},
+            New EepromWriteDefinition With {.Name = "Set_StepMotorsCFS_CAF[2]", .ValueProvider = Function() customerData.FSC_CAF_Speed3 * 10},
+            New EepromWriteDefinition With {.Name = "Set_StepMotors_CAP[0]", .ValueProvider = Function() CInt(num_Speed1CAP.Value)},
+            New EepromWriteDefinition With {.Name = "Set_StepMotors_CAP[1]", .ValueProvider = Function() CInt(num_Speed2CAP.Value)},
+            New EepromWriteDefinition With {.Name = "Set_StepMotors_CAP[2]", .ValueProvider = Function() CInt(num_Speed3CAP.Value)},
+            New EepromWriteDefinition With {.Name = "Set_TimeBoost", .ValueProvider = Function() CInt(num_BoostTimer.Value)},
+            New EepromWriteDefinition With {.Name = "gg_manut_Filter", .ValueProvider = Function() CInt(num_FilterTimer.Value)},
+            New EepromWriteDefinition With {.Name = "Time_Fire_Test", .ValueProvider = Function() CInt(num_FKITimer.Value)},
+            New EepromWriteDefinition With {.Name = "SetPoint_CO2", .ValueProvider = Function() CInt(num_CO2Setpoint.Value)},
+            New EepromWriteDefinition With {.Name = "SetPoint_RH", .ValueProvider = Function() CInt(num_RHSetpoint.Value)},
+            New EepromWriteDefinition With {.Name = "SetPoint_VOC", .ValueProvider = Function() CInt(num_VOCSetpoint.Value)},
+            New EepromWriteDefinition With {.Name = "SetPointTemp[0]", .ValueProvider = Function() CInt(num_TempSetpoint.Value) * 10},
+            New EepromWriteDefinition With {.Name = "hister_Temp_Hot[0]", .ValueProvider = Function() 20},
+            New EepromWriteDefinition With {.Name = "hister_Temp_Hot[1]", .ValueProvider = Function() -10},
+            New EepromWriteDefinition With {.Name = "Bypass_minTempExt", .ValueProvider = Function() If(CB_BPDisable.Checked, 990, CInt(num_SWSetpoint.Value) * 10)},
+            New EepromWriteDefinition With {.Name = "Posiz_NTC", .ValueProvider = Function() If(RB_right.Checked, 177, 228)},
+            New EepromWriteDefinition With {.Name = "user_password[0]", .ValueProvider = Function() customerData.KHK_VALUE},
+            New EepromWriteDefinition With {.Name = "Set_Imbalance[0]", .ValueProvider = Function() customerData.IMBALANCESetPoint1},
+            New EepromWriteDefinition With {.Name = "IMBALANCE_ENABLE", .ValueProvider = Function() If(CB_ImbEnable.Checked, 1, 0)},
+            New EepromWriteDefinition With {.Name = "user_password[1]", .ValueProvider = Function() customerData.KHK_SET_POINT},
+            New EepromWriteDefinition With {.Name = "Set_Imbalance[1]", .ValueProvider = Function() customerData.KHKIMBALANCESetPoint},
+            New EepromWriteDefinition With {.Name = "Imbalance_Speed2", .ValueProvider = Function() customerData.IMBALANCESetPoint2},
+            New EepromWriteDefinition With {.Name = "Imbalance_Speed3", .ValueProvider = Function() customerData.IMBALANCESetPoint3},
+            New EepromWriteDefinition With {.Name = "Imbalance_IAQSpeed", .ValueProvider = Function() customerData.IAQ_Imbalance},
+            New EepromWriteDefinition With {.Name = "SetPoint_Airflow_CO2", .ValueProvider = Function() customerData.IAQ_Reference},
+            New EepromWriteDefinition With {.Name = "Set_Input[0]", .ValueProvider = Function() GetComboValue(cmbInput1)},
+            New EepromWriteDefinition With {.Name = "Set_Input[1]", .ValueProvider = Function() GetComboValue(cmbInput2)},
+            New EepromWriteDefinition With {.Name = "Set_Output[0]", .ValueProvider = Function() GetComboValue(cmbOutput1)},
+            New EepromWriteDefinition With {.Name = "Set_Output[1]", .ValueProvider = Function() GetComboValue(cmbOutput2)},
+            New EepromWriteDefinition With {.Name = "BELIMO", .ValueProvider = Function() CInt(num_Belimo.Value)}
+        }
+    End Function
+
+    Private Sub EnsureEepromWriteDefinitions()
+        If eepromWriteDefinitions Is Nothing Then
+            eepromWriteDefinitions = BuildEepromWriteDefinitions()
+        End If
+    End Sub
+
+    Private Function GetSaveStepCount() As Integer
+        EnsureEepromWriteDefinitions()
+        Return Math.Max(1, eepromWriteDefinitions.Count * 2)
+    End Function
+
+    Private Sub CompleteEepromSave()
+        isWriting = False
+        PB_SaveData.Visible = False
+        PB_SaveData.Value = 0
+        lb_SaveProg.Visible = False
+        writeStep = 1
+        eepromWriteDefinitions = Nothing
+        lb_status.Text = "Data successfully saved"
+        ResetInactivityTimer()
+    End Sub
+
+    Private Sub ProcessEepromWriteSaveStep()
+        EnsureEepromWriteDefinitions()
+
+        Dim commandIndex = (writeStep - 1) \ 2
+        If commandIndex >= eepromWriteDefinitions.Count Then
+            CompleteEepromSave()
+            Return
+        End If
+
+        Dim definition = eepromWriteDefinitions(commandIndex)
+        If (writeStep Mod 2) = 1 Then
+            SendEepromWriteCommand(definition.Name, definition.ValueProvider.Invoke())
+        Else
+            CheckEepromWriteResponse(definition.Name)
+        End If
+    End Sub
 
 
     Private Function GetCurrentApplicationData() As CustomerData
@@ -1181,6 +1218,18 @@ Public Class Program_Form
         CB_LiveData.Enabled = Not isWriting
 
         If isWriting Then
+            ProcessEepromWriteSaveStep()
+
+            If isWriting Then
+                savestep = CInt((writeStep - 1) / GetSaveStepCount() * 100)
+                PB_SaveData.Value = Math.Min(100, Math.Max(0, savestep))
+                lb_SaveProg.Text = PB_SaveData.Value.ToString() + " %"
+            End If
+
+            Return
+        End If
+
+        If isWriting Then
             Select Case writeStep
                 Case 1
                     InviaStringa("7")
@@ -1374,7 +1423,7 @@ Public Class Program_Form
             End Select
 
             If (isWriting) Then
-                savestep = (writeStep - 1) / SaveStepCount * 100
+                savestep = CInt((writeStep - 1) / GetSaveStepCount() * 100)
                 PB_SaveData.Value = savestep
                 lb_SaveProg.Text = savestep.ToString() + " %"
             End If
@@ -1898,6 +1947,8 @@ Public Class Program_Form
 
     Private Sub Btn_SaveData_Click(sender As Object, e As EventArgs) Handles Btn_SaveData.Click
         If Not ShowSaveDisclaimer() Then Exit Sub
+        eepromWriteDefinitions = BuildEepromWriteDefinitions()
+        writeStep = 1
         isWriting = True
         PB_SaveData.Visible = isWriting
         lb_SaveProg.Visible = isWriting

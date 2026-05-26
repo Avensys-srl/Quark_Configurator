@@ -26,6 +26,15 @@ Partial Class Program_Form
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Program_Form))
         Me.SerialPort1 = New System.IO.Ports.SerialPort(Me.components)
         Me.TP_Configurator = New System.Windows.Forms.TabPage()
+        Me.Grp_InputOutput = New System.Windows.Forms.GroupBox()
+        Me.cmbOutput2 = New System.Windows.Forms.ComboBox()
+        Me.lblOutput2 = New System.Windows.Forms.Label()
+        Me.cmbOutput1 = New System.Windows.Forms.ComboBox()
+        Me.lblOutput1 = New System.Windows.Forms.Label()
+        Me.cmbInput2 = New System.Windows.Forms.ComboBox()
+        Me.lblInput2 = New System.Windows.Forms.Label()
+        Me.cmbInput1 = New System.Windows.Forms.ComboBox()
+        Me.lblInput1 = New System.Windows.Forms.Label()
         Me.flpStatus = New System.Windows.Forms.FlowLayoutPanel()
         Me.Grp_Acc = New System.Windows.Forms.GroupBox()
         Me.Btn_ResAcc = New System.Windows.Forms.Button()
@@ -201,7 +210,10 @@ Partial Class Program_Form
         Me.SerialDataTimer = New System.Windows.Forms.Timer(Me.components)
         Me.lb_QKvers = New System.Windows.Forms.Label()
         Me.TimerDateTime = New System.Windows.Forms.Timer(Me.components)
+        Me.lblRH_return = New System.Windows.Forms.Label()
+        Me.Helpers = New System.Windows.Forms.ToolTip(Me.components)
         Me.TP_Configurator.SuspendLayout()
+        Me.Grp_InputOutput.SuspendLayout()
         Me.Grp_Acc.SuspendLayout()
         Me.Grp_Live.SuspendLayout()
         Me.Grp_Smoke.SuspendLayout()
@@ -251,6 +263,7 @@ Partial Class Program_Form
         'TP_Configurator
         '
         Me.TP_Configurator.Controls.Add(Me.flpStatus)
+        Me.TP_Configurator.Controls.Add(Me.Grp_InputOutput)
         Me.TP_Configurator.Controls.Add(Me.Grp_Acc)
         Me.TP_Configurator.Controls.Add(Me.Grp_Live)
         Me.TP_Configurator.Controls.Add(Me.Grp_Smoke)
@@ -280,6 +293,104 @@ Partial Class Program_Form
         Me.TP_Configurator.TabIndex = 0
         Me.TP_Configurator.Text = "Configurator"
         Me.TP_Configurator.UseVisualStyleBackColor = True
+        '
+        'Grp_InputOutput
+        '
+        Me.Grp_InputOutput.Controls.Add(Me.cmbOutput2)
+        Me.Grp_InputOutput.Controls.Add(Me.lblOutput2)
+        Me.Grp_InputOutput.Controls.Add(Me.cmbOutput1)
+        Me.Grp_InputOutput.Controls.Add(Me.lblOutput1)
+        Me.Grp_InputOutput.Controls.Add(Me.cmbInput2)
+        Me.Grp_InputOutput.Controls.Add(Me.lblInput2)
+        Me.Grp_InputOutput.Controls.Add(Me.cmbInput1)
+        Me.Grp_InputOutput.Controls.Add(Me.lblInput1)
+        Me.Grp_InputOutput.Location = New System.Drawing.Point(361, 351)
+        Me.Grp_InputOutput.Name = "Grp_InputOutput"
+        Me.Grp_InputOutput.Size = New System.Drawing.Size(504, 44)
+        Me.Grp_InputOutput.TabIndex = 23
+        Me.Grp_InputOutput.TabStop = False
+        Me.Grp_InputOutput.Text = "Input / Output"
+        Me.Grp_InputOutput.Visible = True
+        '
+        'cmbOutput2
+        '
+        Me.cmbOutput2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.cmbOutput2.DropDownWidth = 230
+        Me.cmbOutput2.Enabled = False
+        Me.cmbOutput2.FormattingEnabled = True
+        Me.cmbOutput2.Location = New System.Drawing.Point(397, 15)
+        Me.cmbOutput2.Name = "cmbOutput2"
+        Me.cmbOutput2.Size = New System.Drawing.Size(50, 21)
+        Me.cmbOutput2.TabIndex = 7
+        '
+        'lblOutput2
+        '
+        Me.lblOutput2.AutoSize = True
+        Me.lblOutput2.Location = New System.Drawing.Point(344, 19)
+        Me.lblOutput2.Name = "lblOutput2"
+        Me.lblOutput2.Size = New System.Drawing.Size(48, 13)
+        Me.lblOutput2.TabIndex = 6
+        Me.lblOutput2.Text = "Output 2"
+        '
+        'cmbOutput1
+        '
+        Me.cmbOutput1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.cmbOutput1.DropDownWidth = 230
+        Me.cmbOutput1.Enabled = False
+        Me.cmbOutput1.FormattingEnabled = True
+        Me.cmbOutput1.Location = New System.Drawing.Point(269, 15)
+        Me.cmbOutput1.Name = "cmbOutput1"
+        Me.cmbOutput1.Size = New System.Drawing.Size(50, 21)
+        Me.cmbOutput1.TabIndex = 5
+        '
+        'lblOutput1
+        '
+        Me.lblOutput1.AutoSize = True
+        Me.lblOutput1.Location = New System.Drawing.Point(216, 19)
+        Me.lblOutput1.Name = "lblOutput1"
+        Me.lblOutput1.Size = New System.Drawing.Size(48, 13)
+        Me.lblOutput1.TabIndex = 4
+        Me.lblOutput1.Text = "Output 1"
+        '
+        'cmbInput2
+        '
+        Me.cmbInput2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.cmbInput2.DropDownWidth = 230
+        Me.cmbInput2.Enabled = False
+        Me.cmbInput2.FormattingEnabled = True
+        Me.cmbInput2.Location = New System.Drawing.Point(159, 15)
+        Me.cmbInput2.Name = "cmbInput2"
+        Me.cmbInput2.Size = New System.Drawing.Size(50, 21)
+        Me.cmbInput2.TabIndex = 3
+        '
+        'lblInput2
+        '
+        Me.lblInput2.AutoSize = True
+        Me.lblInput2.Location = New System.Drawing.Point(112, 19)
+        Me.lblInput2.Name = "lblInput2"
+        Me.lblInput2.Size = New System.Drawing.Size(41, 13)
+        Me.lblInput2.TabIndex = 2
+        Me.lblInput2.Text = "Input 2"
+        '
+        'cmbInput1
+        '
+        Me.cmbInput1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.cmbInput1.DropDownWidth = 230
+        Me.cmbInput1.Enabled = False
+        Me.cmbInput1.FormattingEnabled = True
+        Me.cmbInput1.Location = New System.Drawing.Point(55, 15)
+        Me.cmbInput1.Name = "cmbInput1"
+        Me.cmbInput1.Size = New System.Drawing.Size(50, 21)
+        Me.cmbInput1.TabIndex = 1
+        '
+        'lblInput1
+        '
+        Me.lblInput1.AutoSize = True
+        Me.lblInput1.Location = New System.Drawing.Point(8, 19)
+        Me.lblInput1.Name = "lblInput1"
+        Me.lblInput1.Size = New System.Drawing.Size(41, 13)
+        Me.lblInput1.TabIndex = 0
+        Me.lblInput1.Text = "Input 1"
         '
         'flpStatus
         '
@@ -335,6 +446,7 @@ Partial Class Program_Form
         Me.Grp_Live.Controls.Add(Me.Label32)
         Me.Grp_Live.Controls.Add(Me.lblTSupply)
         Me.Grp_Live.Controls.Add(Me.Label31)
+        Me.Grp_Live.Controls.Add(Me.lblRH_return)
         Me.Grp_Live.Controls.Add(Me.lblRReturn)
         Me.Grp_Live.Controls.Add(Me.lblTReturn)
         Me.Grp_Live.Controls.Add(Me.lblRPMReturn)
@@ -459,7 +571,7 @@ Partial Class Program_Form
         '
         Me.lblRReturn.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lblRReturn.AutoSize = True
-        Me.lblRReturn.Location = New System.Drawing.Point(129, 40)
+        Me.lblRReturn.Location = New System.Drawing.Point(150, 40)
         Me.lblRReturn.Name = "lblRReturn"
         Me.lblRReturn.Size = New System.Drawing.Size(30, 13)
         Me.lblRReturn.TabIndex = 0
@@ -503,7 +615,7 @@ Partial Class Program_Form
         '
         Me.lblRFresh.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lblRFresh.AutoSize = True
-        Me.lblRFresh.Location = New System.Drawing.Point(129, 20)
+        Me.lblRFresh.Location = New System.Drawing.Point(150, 20)
         Me.lblRFresh.Name = "lblRFresh"
         Me.lblRFresh.Size = New System.Drawing.Size(30, 13)
         Me.lblRFresh.TabIndex = 0
@@ -700,6 +812,7 @@ Partial Class Program_Form
         Me.Grp_KHK.TabIndex = 14
         Me.Grp_KHK.TabStop = False
         Me.Grp_KHK.Text = "KHK (Green Connector)"
+        Me.Helpers.SetToolTip(Me.Grp_KHK, "Kitchen Hood Kit (KHK)")
         '
         'Label13
         '
@@ -748,6 +861,7 @@ Partial Class Program_Form
         Me.lb_KHKenable.Size = New System.Drawing.Size(65, 13)
         Me.lb_KHKenable.TabIndex = 5
         Me.lb_KHKenable.Text = "Enable KHK"
+        Me.Helpers.SetToolTip(Me.lb_KHKenable, "Kitchen Hood Kit (KHK)")
         '
         'lb_KHKContactBehavoir
         '
@@ -1038,6 +1152,7 @@ Partial Class Program_Form
         Me.Label36.Size = New System.Drawing.Size(106, 13)
         Me.Label36.TabIndex = 8
         Me.Label36.Text = "FKI Actuator Number"
+        Me.Helpers.SetToolTip(Me.Label36, "Fire Kit (FKI)")
         '
         'lbl_DisRH
         '
@@ -1639,6 +1754,7 @@ Partial Class Program_Form
         Me.lb_Speed3CAP.Size = New System.Drawing.Size(71, 13)
         Me.lb_Speed3CAP.TabIndex = 1
         Me.lb_Speed3CAP.Text = "Speed 3 CAP"
+        Me.Helpers.SetToolTip(Me.lb_Speed3CAP, "Constant Air Pressure (CAP)")
         '
         'vlb_Speed2CAP
         '
@@ -1666,6 +1782,7 @@ Partial Class Program_Form
         Me.lb_Speed2CAP.Size = New System.Drawing.Size(71, 13)
         Me.lb_Speed2CAP.TabIndex = 1
         Me.lb_Speed2CAP.Text = "Speed 2 CAP"
+        Me.Helpers.SetToolTip(Me.lb_Speed2CAP, "Constant Air Pressure (CAP)")
         '
         'Label20
         '
@@ -1711,6 +1828,7 @@ Partial Class Program_Form
         Me.lb_Speed1CAP.Size = New System.Drawing.Size(71, 13)
         Me.lb_Speed1CAP.TabIndex = 1
         Me.lb_Speed1CAP.Text = "Speed 1 CAP"
+        Me.Helpers.SetToolTip(Me.lb_Speed1CAP, "Constant Air Pressure (CAP)")
         '
         'vlb_Speed3FSC
         '
@@ -1747,6 +1865,7 @@ Partial Class Program_Form
         Me.lb_Speed3FSC.Size = New System.Drawing.Size(95, 13)
         Me.lb_Speed3FSC.TabIndex = 1
         Me.lb_Speed3FSC.Text = "Speed 3 FSC/CAF"
+        Me.Helpers.SetToolTip(Me.lb_Speed3FSC, "Constat Fan Speed (FSC) Constant Air Flow (CAF)")
         '
         'vlb_Speed2FSC
         '
@@ -1774,6 +1893,7 @@ Partial Class Program_Form
         Me.lb_Speed2FSC.Size = New System.Drawing.Size(95, 13)
         Me.lb_Speed2FSC.TabIndex = 1
         Me.lb_Speed2FSC.Text = "Speed 2 FSC/CAF"
+        Me.Helpers.SetToolTip(Me.lb_Speed2FSC, "Constat Fan Speed (FSC) Constant Air Flow (CAF)")
         '
         'vlb_Speed1FSC
         '
@@ -1792,6 +1912,7 @@ Partial Class Program_Form
         Me.lb_Speed1FSC.Size = New System.Drawing.Size(95, 13)
         Me.lb_Speed1FSC.TabIndex = 1
         Me.lb_Speed1FSC.Text = "Speed 1 FSC/CAF"
+        Me.Helpers.SetToolTip(Me.lb_Speed1FSC, "Constat Fan Speed (FSC) Constant Air Flow (CAF)")
         '
         'Label2
         '
@@ -2134,6 +2255,17 @@ Partial Class Program_Form
         '
         Me.TimerDateTime.Interval = 1000
         '
+        'lblRH_return
+        '
+        Me.lblRH_return.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblRH_return.AutoSize = True
+        Me.lblRH_return.Location = New System.Drawing.Point(129, 40)
+        Me.lblRH_return.Name = "lblRH_return"
+        Me.lblRH_return.Size = New System.Drawing.Size(23, 13)
+        Me.lblRH_return.TabIndex = 0
+        Me.lblRH_return.Text = "RH"
+        Me.lblRH_return.TextAlign = System.Drawing.ContentAlignment.TopRight
+        '
         'Program_Form
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -2149,6 +2281,8 @@ Partial Class Program_Form
         Me.Text = "Avensys Quark Configurator"
         Me.TP_Configurator.ResumeLayout(False)
         Me.TP_Configurator.PerformLayout()
+        Me.Grp_InputOutput.ResumeLayout(False)
+        Me.Grp_InputOutput.PerformLayout()
         Me.Grp_Acc.ResumeLayout(False)
         Me.Grp_Acc.PerformLayout()
         Me.Grp_Live.ResumeLayout(False)
@@ -2382,4 +2516,15 @@ Partial Class Program_Form
     Friend WithEvents lstTestLogs As ListBox
     Friend WithEvents Btn_RefreshTestLogs As Button
     Friend WithEvents Btn_ExportPdf As Button
+    Friend WithEvents lblRH_return As Label
+    Friend WithEvents Helpers As ToolTip
+    Friend WithEvents Grp_InputOutput As GroupBox
+    Friend WithEvents cmbOutput2 As ComboBox
+    Friend WithEvents lblOutput2 As Label
+    Friend WithEvents cmbOutput1 As ComboBox
+    Friend WithEvents lblOutput1 As Label
+    Friend WithEvents cmbInput2 As ComboBox
+    Friend WithEvents lblInput2 As Label
+    Friend WithEvents cmbInput1 As ComboBox
+    Friend WithEvents lblInput1 As Label
 End Class
