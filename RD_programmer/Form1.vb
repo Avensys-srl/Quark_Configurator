@@ -24,12 +24,18 @@ Public Class Program_Form
     Dim isLoggingEnabled As Boolean = False
     Private character2Sent As Boolean = False
     Private character6Sent As Boolean = False
+    Private eepromDumpSent As Boolean = False
+    Private eepromDumpParsed As Boolean = False
     Private isWriting As Boolean = False
     Private writeStep As Integer = 1
     Private parameterRead As Boolean = False
+    Private eepromDumpCommandStartIndex As Integer = 0
+    Private eepromDumpCommandTime As DateTime = DateTime.MinValue
+    Private eepromDumpData As String = String.Empty
     ReadOnly customerData As New CustomerData
     ReadOnly configDataBuilder As New StringBuilder()
     Private Const InactivityTimeoutMilliseconds As Integer = 1000 ' 1 secondo
+    Private Const EepromDumpTimeoutMilliseconds As Integer = 3000
     Private WithEvents PortWatcher As ManagementEventWatcher
     Private isService = False
     ReadOnly hiddenPages As New List(Of TabPage)()
@@ -1116,6 +1122,11 @@ Public Class Program_Form
     Private Sub Refresh_Data()
         character2Sent = False
         character6Sent = False
+        eepromDumpSent = False
+        eepromDumpParsed = False
+        eepromDumpCommandStartIndex = 0
+        eepromDumpCommandTime = DateTime.MinValue
+        eepromDumpData = String.Empty
         parameterRead = False
         num_F_Speed1.Enabled = False
         num_F_Speed2.Enabled = False
@@ -1438,21 +1449,53 @@ Public Class Program_Form
                 ResetInactivityTimer()
                 lb_status.Text = "Loading data from quark...please wait"
                 VisibleGroups(True)
+            ElseIf Not eepromDumpSent Then
+                eepromDumpCommandStartIndex = tb_COMStrem.TextLength
+                eepromDumpCommandTime = DateTime.Now
+                InviaStringa("EEPDUMP")
+                eepromDumpSent = True
+                ResetInactivityTimer()
+            ElseIf eepromDumpSent AndAlso Not eepromDumpParsed Then
+                Dim dumpResponse = tb_COMStrem.Text.Substring(Math.Min(eepromDumpCommandStartIndex, tb_COMStrem.TextLength))
+                Dim parsedDump As String = String.Empty
+                If TryExtractEepromDump(dumpResponse, parsedDump) Then
+                    eepromDumpData = parsedDump
+                    eepromDumpParsed = True
+                    If EepromDumpHasBasicInfo(eepromDumpData) Then
+                        ParseEepromDump(eepromDumpData, customerData)
+                        FinishConfigDataLoad()
+                        ResetInactivityTimer()
+                        character6Sent = True
+                        parameterRead = True
+                    End If
+                ElseIf (DateTime.Now - eepromDumpCommandTime).TotalMilliseconds > EepromDumpTimeoutMilliseconds Then
+                    eepromDumpParsed = True
+                End If
             ElseIf Not character6Sent Then
                 InviaStringa("6")
                 character6Sent = True
                 ResetInactivityTimer()
             ElseIf character2Sent AndAlso character6Sent AndAlso Not parameterRead Then
-                InviaStringa("")
-                ExtractConfigData()
-                ResetInactivityTimer()
-                parameterRead = True
+                If TryParseLegacyConfigData() Then
+                    If Not String.IsNullOrWhiteSpace(eepromDumpData) Then
+                        ParseEepromDump(eepromDumpData, customerData)
+                    End If
+                    FinishConfigDataLoad()
+                    ResetInactivityTimer()
+                    parameterRead = True
+                End If
             End If
         End If
     End Sub
 
 
     Private Sub ExtractConfigData()
+        If TryParseLegacyConfigData() Then
+            FinishConfigDataLoad()
+        End If
+    End Sub
+
+    Private Function TryParseLegacyConfigData() As Boolean
         Dim startPattern As String = "---[ 2  Read Config. Data Unit ]---"
         Dim endPattern As String = "--- END OF READING ---"
         Dim startIndex As Integer = tb_COMStrem.Text.IndexOf(startPattern)
@@ -1460,7 +1503,12 @@ Public Class Program_Form
         If startIndex <> -1 AndAlso endIndex <> -1 AndAlso endIndex > startIndex Then
             Dim dataToParse As String = tb_COMStrem.Text.Substring(startIndex + startPattern.Length, endIndex - (startIndex + startPattern.Length))
             ParseCustomerData(dataToParse, customerData)
+            Return True
         End If
+        Return False
+    End Function
+
+    Private Sub FinishConfigDataLoad()
         lb_status.Text = "Data loaded successfully."
         If txtUnitTestSerial IsNot Nothing AndAlso String.IsNullOrWhiteSpace(txtUnitTestSerial.Text) Then
             txtUnitTestSerial.Text = customerData.SerialNumber
@@ -1684,6 +1732,153 @@ Public Class Program_Form
         If SerialPort1.IsOpen Then
             SerialPort1.Write(testo & SerialPort1.NewLine)
         End If
+    End Sub
+
+    Private Function TryExtractEepromDump(response As String, ByRef dump As String) As Boolean
+        If String.IsNullOrWhiteSpace(response) Then Return False
+
+        Dim lines = Regex.Split(response, "\r\n|\n|\r")
+        Dim dumpLines As New List(Of String)()
+        Dim foundAnyValue As Boolean = False
+
+        For Each rawLine In lines
+            Dim line = rawLine.Trim()
+            If line.Length = 0 Then Continue For
+
+            If line.StartsWith("ERR", StringComparison.OrdinalIgnoreCase) Then
+                Return False
+            End If
+
+            If (line.StartsWith("OK ", StringComparison.OrdinalIgnoreCase) OrElse line.StartsWith("OKINFO ", StringComparison.OrdinalIgnoreCase)) AndAlso line.Contains("=") Then
+                foundAnyValue = True
+                dumpLines.Add(line)
+            ElseIf foundAnyValue AndAlso line.Equals("OK", StringComparison.OrdinalIgnoreCase) Then
+                dump = String.Join(Environment.NewLine, dumpLines)
+                Return True
+            End If
+        Next
+
+        Return False
+    End Function
+
+    Private Function EepromDumpHasBasicInfo(data As String) As Boolean
+        Return data.IndexOf("OKINFO SerialNumber =", StringComparison.OrdinalIgnoreCase) >= 0 AndAlso
+               data.IndexOf("OKINFO VersionHW =", StringComparison.OrdinalIgnoreCase) >= 0 AndAlso
+               data.IndexOf("OKINFO VersionSW =", StringComparison.OrdinalIgnoreCase) >= 0 AndAlso
+               data.IndexOf("OKINFO Accessories =", StringComparison.OrdinalIgnoreCase) >= 0
+    End Function
+
+    Private Sub ParseEepromDump(data As String, customerData As CustomerData)
+        Dim lines = Regex.Split(data, "\r\n|\n|\r")
+
+        For Each rawLine In lines
+            Dim line = rawLine.Trim()
+            Dim isInfo = line.StartsWith("OKINFO ", StringComparison.OrdinalIgnoreCase)
+            Dim isValue = line.StartsWith("OK ", StringComparison.OrdinalIgnoreCase)
+            If Not isInfo AndAlso Not isValue Then Continue For
+
+            Dim equalsIndex = line.IndexOf("="c)
+            If equalsIndex <= 3 Then Continue For
+
+            Dim prefixLength = If(isInfo, 7, 3)
+            Dim name = line.Substring(prefixLength, equalsIndex - prefixLength).Trim()
+            Dim valueText = line.Substring(equalsIndex + 1).Trim()
+
+            If isInfo Then
+                ApplyEepromInfoValue(customerData, name, valueText)
+                Continue For
+            End If
+
+            Dim value As Integer
+            If Not Integer.TryParse(valueText, value) Then Continue For
+
+            ApplyEepromDumpValue(customerData, name, value)
+        Next
+
+        UpdateFormControls()
+    End Sub
+
+    Private Sub ApplyEepromInfoValue(customerData As CustomerData, name As String, value As String)
+        Select Case name
+            Case "VersionHW"
+                customerData.VersionHW = value
+            Case "VersionSW"
+                customerData.VersionSW = value
+            Case "SerialNumber"
+                customerData.SerialNumber = value
+            Case "Accessories"
+                customerData.Accessories = value
+        End Select
+    End Sub
+
+    Private Sub ApplyEepromDumpValue(customerData As CustomerData, name As String, value As Integer)
+        Select Case name
+            Case "Set_StepMotorsCFS_CAF[0]"
+                customerData.FSC_CAF_Speed1 = value \ 10
+            Case "Set_StepMotorsCFS_CAF[1]"
+                customerData.FSC_CAF_Speed2 = value \ 10
+            Case "Set_StepMotorsCFS_CAF[2]"
+                customerData.FSC_CAF_Speed3 = value \ 10
+            Case "Set_StepMotors_CAP[0]"
+                customerData.CAP_Speed1 = value
+            Case "Set_StepMotors_CAP[1]"
+                customerData.CAP_Speed2 = value
+            Case "Set_StepMotors_CAP[2]"
+                customerData.CAP_Speed3 = value
+            Case "Set_TimeBoost"
+                customerData.BoostTimer = value
+            Case "gg_manut_Filter"
+                customerData.FilterTimer = value
+            Case "Time_Fire_Test"
+                customerData.FireKitTimer = value
+            Case "SetPoint_CO2"
+                customerData.CO2SetPoint = value
+            Case "SetPoint_RH"
+                customerData.RHSetPoint = value
+            Case "SetPoint_VOC"
+                customerData.VOCSetPoint = value
+            Case "SetPointTemp[0]"
+                customerData.TempSetPoint = value \ 10
+            Case "Bypass_minTempExt"
+                customerData.SUM_WINSetPoint = value \ 10
+            Case "Posiz_NTC"
+                If value = 228 Then
+                    customerData.Configuration = "LEFT"
+                ElseIf value = 177 Then
+                    customerData.Configuration = "RIGHT"
+                End If
+            Case "user_password[0]"
+                customerData.KHK_VALUE = CByte(Math.Max(0, Math.Min(255, value)))
+            Case "Set_Imbalance[0]"
+                customerData.IMBALANCESetPoint1 = CSByte(Math.Max(SByte.MinValue, Math.Min(SByte.MaxValue, value)))
+            Case "IMBALANCE_ENABLE"
+                customerData.IMBALANCE_ENABLE = CByte(If(value = 0, 0, 1))
+            Case "user_password[1]"
+                customerData.KHK_SET_POINT = CByte(Math.Max(0, Math.Min(255, value)))
+            Case "Set_Imbalance[1]"
+                customerData.KHKIMBALANCESetPoint = CSByte(Math.Max(SByte.MinValue, Math.Min(SByte.MaxValue, value)))
+            Case "Imbalance_Speed2"
+                customerData.IMBALANCESetPoint2 = CSByte(Math.Max(SByte.MinValue, Math.Min(SByte.MaxValue, value)))
+            Case "Imbalance_Speed3"
+                customerData.IMBALANCESetPoint3 = CSByte(Math.Max(SByte.MinValue, Math.Min(SByte.MaxValue, value)))
+            Case "Imbalance_IAQSpeed"
+                customerData.IAQ_Imbalance = CSByte(Math.Max(SByte.MinValue, Math.Min(SByte.MaxValue, value)))
+            Case "SetPoint_Airflow_CO2"
+                customerData.IAQ_Reference = value
+            Case "BELIMO"
+                customerData.Belimo = value
+            Case "Set_Input[0]"
+                customerData.Input1Value = Math.Max(0, Math.Min(255, value))
+            Case "Set_Input[1]"
+                customerData.Input2Value = Math.Max(0, Math.Min(255, value))
+                If customerData.Input2Value >= 0 AndAlso customerData.Input2Value <= 2 Then
+                    customerData.SMOKE_VALUE = CByte(customerData.Input2Value)
+                End If
+            Case "Set_Output[0]"
+                customerData.Output1Value = Math.Max(0, Math.Min(255, value))
+            Case "Set_Output[1]"
+                customerData.Output2Value = Math.Max(0, Math.Min(255, value))
+        End Select
     End Sub
 
     Private Sub ParseCustomerData(data As String, customerData As CustomerData, Optional updateUI As Boolean = True)
